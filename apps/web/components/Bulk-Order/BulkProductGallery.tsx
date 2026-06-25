@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
+import type { SyntheticEvent } from "react";
 
 const defaultImages = [
   "/images/apparel-order/big.png",
@@ -83,7 +84,7 @@ export default function ProductGallery({
             alt="product"
             fill
             className="object-cover"
-            onError={(e) => {
+            onError={(e: SyntheticEvent<HTMLImageElement>) => {
               const target = e.target as HTMLImageElement;
               target.src = "/images/apparel-order/big.png";
             }}
@@ -124,7 +125,7 @@ export default function ProductGallery({
               alt=""
               fill
               className="object-cover"
-              onError={(e) => {
+              onError={(e: SyntheticEvent<HTMLImageElement>) => {
                 const target = e.target as HTMLImageElement;
                 target.src = "/images/apparel-order/big.png";
               }}
