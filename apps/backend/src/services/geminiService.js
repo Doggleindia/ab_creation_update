@@ -1,12 +1,22 @@
 // services/geminiService.js
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+// Instantiate the Gemini client lazily so a missing GEMINI_API_KEY doesn't
+// crash the whole server at startup — only ticket AI suggestions are affected.
+let ai = null;
+const getAi = () => {
+  if (!process.env.GEMINI_API_KEY) return null;
+  if (!ai) ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  return ai;
+};
 
 export const generateAISuggestion = async (userMessage) => {
   try {
+    const client = getAi();
+    if (!client) {
+      return "Thanks for reaching out — our team will review your message and get back to you shortly.";
+    }
+
     const prompt = `
 You are a professional customer support assistant.
 
@@ -21,7 +31,7 @@ Give:
 - No technical jargon
 `;
 
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
         {
