@@ -3,9 +3,9 @@ services:
     build:
       context: .
       args:
-        # Supply the backend URL at build time (CRA bakes it into the bundle).
-        # Set REACT_APP_MAIN_BACKEND in your shell or a .env file next to this.
-        REACT_APP_MAIN_BACKEND: ${REACT_APP_MAIN_BACKEND:-}
+        # Supply the backend URL at build time (Vite bakes it into the bundle).
+        # Set VITE_MAIN_BACKEND in your shell or a .env file next to this.
+        VITE_MAIN_BACKEND: ${VITE_MAIN_BACKEND:-}
     # The image serves the production build via nginx on port 80.
     ports:
       - "3000:80"

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AuthState, User, LoginCredentials, SignupCredentials, ResetPasswordData } from '../types';
 
-const BASE_URL = process.env.REACT_APP_MAIN_BACKEND;
+const BASE_URL = import.meta.env.VITE_MAIN_BACKEND;
 const API_BASE = `${BASE_URL}/api/admin`;
 
 interface AuthStore extends AuthState {

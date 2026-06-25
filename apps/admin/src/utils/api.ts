@@ -1,7 +1,7 @@
 import { LookBookMedia, CategoryResponse, CategoriesResponse, CreateCategoryRequest, UpdateCategoryRequest, CreateProductRequest, UpdateProductRequest, ProductsResponse, ProductResponse, CreateVariantRequest, VariantsResponse, VariantResponse, CreateVariantResponse, UpdateVariantRequest, UpdateVariantResponse, UpdateInventoryRequest, InventoryResponse, BulkUpdateInventoryRequest, BulkInventoryResponse, ProductInventoriesResponse, BulkProduct, CreateBulkProductRequest, UpdateBulkProductRequest, BulkProductResponse, BulkProductsResponse, BulkProductVariant, CreateBulkProductVariantRequest, UpdateBulkProductVariantRequest, BulkProductVariantResponse, BulkProductVariantsResponse, ContactsResponse, ContactResponse, DeleteContactResponse, User, WishlistItem, Wishlist, WishlistAnalytics, CollectionResponse, CollectionsResponse, CreateCollectionRequest, UpdateCollectionRequest } from '../types/models';
 import { useAuthStore } from '../store/authStore';
 
-const BASE_URL = process.env.REACT_APP_MAIN_BACKEND;
+const BASE_URL = import.meta.env.VITE_MAIN_BACKEND;
 const API_BASE = `${BASE_URL}/api`;
 const CATEGORIES_API_BASE = `${BASE_URL}/api/categories/admin`;
 const COLLECTIONS_API_BASE = `${BASE_URL}/api/collections/admin`;

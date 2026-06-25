@@ -8,6 +8,7 @@ import { CheckCircle2, ShoppingBag, ArrowRight, Calendar, CreditCard, Truck, Cop
 import Footer from "@/components/Footer"
 import { Button } from "@/components/ui/button"
 import { getOrderById } from "@/lib/api"
+import type { Order } from "@kt/types"
 
 function OrderConfirmedContent() {
   const searchParams = useSearchParams()
@@ -32,8 +33,8 @@ function OrderConfirmedContent() {
     let active = true
     getOrderById(orderId, token)
       .then((res) => {
-        const order = res?.data || res?.order
-        if (active && order && order.totalAmount != null) {
+        const order: Partial<Order> = res?.data || res?.order || {}
+        if (active && order.totalAmount != null) {
           setAmount(String(order.totalAmount))
         }
       })

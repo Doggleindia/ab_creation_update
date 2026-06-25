@@ -9,49 +9,39 @@ storefront, its admin panel, and the shared backend API.
 apps/
 ├── backend/   Express 5 + MongoDB (Mongoose) REST API
 ├── web/       Next.js 16 customer storefront
-└── admin/     React (CRA) admin dashboard
+└── admin/     React + Vite admin dashboard
+packages/
+└── types/     @kt/types — shared TypeScript domain types
 ```
 
-Each app is self-contained with its own `package.json`, build, and deploy
-config (Dockerfiles included). They are developed together here but deploy
-independently.
+This is an **npm workspaces** monorepo: a single `npm install` at the root
+installs every app and links the shared `@kt/types` package. Each app still has
+its own build and deploy config (Dockerfiles included) and deploys independently.
 
 ## Getting started
 
-Each app reads its config from a local `.env` — copy the example first:
+Install everything once from the repo root (npm workspaces):
 
 ```bash
-# Backend API
-cd apps/backend
-cp .env.example .env      # fill in Mongo, JWT, Razorpay, AWS, etc.
 npm install
-npm run dev
-
-# Storefront
-cd apps/web
-cp .env.example .env      # set NEXT_PUBLIC_MAIN_BACKEND
-npm install
-npm run dev
-
-# Admin panel
-cd apps/admin
-cp .env.example .env      # set REACT_APP_MAIN_BACKEND
-npm install
-npm start
 ```
 
-See each app's required environment variables in its `.env.example`.
+Then copy each app's env file and fill it in:
+
+```bash
+cp apps/backend/.env.example apps/backend/.env   # Mongo, JWT, Razorpay, AWS, etc.
+cp apps/web/.env.example     apps/web/.env       # NEXT_PUBLIC_MAIN_BACKEND
+cp apps/admin/.env.example   apps/admin/.env     # VITE_MAIN_BACKEND
+```
 
 ### Running from the repo root
 
-Convenience scripts in the root `package.json` delegate to each app (no
-workspace hoisting — every app keeps its own `node_modules`):
+Convenience scripts in the root `package.json`:
 
 ```bash
-npm run install:all     # install deps in all three apps
 npm run dev:backend     # start the API (nodemon)
 npm run dev:web         # start the storefront (Next.js)
-npm run dev:admin       # start the admin panel (CRA)
+npm run dev:admin       # start the admin panel (Vite)
 npm run build:all       # production build of web + admin
 ```
 
