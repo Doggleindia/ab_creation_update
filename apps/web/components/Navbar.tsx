@@ -91,7 +91,7 @@ export default function Navbar() {
 
       {/* Main Navbar */}
       <div className="border-b border-slate-200 relative">
-        <div className="container mx-auto max-w-screen-2xl flex h-20 items-center justify-between px-4 md:px-6 lg:px-8">
+        <div className="container mx-auto max-w-screen-2xl flex h-32 items-center justify-between px-4 md:px-6 lg:px-8">
           {isSearchOpen ? (
             <div className="flex w-full items-center gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
               <div className="relative flex-1">
@@ -133,9 +133,9 @@ export default function Navbar() {
                 <Image
                   src="/ab-creation-logo.png"
                   alt="AB Creation"
-                  width={64}
-                  height={64}
-                  className="h-14 w-auto"
+                  width={112}
+                  height={112}
+                  className="h-[112px] w-auto"
                   priority
                 />
               </Link>

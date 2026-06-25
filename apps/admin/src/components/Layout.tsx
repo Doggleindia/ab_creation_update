@@ -85,8 +85,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         } fixed lg:relative w-64 h-screen bg-white border-r border-slate-200 transition-transform duration-300 z-30 flex flex-col`}
       >
         {/* Sidebar Header */}
-        <div className="h-16 flex items-center gap-3 px-4 border-b border-slate-200">
-          <img src="/ab-creation-logo.png" alt="AB Creation" className="h-11 w-auto" />
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200">
+          <img src="/ab-creation-logo.png" alt="AB Creation" className="h-[88px] w-auto" />
           <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#B87D4C]">Admin</span>
         </div>
 
