@@ -39,7 +39,7 @@ export default function ChooseHowToShop() {
            <Link
   href="/products"
   className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md 
-    bg-[#FFCD7B] border 
+    bg-[#CBAA75] border 
     hover:bg-[#C76B4E] hover:text-white hover:shadow-xl 
     shadow-lg transform hover:-translate-y-0.5 
     transition-all duration-300"

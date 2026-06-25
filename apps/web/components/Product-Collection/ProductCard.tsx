@@ -69,7 +69,7 @@ export default function ProductCard({
         <DialogContent className="sm:max-w-md bg-white border border-gray-100 rounded-xl shadow-xl z-[100]">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Heart className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-[#B87D4C] fill-orange-500/10"}`} />
+              <Heart className={`h-5 w-5 ${isFavorited ? "fill-[#C79280] text-[#C79280]" : "text-[#B87D4C] fill-[#B87D4C]/10"}`} />
               {isFavorited ? "Remove from Wishlist" : "Add to Wishlist"}
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-500">
@@ -90,8 +90,8 @@ export default function ProductCard({
               onClick={handleConfirm}
               className={`flex-1 sm:flex-none text-white text-sm font-semibold py-2.5 px-6 rounded-lg transition ${
                 isFavorited 
-                  ? "bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/10" 
-                  : "bg-[#171717] hover:bg-[#B87D4C] shadow-md shadow-orange-500/10"
+                  ? "bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/10"
+                  : "bg-[#171717] hover:bg-[#B87D4C] shadow-md shadow-[#B87D4C]/10"
               }`}
             >
               Yes
@@ -102,7 +102,7 @@ export default function ProductCard({
 
       {/* Badge */}
       {badge && (
-        <span className="absolute top-3 left-3 bg-[#B87D4C] text-white text-xs font-semibold px-3 py-1 rounded z-10">
+        <span className="absolute top-3 left-3 bg-[#CBAA75] text-[#171717] text-xs font-semibold px-3 py-1 rounded z-10">
           {badge}
         </span>
       )}
@@ -113,7 +113,7 @@ export default function ProductCard({
         className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white shadow hover:bg-gray-100 transition"
       >
         <Heart
-          className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-gray-600"
+          className={`h-5 w-5 ${isFavorited ? "fill-[#C79280] text-[#C79280]" : "text-gray-600"
             }`}
         />
       </button>

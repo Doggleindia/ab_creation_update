@@ -1350,7 +1350,7 @@ export default function TShirtDesigner({
                 {/* FRONT CARD */}
                 <div
                   onClick={() => handleSelectSideMode("front")}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-950/20"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-neutral-900 hover:shadow-lg hover:shadow-[#B87D4C]/20"
                 >
                   <div className="mx-auto mb-6 h-48 w-44 opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all">
                     <TShirtSVG color="#171717" side="front" />
@@ -1363,7 +1363,7 @@ export default function TShirtDesigner({
                 {/* BACK CARD */}
                 <div
                   onClick={() => handleSelectSideMode("back")}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-950/20"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-neutral-900 hover:shadow-lg hover:shadow-[#B87D4C]/20"
                 >
                   <div className="mx-auto mb-6 h-48 w-44 opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all">
                     <TShirtSVG color="#171717" side="back" />
@@ -1376,7 +1376,7 @@ export default function TShirtDesigner({
                 {/* BOTH FRONT & BACK CARD */}
                 <div
                   onClick={() => handleSelectSideMode("both")}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-[#B87D4C]/5 hover:shadow-lg hover:shadow-orange-950/30"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-[#B87D4C]/5 hover:shadow-lg hover:shadow-[#B87D4C]/30"
                 >
                   <div className="mx-auto mb-6 flex h-48 w-44 items-center justify-center gap-1 opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all">
                     <div className="w-1/2 scale-90 -translate-x-2">
@@ -1467,7 +1467,7 @@ export default function TShirtDesigner({
                 {/* Preview */}
                 <button
                   onClick={() => setIsPreviewModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#B87D4C]/40 bg-[#B87D4C]/10 px-3.5 py-1.5 text-xs font-semibold text-[#B87D4C] hover:bg-[#B87D4C]/20 hover:border-[#B87D4C] transition-all shadow-md shadow-orange-950/5"
+                  className="flex items-center gap-1.5 rounded-lg border border-[#B87D4C]/40 bg-[#B87D4C]/10 px-3.5 py-1.5 text-xs font-semibold text-[#B87D4C] hover:bg-[#B87D4C]/20 hover:border-[#B87D4C] transition-all shadow-md shadow-[#B87D4C]/5"
                 >
                   <Eye className="h-3.5 w-3.5" /> Preview Design
                 </button>
@@ -1484,7 +1484,7 @@ export default function TShirtDesigner({
                 {/* Finish & Save */}
                 <button
                   onClick={handleSaveDesign}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#B87D4C] px-4 py-1.5 text-xs font-bold text-white hover:bg-[#B87D4C] transition-all shadow-lg shadow-orange-950/20"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#B87D4C] px-4 py-1.5 text-xs font-bold text-white hover:bg-[#B87D4C] transition-all shadow-lg shadow-[#B87D4C]/20"
                 >
                   <Save className="h-3.5 w-3.5" /> Save Design
                 </button>
@@ -1914,7 +1914,7 @@ export default function TShirtDesigner({
                               onClick={() => setTshirtColor(c.hex)}
                               style={{ backgroundColor: c.hex }}
                               className={`aspect-square rounded-full border-2 transition-all relative ${tshirtColor.toLowerCase() === c.hex.toLowerCase()
-                                ? "border-[#B87D4C] scale-110 shadow-lg shadow-orange-950/40"
+                                ? "border-[#B87D4C] scale-110 shadow-lg shadow-[#B87D4C]/40"
                                 : "border-neutral-800 hover:scale-105"
                                 }`}
                               title={c.name}
@@ -2394,7 +2394,7 @@ export default function TShirtDesigner({
                     <div className="relative flex items-center justify-center my-6 py-6 w-full">
 
                       {/* Curved Technical Dashed SVG Arrow pointing from Mockup to Magnifier */}
-                      <svg viewBox="0 0 100 100" className="absolute top-[40%] -left-6 w-14 h-14 pointer-events-none select-none text-[#B87D4C] hidden lg:block drop-shadow-[0_0_8px_rgba(255,107,0,0.4)]">
+                      <svg viewBox="0 0 100 100" className="absolute top-[40%] -left-6 w-14 h-14 pointer-events-none select-none text-[#B87D4C] hidden lg:block drop-shadow-[0_0_8px_rgba(184,125,76,0.4)]">
                         <path
                           d="M 10,80 Q 25,25 80,40"
                           fill="none"
@@ -2407,7 +2407,7 @@ export default function TShirtDesigner({
                       </svg>
 
                       {/* THE MAGNIFIER GLASS */}
-                      <div className="relative w-64 h-64 rounded-full border-4 border-[#B87D4C] shadow-[0_0_35px_rgba(255,107,0,0.25),inset_0_0_20px_rgba(0,0,0,0.8)] overflow-hidden bg-neutral-950 flex items-center justify-center z-10 transition-transform duration-300 hover:scale-105">
+                      <div className="relative w-64 h-64 rounded-full border-4 border-[#B87D4C] shadow-[0_0_35px_rgba(184,125,76,0.25),inset_0_0_20px_rgba(0,0,0,0.8)] overflow-hidden bg-neutral-950 flex items-center justify-center z-10 transition-transform duration-300 hover:scale-105">
 
                         {/* Circular grid lines simulating target/lens view */}
                         <div className="absolute inset-0 border border-neutral-700/10 rounded-full scale-75 pointer-events-none z-20" />
@@ -2466,7 +2466,7 @@ export default function TShirtDesigner({
                   </button>
                   <button
                     onClick={handleFinalSave}
-                    className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-[#B87D4C] to-[#B87D4C] text-white px-7 py-2.5 text-xs font-bold transition-all hover:scale-[1.02] shadow-lg shadow-orange-950/30 flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-[#B87D4C] to-[#B87D4C] text-white px-7 py-2.5 text-xs font-bold transition-all hover:scale-[1.02] shadow-lg shadow-[#B87D4C]/30 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Check className="h-4 w-4" /> Yes, Confirm & Save
                   </button>

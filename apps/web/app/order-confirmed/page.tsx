@@ -188,7 +188,7 @@ function OrderConfirmedContent() {
 
                   {/* Step 2 */}
                   <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-2 md:w-1/4">
-                    <div className="w-8 h-8 rounded-full bg-[#CBAA75] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-amber-500/20 animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-[#CBAA75] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#B87D4C]/20 animate-pulse">
                       2
                     </div>
                     <div className="text-left">

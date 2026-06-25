@@ -83,7 +83,7 @@ export default function Navbar() {
           <span className="text-xs md:text-sm">If you order today estimate delivery time is 12 September.</span>
           <div className="flex items-center space-x-4 text-xs md:text-sm">
             <span>🕐 9:00 AM - 5:30 PM</span>
-            <span>📞 Call us: (912) 112 12 12</span>
+            <span>📞 Call us: <span className="text-[#CBAA75] font-medium">(912) 112 12 12</span></span>
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function Navbar() {
             <>
               {/* Logo - Left */}
               <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-                <span className="text-2xl font-bold text-[#B87D4C]">INK & PRESS</span>
+                <span className="text-2xl font-bold text-[#171717]">INK &amp; PRESS</span>
               </Link>
 
               {/* Desktop Menu - Center */}
@@ -206,7 +206,7 @@ export default function Navbar() {
                 {/* Wishlist Icon */}
                 <Button variant="ghost" size="sm" className="h-10 w-10 p-0 relative">
                   <Link href="/wishlist" className="flex items-center justify-center">
-                    <Heart className={wishlistCount > 0 ? "h-5 w-5 text-red-500 fill-red-500" : "h-5 w-5 text-slate-800"} />
+                    <Heart className={wishlistCount > 0 ? "h-5 w-5 text-[#C79280] fill-[#C79280]" : "h-5 w-5 text-slate-800"} />
                     <span className="sr-only">Wishlist</span>
                   </Link>
                   {wishlistCount > 0 && (

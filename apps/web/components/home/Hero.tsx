@@ -12,6 +12,9 @@ export default function Hero() {
           
           {/* LEFT - TEXT & BUTTONS */}
           <div className="max-w-xl">
+            <span className="inline-flex items-center gap-2 bg-[#171717] text-[#CBAA75] text-xs font-semibold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6">
+              ✦ Premium Custom Printing
+            </span>
             <h1 className="text-5xl md:text-[64px] font-bold text-[#171717] leading-[1.15] mb-6 tracking-tight">
               Printed for You.<br />
               Built for Your Brand.
@@ -22,7 +25,7 @@ export default function Hero() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-[#B87D4C] hover:bg-[#e65800] text-white px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all shadow-[0_8px_20px_-6px_rgba(255,98,0,0.6)]">
+              <button className="bg-[#171717] hover:bg-[#B87D4C] text-white px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all shadow-[0_8px_20px_-6px_rgba(184,125,76,0.5)]">
                 Customize Product
                 <ArrowRight className="ml-2 w-5 h-5" strokeWidth={2.5} />
               </button>

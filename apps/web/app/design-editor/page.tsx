@@ -23,7 +23,7 @@ export default function DesignEditorPage() {
             onClick={() => {
               window.dispatchEvent(new CustomEvent("open-standalone-designer"));
             }}
-            className="w-full py-3 bg-[#B87D4C] hover:bg-[#B87D4C] rounded-xl text-white font-bold text-sm transition-all shadow-lg shadow-orange-950/20"
+            className="w-full py-3 bg-[#B87D4C] hover:bg-[#B87D4C] rounded-xl text-white font-bold text-sm transition-all shadow-lg shadow-[#B87D4C]/20"
           >
             Launch Designer Sandbox
           </button>

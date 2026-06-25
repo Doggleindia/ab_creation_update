@@ -35,11 +35,11 @@ const features = [
 
 export default function SmarterWaySection() {
   return (
-    <section className="bg-[#0a0a0a] text-white py-20 md:py-28 font-sans">
+    <section className="bg-[#171717] text-white py-20 md:py-28 font-sans">
       <div className="max-w-[1400px] mx-auto px-6">
         {/* HEADING */}
         <div className="text-center mb-16">
-          <p className="text-[#B87D4C] text-[13px] font-bold tracking-[0.2em] uppercase mb-5">
+          <p className="text-[#CBAA75] text-[13px] font-bold tracking-[0.2em] uppercase mb-5">
             Why Choose Us
           </p>
           <h2 className="text-4xl md:text-[44px] font-bold mb-6 text-white tracking-tight">
