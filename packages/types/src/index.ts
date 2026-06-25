@@ -15,6 +15,11 @@ export type ProductStatus = "draft" | "published";
 
 export type EntityStatus = "active" | "inactive";
 
+export type CollectionName =
+  | "MENS-COLLECTIONS"
+  | "WOMENS-COLLECTIONS"
+  | "KIDS-COLLECTIONS";
+
 export type OrderStatus =
   | "pending"
   | "processing"
@@ -38,9 +43,51 @@ export interface Address {
   country?: string;
 }
 
-export interface MediaSet {
-  images?: string[];
-  videos?: string[];
+export interface VariantMedia {
+  images: string[];
+  videos: string[];
+}
+
+export interface MaterialAndCare {
+  material?: string;
+  careInstructions?: string[];
+}
+
+export interface Specifications {
+  fabric?: string;
+  fashionType?: string;
+  fit?: string;
+  type?: string;
+  neck?: string;
+  sleeveLength?: string;
+  pattern?: string;
+  occasion?: string;
+  closure?: string;
+  [key: string]: string | undefined;
+}
+
+export interface ProductSeo {
+  metaKeywords?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogType?: string;
+  ogUrl?: string;
+  schemaMarkup?: string;
+}
+
+export interface CustomizationTypeItem {
+  type: "DTF" | "Screen" | "Embroidery" | "Heat Transfer";
+  addPercentage: number;
+}
+
+export interface GsmPricingTier {
+  gsmQuantity: number;
+  addPercentage?: number;
+  finalPrice?: number;
 }
 
 // ---- Catalog ----
@@ -48,11 +95,12 @@ export interface MediaSet {
 export interface Collection {
   _id: string;
   id: string;
-  name: string;
+  name: CollectionName;
   slug: string;
-  status?: EntityStatus;
-  createdAt?: string;
-  updatedAt?: string;
+  status: EntityStatus;
+  createdAt: string;
+  updatedAt: string;
+  categoriesCount?: number;
 }
 
 export interface Category {
@@ -60,21 +108,26 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
-  collectionId?: string | Collection | null;
   images?: string[];
+  collectionId?: string | Collection;
+  productsCount?: number;
   status?: EntityStatus;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Variant {
   _id: string;
-  id?: string;
-  productId: string;
+  id: string;
+  productId: string | { _id: string; id: string; title: string; basePrice?: number };
   color: string;
   sku: string;
   addPercentageInBasePrice?: number;
-  media?: MediaSet;
+  media: VariantMedia;
+  inventory?: {
+    stock: number;
+    reservedStock: number;
+  };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -83,23 +136,22 @@ export interface Product {
   _id: string;
   id: string;
   title: string;
-  categoryId: string | Category;
+  slug: string;
+  categoryId: Category | string;
   basePrice: number;
+  customizationTypes: string[];
   discountPercentage?: number;
   description?: string;
-  slug: string;
   sizes?: string[];
   colors?: string[];
-  customizationTypes?: string[];
+  productDetails?: string[];
+  materialAndCare?: MaterialAndCare;
+  specifications?: Specifications;
   status: ProductStatus;
+  seo?: ProductSeo;
+  variantsCount?: number;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface GsmPricingTier {
-  gsmQuantity: number;
-  addPercentage: number;
-  finalPrice?: number;
 }
 
 export interface BulkProduct {
@@ -107,25 +159,34 @@ export interface BulkProduct {
   id: string;
   title: string;
   slug: string;
-  categoryId: string | Category;
-  basePrice: number;
+  categoryId: Category | string;
+  description?: string;
+  uploadYourDesign?: "optional" | "required";
+  anyText?: "optional" | "required";
   sizes?: string[];
   colors?: string[];
-  status?: ProductStatus;
-  createdAt?: string;
-  updatedAt?: string;
+  quantities?: number[];
+  gsmQuantity: number[];
+  customizationTypes?: CustomizationTypeItem[];
+  basePrice: number;
+  status: ProductStatus;
+  productDetails?: string[];
+  materialAndCare?: MaterialAndCare;
+  specifications?: Specifications;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BulkProductVariant {
   _id: string;
-  id?: string;
-  bulkProductId: string;
+  id: string;
+  bulkProductId: string | BulkProduct;
   color: string;
-  sku?: string;
   gsmPricingTiers: GsmPricingTier[];
+  sku?: string;
   images?: string[];
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ---- Commerce ----

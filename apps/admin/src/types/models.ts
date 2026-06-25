@@ -1,3 +1,39 @@
+// ---------------------------------------------------------------------------
+// Shared domain entities now live in the @kt/types workspace package. They are
+// imported here (and re-exported) so existing admin code keeps importing them
+// from './models' unchanged, while the canonical definition is shared across
+// the storefront and backend contracts.
+// ---------------------------------------------------------------------------
+import type {
+  Product,
+  Variant,
+  VariantMedia,
+  Category,
+  Collection,
+  BulkProduct,
+  BulkProductVariant,
+  MaterialAndCare,
+  Specifications,
+  ProductSeo,
+  CustomizationTypeItem,
+  GsmPricingTier as GSMPricingTier,
+} from "@kt/types";
+
+export type {
+  Product,
+  Variant,
+  VariantMedia,
+  Category,
+  Collection,
+  BulkProduct,
+  BulkProductVariant,
+  MaterialAndCare,
+  Specifications,
+  ProductSeo,
+  CustomizationTypeItem,
+  GSMPricingTier,
+};
+
 // Customer types
 export interface Customer {
   id: string;
@@ -11,7 +47,8 @@ export interface Customer {
   lastOrderDate: string;
 }
 
-// Order types
+// Order types (admin dashboard / mock UI shapes — distinct from the backend
+// Order contract in @kt/types)
 export type OrderStatus = 'Paid' | 'Processing' | 'Shipping' | 'Delivered' | 'Cancelled';
 export type PrintingType = 'DTF' | 'Embroidered' | 'Screen Printing';
 export type ProductType = 'Hoodie' | 'T-Shirt' | 'Tops';
@@ -71,7 +108,8 @@ export interface DeleteContactResponse {
   message: string;
 }
 
-// Wallet types
+// Wallet types (admin dashboard / mock UI shapes — distinct from the backend
+// WalletTransaction contract in @kt/types)
 export type TransactionType = 'Credit' | 'Debit' | 'Refund' | 'Withdrawal';
 export type TransactionStatus = 'Completed' | 'Pending' | 'Failed';
 
@@ -116,18 +154,7 @@ export interface LookBook {
   lastUpdated: string;
 }
 
-// Collection types
-export interface Collection {
-  _id: string;
-  id: string;
-  name: 'MENS-COLLECTIONS' | 'WOMENS-COLLECTIONS' | 'KIDS-COLLECTIONS';
-  slug: string;
-  status: 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
-  categoriesCount?: number;
-}
-
+// Collection responses / requests (entity comes from @kt/types)
 export interface CollectionResponse {
   status: string;
   data: {
@@ -160,19 +187,7 @@ export interface UpdateCollectionRequest {
   status?: 'active' | 'inactive';
 }
 
-// Category types
-export interface Category {
-  _id: string;
-  id: string;
-  name: string;
-  slug: string;
-  images?: string[];
-  collectionId?: string | Collection;
-  productsCount?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
+// Category responses / requests (entity comes from @kt/types)
 export interface CategoryWithParent extends Omit<Category, 'collectionId'> {
   collectionId?: {
     _id: string;
@@ -216,40 +231,7 @@ export interface UpdateCategoryRequest {
   collectionId?: string;
 }
 
-// Product types
-export interface Product {
-  _id: string;
-  id: string;
-  title: string;
-  slug: string;
-  categoryId: Category | string;
-  basePrice: number;
-  customizationTypes: string[];
-  discountPercentage?: number;
-  description?: string;
-  sizes?: string[];
-  colors?: string[];
-  productDetails?: string[];
-  materialAndCare?: MaterialAndCare;
-  specifications?: Specifications;
-  status: 'draft' | 'published';
-  seo?: {
-    metaKeywords?: string[];
-    metaTitle?: string;
-    metaDescription?: string;
-    canonicalUrl?: string;
-    ogTitle?: string;
-    ogDescription?: string;
-    ogImage?: string;
-    ogType?: string;
-    ogUrl?: string;
-    schemaMarkup?: string;
-  };
-  variantsCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
+// Product responses / requests (entity comes from @kt/types)
 export interface CreateProductRequest {
   id: string;
   title: string;
@@ -265,18 +247,7 @@ export interface CreateProductRequest {
   materialAndCare?: MaterialAndCare;
   specifications?: Specifications;
   status?: 'draft' | 'published';
-  seo?: {
-    metaKeywords?: string[];
-    metaTitle?: string;
-    metaDescription?: string;
-    canonicalUrl?: string;
-    ogTitle?: string;
-    ogDescription?: string;
-    ogImage?: string;
-    ogType?: string;
-    ogUrl?: string;
-    schemaMarkup?: string;
-  };
+  seo?: ProductSeo;
 }
 
 export interface UpdateProductRequest {
@@ -293,18 +264,7 @@ export interface UpdateProductRequest {
   materialAndCare?: MaterialAndCare;
   specifications?: Specifications;
   status?: 'draft' | 'published';
-  seo?: {
-    metaKeywords?: string[];
-    metaTitle?: string;
-    metaDescription?: string;
-    canonicalUrl?: string;
-    ogTitle?: string;
-    ogDescription?: string;
-    ogImage?: string;
-    ogType?: string;
-    ogUrl?: string;
-    schemaMarkup?: string;
-  };
+  seo?: ProductSeo;
 }
 
 export interface ProductsResponse {
@@ -323,28 +283,7 @@ export interface ProductResponse {
   data: Product;
 }
 
-// Variant types
-export interface VariantMedia {
-  images: string[];
-  videos: string[];
-}
-
-export interface Variant {
-  _id: string;
-  id: string;
-  productId: string | { _id: string; id: string; title: string; basePrice?: number };
-  color: string;
-  sku: string;
-  addPercentageInBasePrice?: number;
-  media: VariantMedia;
-  inventory?: {
-    stock: number;
-    reservedStock: number;
-  };
-  createdAt?: string;
-  updatedAt?: string;
-}
-
+// Variant responses / requests (entity comes from @kt/types)
 export interface CreateVariantRequest {
   id: string;
   color: string;
@@ -502,54 +441,7 @@ export interface WishlistAnalytics {
   analytics: WishlistAnalyticsItem[];
 }
 
-export interface CustomizationTypeItem {
-  type: 'DTF' | 'Screen' | 'Embroidery' | 'Heat Transfer';
-  addPercentage: number;
-}
-
-// Bulk Product types
-export interface MaterialAndCare {
-  material?: string;
-  careInstructions?: string[];
-}
-
-export interface Specifications {
-  fabric?: string;
-  fashionType?: string;
-  fit?: string;
-  type?: string;
-  neck?: string;
-  sleeveLength?: string;
-  pattern?: string;
-  occasion?: string;
-  closure?: string;
-
-  [key: string]: string | undefined;
-}
-
-export interface BulkProduct {
-  _id: string;
-  id: string;
-  title: string;
-  slug: string;
-  categoryId: Category | string;
-  description?: string;
-  uploadYourDesign?: 'optional' | 'required';
-  anyText?: 'optional' | 'required';
-  sizes?: string[];
-  colors?: string[];
-  quantities?: number[];
-  gsmQuantity: number[];
-  customizationTypes?: CustomizationTypeItem[];
-  basePrice: number;
-  status: 'draft' | 'published';
-  productDetails?: string[];
-  materialAndCare?: MaterialAndCare;
-  specifications?: Specifications;
-  createdAt: string;
-  updatedAt: string;
-}
-
+// Bulk product responses / requests (entities come from @kt/types)
 export interface CreateBulkProductRequest {
   id: string;
   title: string;
@@ -603,24 +495,6 @@ export interface BulkProductsResponse {
   totalPages: number;
   results: number;
   data: BulkProduct[];
-}
-
-export interface GSMPricingTier {
-  gsmQuantity: number;
-  addPercentage?: number;
-  finalPrice?: number;
-}
-
-export interface BulkProductVariant {
-  _id: string;
-  id: string;
-  bulkProductId: string | BulkProduct;
-  color: string;
-  gsmPricingTiers: GSMPricingTier[];
-  sku?: string;
-  images?: string[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateBulkProductVariantRequest {
