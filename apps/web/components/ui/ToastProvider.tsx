@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 type ToastType = "success" | "error" | "info";
@@ -18,6 +18,10 @@ export const useToast = () => {
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  // Only render the portal after mount so the first client render matches the
+  // server (which renders nothing) — avoids a hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const toast = useCallback((type: ToastType, message: string) => {
     const id = Date.now();
@@ -30,7 +34,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      {typeof window !== "undefined" && createPortal(
+      {mounted && createPortal(
         <div className="fixed right-4 top-4 z-[9999] flex flex-col gap-2">
           {toasts.map((t) => (
             <div
