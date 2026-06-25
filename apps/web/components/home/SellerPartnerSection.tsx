@@ -11,7 +11,7 @@ export default function SellerPartnerSection() {
           
           {/* LEFT CONTENT */}
           <div className="px-6 sm:px-10 lg:px-24 py-16 lg:py-0">
-            <h2 className="text-[#111827] text-[42px] sm:text-[52px] leading-[110%] font-bold tracking-[-1.5px]">
+            <h2 className="text-[#171717] text-[42px] sm:text-[52px] leading-[110%] font-bold tracking-[-1.5px]">
               Become a Seller Partner
             </h2>
 
@@ -26,7 +26,7 @@ export default function SellerPartnerSection() {
                   h-[52px]
                   min-w-[146px]
                   rounded-full
-                  bg-[#FF6600]
+                  bg-[#B87D4C]
                   hover:bg-[#e85d00]
                   text-white
                   text-[15px]
@@ -47,7 +47,7 @@ export default function SellerPartnerSection() {
                   border-[#2B2B2B]
                   bg-transparent
                   hover:bg-transparent
-                  text-[#111827]
+                  text-[#171717]
                   text-[15px]
                   font-semibold
                   px-8

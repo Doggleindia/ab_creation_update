@@ -28,7 +28,7 @@ const WalletTransactionTable: React.FC<WalletTransactionTableProps> = ({ transac
       case 'Refund':
         return renderIcon(FiRotateCcw, { size: 18, color: '#F59E0B' });
       case 'Withdrawal':
-        return renderIcon(FiArrowUpCircle, { size: 18, color: '#8B5CF6' });
+        return renderIcon(FiArrowUpCircle, { size: 18, color: '#B87D4C' });
       default:
         return renderIcon(FiArrowDownCircle, { size: 18, color: '#6B7280' });
     }
@@ -43,7 +43,7 @@ const WalletTransactionTable: React.FC<WalletTransactionTableProps> = ({ transac
       case 'Refund':
         return 'bg-amber-100 text-amber-800';
       case 'Withdrawal':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-[#E8E6E3] text-[#B87D4C]';
       default:
         return 'bg-gray-100 text-gray-800';
     }

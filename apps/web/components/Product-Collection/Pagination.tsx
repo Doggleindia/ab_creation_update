@@ -27,7 +27,7 @@ export default function Pagination({
             key={p}
             onClick={() => onPageChange && onPageChange(p)}
             className={`h-10 w-10 flex items-center justify-center border rounded text-sm font-medium transition-colors ${p === page
-                ? "bg-orange-500 text-white border-orange-500"
+                ? "bg-[#B87D4C] text-white border-[#B87D4C]"
                 : "border-gray-300 text-gray-700 hover:border-gray-400"
               }`}
           >

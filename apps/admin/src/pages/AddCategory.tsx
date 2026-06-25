@@ -131,7 +131,7 @@ const AddCategory: React.FC = () => {
                 value={formData.id}
                 onChange={handleInputChange}
                 placeholder="Enter category ID (e.g., CAT001)"
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 required
               />
               <p className="text-xs text-gray-500 mt-1">Format: CAT followed by 3 digits (e.g., CAT001)</p>
@@ -149,7 +149,7 @@ const AddCategory: React.FC = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter category name (e.g., Shirts)"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   required
                 />
               </div>
@@ -165,7 +165,7 @@ const AddCategory: React.FC = () => {
                   value={formData.slug}
                   onChange={handleInputChange}
                   placeholder="Enter category slug (e.g., shirts)"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">Lowercase letters, numbers, and hyphens only</p>
@@ -181,7 +181,7 @@ const AddCategory: React.FC = () => {
                 name="collectionId"
                 value={formData.collectionId}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
               >
                 <option value="">Select a collection</option>
                 {collections.map((collection) => (
@@ -212,7 +212,7 @@ const AddCategory: React.FC = () => {
                     </button>
                   </div>
                 ))}
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-[#B87D4C] transition-colors">
                   <input
                     type="file"
                     multiple
@@ -238,7 +238,7 @@ const AddCategory: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating...' : 'Create Category'}
               </button>

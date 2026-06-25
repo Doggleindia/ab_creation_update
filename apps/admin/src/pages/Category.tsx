@@ -79,7 +79,7 @@ const CategoryPage: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/category/add')}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center gap-2 px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium"
           >
             {renderIcon(FiPlus, { size: 20 })}
             <span>Add Category</span>
@@ -90,7 +90,7 @@ const CategoryPage: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-blue-600 mx-auto mb-4' })}
+              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-[#B87D4C] mx-auto mb-4' })}
               <p className="text-gray-600">Loading categories...</p>
             </div>
           </div>
@@ -105,7 +105,7 @@ const CategoryPage: React.FC = () => {
                     placeholder="Search by name or description..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   />
                 </div>
               </div>
@@ -118,7 +118,7 @@ const CategoryPage: React.FC = () => {
                 </div>
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
                   <p className="text-gray-600 text-sm font-medium">Total Categories</p>
-                  <p className="text-2xl font-bold text-blue-600 mt-1">
+                  <p className="text-2xl font-bold text-[#B87D4C] mt-1">
                     {categories.length}
                   </p>
                 </div>
@@ -130,7 +130,7 @@ const CategoryPage: React.FC = () => {
                 </div>
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
                   <p className="text-gray-600 text-sm font-medium">Standalone Categories</p>
-                  <p className="text-2xl font-bold text-purple-600 mt-1">
+                  <p className="text-2xl font-bold text-[#B87D4C] mt-1">
                     {categories.filter(c => !c.collectionId).length}
                   </p>
                 </div>

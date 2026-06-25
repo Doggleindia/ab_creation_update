@@ -137,7 +137,7 @@ const AddCollection: React.FC = () => {
                 value={formData.id}
                 onChange={handleInputChange}
                 placeholder="COL001"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
               />
               <p className="mt-1 text-xs text-gray-500">Format: COL### (e.g., COL001)</p>
             </div>
@@ -151,7 +151,7 @@ const AddCollection: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
               >
                 {collectionNames.map((name) => (
                   <option key={name} value={name}>
@@ -173,7 +173,7 @@ const AddCollection: React.FC = () => {
                 value={formData.slug}
                 onChange={handleInputChange}
                 placeholder="mens-collections"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
               />
               <p className="mt-1 text-xs text-gray-500">URL-friendly slug (lowercase with hyphens)</p>
             </div>
@@ -187,7 +187,7 @@ const AddCollection: React.FC = () => {
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -206,7 +206,7 @@ const AddCollection: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-6 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] disabled:opacity-50 transition-colors"
               >
                 {renderIcon(FiSave)}
                 {loading ? 'Creating...' : 'Create Collection'}

@@ -254,7 +254,7 @@ const AddProduct: React.FC = () => {
                     name="id"
                     value={formData.id}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="PROD001"
                     required
                   />
@@ -269,7 +269,7 @@ const AddProduct: React.FC = () => {
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="Premium Cotton T-Shirt"
                     required
                   />
@@ -283,7 +283,7 @@ const AddProduct: React.FC = () => {
                     name="categoryId"
                     value={formData.categoryId}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     required
                   >
                     <option value="">Select Category</option>
@@ -304,7 +304,7 @@ const AddProduct: React.FC = () => {
                     name="slug"
                     value={formData.slug}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="premium-cotton-tshirt"
                     required
                   />
@@ -319,7 +319,7 @@ const AddProduct: React.FC = () => {
                     name="basePrice"
                     value={formData.basePrice}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="499"
                     min="0"
                   />
@@ -333,7 +333,7 @@ const AddProduct: React.FC = () => {
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
@@ -353,25 +353,25 @@ const AddProduct: React.FC = () => {
                       value={newCustomizationType}
                       onChange={(e) => setNewCustomizationType(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomizationType())}
-                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="Add customization type"
                     />
                     <button
                       type="button"
                       onClick={addCustomizationType}
-                      className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                      className="px-4 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded-lg"
                     >
                       Add
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {formData.customizationTypes.map((type, index) => (
-                      <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2">
+                      <span key={index} className="px-3 py-1 bg-[#E8E6E3] text-[#B87D4C] rounded-full text-sm flex items-center gap-2">
                         {type}
                         <button
                           type="button"
                           onClick={() => removeCustomizationType(index)}
-                          className="text-blue-900 hover:text-blue-700"
+                          className="text-[#B87D4C] hover:text-[#B87D4C]"
                         >
                           ×
                         </button>
@@ -393,13 +393,13 @@ const AddProduct: React.FC = () => {
                       value={newColor}
                       onChange={(e) => setNewColor(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addColor())}
-                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="Red, Black, Blue"
                     />
                     <button
                       type="button"
                       onClick={addColor}
-                      className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                      className="px-4 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded-lg"
                     >
                       Add
                     </button>
@@ -433,13 +433,13 @@ const AddProduct: React.FC = () => {
                       value={newSize}
                       onChange={(e) => setNewSize(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSize())}
-                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="XS, S, M, L, XL, XXL"
                     />
                     <button
                       type="button"
                       onClick={addSize}
-                      className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                      className="px-4 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded-lg"
                     >
                       Add
                     </button>
@@ -473,13 +473,13 @@ const AddProduct: React.FC = () => {
                       value={newProductDetail}
                       onChange={(e) => setNewProductDetail(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addProductDetail())}
-                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="Add product detail"
                     />
                     <button
                       type="button"
                       onClick={addProductDetail}
-                      className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                      className="px-4 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded-lg"
                     >
                       Add
                     </button>
@@ -514,7 +514,7 @@ const AddProduct: React.FC = () => {
                       name="materialAndCare.material"
                       value={formData.materialAndCare?.material || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="Cotton, Polyester, etc."
                     />
                   </div>
@@ -530,13 +530,13 @@ const AddProduct: React.FC = () => {
                           value={newCareInstruction}
                           onChange={(e) => setNewCareInstruction(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCareInstruction())}
-                          className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                           placeholder="Add care instruction"
                         />
                         <button
                           type="button"
                           onClick={addCareInstruction}
-                          className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                          className="px-4 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded-lg"
                         >
                           Add
                         </button>
@@ -584,7 +584,7 @@ const AddProduct: React.FC = () => {
                         name={`specifications.${field.name}`}
                         value={formData.specifications?.[field.name] || ''}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                         placeholder={field.label}
                       />
                     </div>
@@ -602,7 +602,7 @@ const AddProduct: React.FC = () => {
                   name="discountPercentage"
                   value={formData.discountPercentage}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   placeholder="10"
                   min="0"
                   max="100"
@@ -619,7 +619,7 @@ const AddProduct: React.FC = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   placeholder="Product description..."
                 />
               </div>
@@ -638,7 +638,7 @@ const AddProduct: React.FC = () => {
                       name="seo.metaTitle"
                       value={formData.seo?.metaTitle || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="SEO Meta Title"
                     />
                   </div>
@@ -652,7 +652,7 @@ const AddProduct: React.FC = () => {
                       name="seo.metaDescription"
                       value={formData.seo?.metaDescription || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="SEO Meta Description"
                     />
                   </div>
@@ -666,7 +666,7 @@ const AddProduct: React.FC = () => {
                       name="seo.canonicalUrl"
                       value={formData.seo?.canonicalUrl || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="https://example.com/product"
                     />
                   </div>
@@ -680,7 +680,7 @@ const AddProduct: React.FC = () => {
                       name="seo.ogTitle"
                       value={formData.seo?.ogTitle || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="Open Graph Title"
                     />
                   </div>
@@ -694,7 +694,7 @@ const AddProduct: React.FC = () => {
                       name="seo.ogDescription"
                       value={formData.seo?.ogDescription || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="Open Graph Description"
                     />
                   </div>
@@ -708,7 +708,7 @@ const AddProduct: React.FC = () => {
                       name="seo.ogImage"
                       value={formData.seo?.ogImage || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="https://example.com/image.jpg"
                     />
                   </div>
@@ -722,7 +722,7 @@ const AddProduct: React.FC = () => {
                       name="seo.ogType"
                       value={formData.seo?.ogType || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="website, product, article"
                     />
                   </div>
@@ -736,7 +736,7 @@ const AddProduct: React.FC = () => {
                       name="seo.ogUrl"
                       value={formData.seo?.ogUrl || ''}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="https://example.com/product"
                     />
                   </div>
@@ -750,7 +750,7 @@ const AddProduct: React.FC = () => {
                       value={formData.seo?.schemaMarkup || ''}
                       onChange={handleInputChange}
                       rows={3}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       placeholder="JSON-LD schema markup"
                     />
                   </div>
@@ -769,7 +769,7 @@ const AddProduct: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+                  className="px-6 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded-lg transition-colors disabled:opacity-50"
                 >
                   {loading ? 'Creating...' : 'Create Product'}
                 </button>

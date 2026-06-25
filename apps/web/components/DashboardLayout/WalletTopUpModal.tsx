@@ -120,7 +120,7 @@ export default function WalletTopUpModal({
         modal: {
           ondismiss: () => setLoading(false),
         },
-        theme: { color: "#7a3a2e" },
+        theme: { color: "#B87D4C" },
       })
       rzp.open()
     } catch (err: unknown) {
@@ -147,9 +147,9 @@ export default function WalletTopUpModal({
 
         <div className="space-y-4">
           {/* Current Balance Display */}
-          <div className="bg-[#7a3a2e]/10 p-3 rounded-lg">
+          <div className="bg-[#171717]/10 p-3 rounded-lg">
             <p className="text-sm text-muted-foreground">Current Balance</p>
-            <p className="text-lg font-semibold text-[#7a3a2e]">
+            <p className="text-lg font-semibold text-[#B87D4C]">
               ₹{currentBalance.toLocaleString("en-IN")}
             </p>
           </div>
@@ -181,7 +181,7 @@ export default function WalletTopUpModal({
                   setAmount(amt.toString())
                   setError("")
                 }}
-                className={amount === amt.toString() ? "border-[#7a3a2e] text-[#7a3a2e]" : ""}
+                className={amount === amt.toString() ? "border-[#B87D4C] text-[#B87D4C]" : ""}
               >
                 ₹{amt}
               </Button>
@@ -190,7 +190,7 @@ export default function WalletTopUpModal({
 
           {/* Submit Button */}
           <Button
-            className="bg-[#7a3a2e] w-full hover:bg-[#6a2a1e]"
+            className="bg-[#171717] w-full hover:bg-[#6a2a1e]"
             onClick={handleRecharge}
             disabled={loading || !amount}
           >

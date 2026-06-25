@@ -51,8 +51,8 @@ export default function ApparelOrderDetailModal({
     if (!status) return "bg-gray-100 text-gray-700";
     const statusLower = status.toLowerCase();
     if (statusLower === "pending") return "bg-yellow-100 text-yellow-700";
-    if (statusLower === "processing") return "bg-blue-100 text-blue-700";
-    if (statusLower === "shipped") return "bg-purple-100 text-purple-700";
+    if (statusLower === "processing") return "bg-[#E8E6E3] text-[#B87D4C]";
+    if (statusLower === "shipped") return "bg-[#E8E6E3] text-[#B87D4C]";
     if (statusLower === "delivered") return "bg-green-100 text-green-700";
     if (statusLower === "cancelled") return "bg-red-100 text-red-700";
     return "bg-gray-100 text-gray-700";
@@ -200,7 +200,7 @@ export default function ApparelOrderDetailModal({
                       key={idx}
                       className="flex items-center gap-2 bg-gray-50 p-2 rounded"
                     >
-                      <span className="w-2 h-2 bg-[#7a3a2e] rounded-full"></span>
+                      <span className="w-2 h-2 bg-[#171717] rounded-full"></span>
                       {placement}
                     </div>
                   ))}
@@ -289,7 +289,7 @@ export default function ApparelOrderDetailModal({
               </div>
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total Price:</span>
-                <span className="text-[#7a3a2e]">₹{order.totalPrice}</span>
+                <span className="text-[#B87D4C]">₹{order.totalPrice}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Order Date:</span>
@@ -300,7 +300,7 @@ export default function ApparelOrderDetailModal({
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="w-full mt-6 px-4 py-2 bg-[#7a3a2e] text-white rounded-lg hover:bg-[#6a2f25] transition-colors"
+              className="w-full mt-6 px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#6a2f25] transition-colors"
             >
               Close
             </button>

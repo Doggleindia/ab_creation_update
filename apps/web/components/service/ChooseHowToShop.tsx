@@ -26,7 +26,7 @@ export default function ChooseHowToShop() {
             <Link
   href="/design-your-own"
   className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md 
-    bg-[linear-gradient(98.51deg,#D88270_1.39%,#763A2D_100%)]
+    bg-[linear-gradient(98.51deg,#C79280_1.39%,#B87D4C_100%)]
     hover:bg-[linear-gradient(98.51deg,#E89985_1.39%,#8B4F42_100%)]
     text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 
     transition-all duration-300"

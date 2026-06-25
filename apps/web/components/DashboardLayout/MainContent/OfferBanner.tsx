@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 
 export default function OfferBanner() {
   return (
-    <div className="bg-[#faf6ef] rounded-lg p-6 flex items-center justify-between">
+    <div className="bg-[#F5F1EA] rounded-lg p-6 flex items-center justify-between">
       <div>
         <p className="font-medium mb-1">
           50% off first order
@@ -12,7 +12,7 @@ export default function OfferBanner() {
           (products only, excl. shipping).
         </p>
 
-        <Button className="mt-4 bg-[#7a3a2e] hover:bg-[#682f25]">
+        <Button className="mt-4 bg-[#171717] hover:bg-[#B87D4C]">
           ORDER NOW
         </Button>
       </div>

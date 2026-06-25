@@ -49,7 +49,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ products, onEdit, onDelete,
                 <td className="px-6 py-4 text-sm font-medium text-gray-900">
                   <button
                     onClick={() => navigate(`/variant?productId=${product._id}`)}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-[#B87D4C] hover:text-[#B87D4C] hover:underline"
                   >
                     {product.title}
                   </button>
@@ -61,7 +61,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ products, onEdit, onDelete,
                 <td className="px-6 py-4 text-sm text-gray-600">
                   <div className="flex flex-wrap gap-1">
                     {product.customizationTypes.slice(0, 2).map((type, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
+                      <span key={idx} className="px-2 py-1 bg-[#E8E6E3] text-[#B87D4C] text-xs rounded">
                         {type}
                       </span>
                     ))}
@@ -110,7 +110,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ products, onEdit, onDelete,
                     </button>
                     <button
                       onClick={() => onEdit(product)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                       title="Edit"
                     >
                       {renderIcon(FiEdit2, { size: 16 })}

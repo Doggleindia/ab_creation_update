@@ -101,7 +101,7 @@ export default function Breadcrumbs({ customSegments, className, transparent, is
   return (
     <nav 
       aria-label="Breadcrumb" 
-      className={className || `w-full py-4 px-4 sm:px-6 ${transparent ? 'bg-transparent border-0 py-0 px-0' : 'bg-[#faf6ef]/40 border-b border-[#ECECEC] backdrop-blur-sm'}`}
+      className={className || `w-full py-4 px-4 sm:px-6 ${transparent ? 'bg-transparent border-0 py-0 px-0' : 'bg-[#F5F1EA]/40 border-b border-[#E8E6E3] backdrop-blur-sm'}`}
     >
       <div className="max-w-7xl mx-auto flex items-center flex-wrap gap-1.5 text-xs sm:text-sm font-medium text-neutral-500">
         {breadcrumbList.map((item, index) => {
@@ -117,13 +117,13 @@ export default function Breadcrumbs({ customSegments, className, transparent, is
                   <Home className="h-3.5 w-3.5 mr-1 text-neutral-400 shrink-0" />
                 )}
                 {isLast || !item.href ? (
-                  <span className="text-[#7a3a2e] font-semibold truncate max-w-[150px] sm:max-w-[250px]">
+                  <span className="text-[#B87D4C] font-semibold truncate max-w-[150px] sm:max-w-[250px]">
                     {item.label}
                   </span>
                 ) : (
                   <Link
                     href={item.href}
-                    className="hover:text-[#7a3a2e] hover:underline transition-all duration-200 truncate max-w-[150px] sm:max-w-[200px]"
+                    className="hover:text-[#B87D4C] hover:underline transition-all duration-200 truncate max-w-[150px] sm:max-w-[200px]"
                   >
                     {item.label}
                   </Link>

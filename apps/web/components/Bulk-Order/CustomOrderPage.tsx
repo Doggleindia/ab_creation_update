@@ -329,7 +329,7 @@ export default function CustomOrderPage() {
                     <div key={placement} className="relative">
                       <button
                         onClick={() => triggerFileInput(placement)}
-                        className="relative h-36 w-full rounded-md border-2 border-dashed border-gray-300 transition-all hover:border-[#7a3a2e] hover:bg-gray-50"
+                        className="relative h-36 w-full rounded-md border-2 border-dashed border-gray-300 transition-all hover:border-[#B87D4C] hover:bg-gray-50"
                       >
                         {uploadedDesigns[placement] ? (
                           <div className="relative h-full w-full overflow-hidden rounded-md">
@@ -392,7 +392,7 @@ export default function CustomOrderPage() {
                       type="button"
                       onClick={() => handlePrintPlacementChange(placement)}
                       className={`capitalize transition-all ${printPlacements.includes(placement)
-                        ? "bg-[#7a3a2e] text-white hover:bg-[#682f25]"
+                        ? "bg-[#171717] text-white hover:bg-[#B87D4C]"
                         : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                         }`}
                       disabled={!selectedProduct}
@@ -411,7 +411,7 @@ export default function CustomOrderPage() {
                     {printPlacements.map((placement) => (
                       <div
                         key={placement}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#7a3a2e] px-4 py-2 text-sm text-white"
+                        className="inline-flex items-center gap-2 rounded-full bg-[#171717] px-4 py-2 text-sm text-white"
                       >
                         <span className="capitalize">{placement}</span>
                         <button
@@ -480,7 +480,7 @@ export default function CustomOrderPage() {
               <Button 
                 type="button"
                 onClick={addSizeQuantity}
-                className="mt-2 bg-[#7a3a2e] hover:bg-[#682f25]"
+                className="mt-2 bg-[#171717] hover:bg-[#B87D4C]"
                 disabled={!selectedSize || !quantity}
               >
                 Add Size
@@ -580,7 +580,7 @@ export default function CustomOrderPage() {
             </section>
 
             <Button 
-              className="w-fit bg-[#7a3a2e] hover:bg-[#682f25]"
+              className="w-fit bg-[#171717] hover:bg-[#B87D4C]"
               onClick={handleSubmit}
               disabled={submitting}
             >

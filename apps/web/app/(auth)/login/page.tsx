@@ -94,7 +94,7 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  className="w-40 bg-[#7a3a2e] hover:bg-[#682f25]"
+                  className="w-40 bg-[#171717] hover:bg-[#B87D4C]"
                 >
                   LOG IN
                 </Button>

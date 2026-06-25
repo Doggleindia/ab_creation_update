@@ -9,7 +9,7 @@ export default function DesignEditorPage() {
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 text-white text-center font-sans">
       <div className="max-w-md w-full rounded-2xl border border-neutral-800 bg-neutral-900/40 p-8 shadow-2xl backdrop-blur-md">
-        <div className="inline-flex p-3 rounded-2xl bg-[#FF6B00]/10 text-[#FF6B00] mb-6">
+        <div className="inline-flex p-3 rounded-2xl bg-[#B87D4C]/10 text-[#B87D4C] mb-6">
           <Sparkles className="h-6 w-6" />
         </div>
         
@@ -23,7 +23,7 @@ export default function DesignEditorPage() {
             onClick={() => {
               window.dispatchEvent(new CustomEvent("open-standalone-designer"));
             }}
-            className="w-full py-3 bg-[#FF6B00] hover:bg-[#f45f00] rounded-xl text-white font-bold text-sm transition-all shadow-lg shadow-orange-950/20"
+            className="w-full py-3 bg-[#B87D4C] hover:bg-[#B87D4C] rounded-xl text-white font-bold text-sm transition-all shadow-lg shadow-orange-950/20"
           >
             Launch Designer Sandbox
           </button>

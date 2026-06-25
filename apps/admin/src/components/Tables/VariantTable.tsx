@@ -67,7 +67,7 @@ const VariantTable: React.FC<VariantTableProps> = ({ variants, productId, onEdit
                     </button>
                     <button
                       onClick={() => onEdit(variant)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                       title="Edit"
                     >
                       {renderIcon(FiEdit2, { size: 16 })}

@@ -62,8 +62,8 @@ export default function OrdersPage() {
     if (!status) return "bg-gray-100 text-gray-700";
     const statusLower = status.toLowerCase();
     if (statusLower === "pending") return "bg-yellow-100 text-yellow-700";
-    if (statusLower === "processing") return "bg-blue-100 text-blue-700";
-    if (statusLower === "shipped") return "bg-purple-100 text-purple-700";
+    if (statusLower === "processing") return "bg-[#E8E6E3] text-[#B87D4C]";
+    if (statusLower === "shipped") return "bg-[#E8E6E3] text-[#B87D4C]";
     if (statusLower === "delivered") return "bg-green-100 text-green-700";
     if (statusLower === "cancelled") return "bg-red-100 text-red-700";
     return "bg-gray-100 text-gray-700";
@@ -140,7 +140,7 @@ export default function OrdersPage() {
             setOrders(null)
           }}
           className={`pb-3 px-1 font-semibold text-sm transition-colors ${activeTab === "ready"
-            ? "border-b-2 border-[#7a3a2e] text-[#7a3a2e]"
+            ? "border-b-2 border-[#B87D4C] text-[#B87D4C]"
             : "text-muted-foreground hover:text-foreground"
             }`}
         >
@@ -152,7 +152,7 @@ export default function OrdersPage() {
             setOrders(null)
           }}
           className={`pb-3 px-1 font-semibold text-sm transition-colors ${activeTab === "bulk"
-            ? "border-b-2 border-[#7a3a2e] text-[#7a3a2e]"
+            ? "border-b-2 border-[#B87D4C] text-[#B87D4C]"
             : "text-muted-foreground hover:text-foreground"
             }`}
         >
@@ -194,7 +194,7 @@ export default function OrdersPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded bg-neutral-100 flex items-center justify-center shrink-0 overflow-hidden relative border border-[#ECECEC]">
+                  <div className="w-16 h-16 rounded bg-neutral-100 flex items-center justify-center shrink-0 overflow-hidden relative border border-[#E8E6E3]">
                     {o.productId?.image || o.productId?.images?.[0] ? (
                       <img 
                         src={o.productId?.image || o.productId?.images?.[0]} 
@@ -219,7 +219,7 @@ export default function OrdersPage() {
                   </div>
 
                   <div className="text-right">
-                    <p className="text-sm font-bold text-[#7a3a2e]">
+                    <p className="text-sm font-bold text-[#B87D4C]">
                       ₹ {o.totalAmount}
                     </p>
                   </div>
@@ -232,7 +232,7 @@ export default function OrdersPage() {
                     </p>
                   )}
                   <div className="flex gap-4 ml-auto">
-                    <Link href={`/dashboard/orders/${o._id}`} className="text-[#7a3a2e] font-semibold hover:underline">
+                    <Link href={`/dashboard/orders/${o._id}`} className="text-[#B87D4C] font-semibold hover:underline">
                       View Order Details
                     </Link>
                   </div>
@@ -298,7 +298,7 @@ export default function OrdersPage() {
                             aria-current={currentPage === page ? "page" : undefined}
                             className={`relative inline-flex items-center px-4 py-2 text-xs font-semibold focus:z-20 border-r border-neutral-200 last:border-r-0 transition-all duration-200 ${
                               currentPage === page
-                                ? "bg-[#7a3a2e] text-white hover:bg-[#663026]"
+                                ? "bg-[#171717] text-white hover:bg-[#663026]"
                                 : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
                             }`}
                           >

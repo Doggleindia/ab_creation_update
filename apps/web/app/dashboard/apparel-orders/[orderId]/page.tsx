@@ -64,8 +64,8 @@ export default function ApparelOrderDetails({ params }: { params: Promise<{ orde
     if (!status) return "bg-gray-100 text-gray-700";
     const statusLower = status.toLowerCase();
     if (statusLower === "pending") return "bg-yellow-100 text-yellow-700";
-    if (statusLower === "processing") return "bg-blue-100 text-blue-700";
-    if (statusLower === "shipped") return "bg-purple-100 text-purple-700";
+    if (statusLower === "processing") return "bg-[#E8E6E3] text-[#B87D4C]";
+    if (statusLower === "shipped") return "bg-[#E8E6E3] text-[#B87D4C]";
     if (statusLower === "delivered") return "bg-green-100 text-green-700";
     if (statusLower === "cancelled") return "bg-red-100 text-red-700";
     return "bg-gray-100 text-gray-700";
@@ -116,7 +116,7 @@ export default function ApparelOrderDetails({ params }: { params: Promise<{ orde
         </Link>
       </div>
 
-      <div className="bg-[#faf6ef] p-5 rounded-lg space-y-4">
+      <div className="bg-[#F5F1EA] p-5 rounded-lg space-y-4">
         {/* Order Status and Meta */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
@@ -185,7 +185,7 @@ export default function ApparelOrderDetails({ params }: { params: Promise<{ orde
                   key={idx}
                   className="flex items-center gap-2 bg-white p-2 rounded"
                 >
-                  <span className="w-2 h-2 bg-[#7a3a2e] rounded-full"></span>
+                  <span className="w-2 h-2 bg-[#171717] rounded-full"></span>
                   {placement}
                 </div>
               ))}
@@ -269,7 +269,7 @@ export default function ApparelOrderDetails({ params }: { params: Promise<{ orde
         {/* Total Amount */}
         <div className="pt-4 border-t">
           <div className="text-lg font-semibold">
-            Total Amount: <span className="text-[#7a3a2e]">₹{order.totalPrice}</span>
+            Total Amount: <span className="text-[#B87D4C]">₹{order.totalPrice}</span>
           </div>
         </div>
       </div>

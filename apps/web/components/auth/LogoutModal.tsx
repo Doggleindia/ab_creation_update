@@ -82,7 +82,7 @@ export default function LogoutModal({
             Are you sure you want to log out?
           </h3>
 
-          <Button onClick={handleLogout} className="w-32 bg-[#7a3a2e] hover:bg-[#682f25]">
+          <Button onClick={handleLogout} className="w-32 bg-[#171717] hover:bg-[#B87D4C]">
             Log out
           </Button>
         </div>

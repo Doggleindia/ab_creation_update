@@ -63,7 +63,7 @@ const CollectionTable: React.FC<CollectionTableProps> = ({ collections, onEdit, 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onView(collection)}
-                      className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors"
+                      className="p-2 hover:bg-[#E8E6E3] rounded-lg text-[#B87D4C] transition-colors"
                       title="View"
                     >
                       {renderIcon(FiEye)}

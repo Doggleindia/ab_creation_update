@@ -8,7 +8,7 @@ const products = [
     title: "Flower design",
     subtitle: "Stylish color print",
     badge: "Best Seller",
-    badgeColor: "bg-yellow-400",
+    badgeColor: "bg-[#CBAA75]",
   },
   {
     image: "/images/home/Menclothing.png",
@@ -20,7 +20,7 @@ const products = [
     title: "Flower design",
     subtitle: "Stylish color print",
     badge: "Best Seller",
-    badgeColor: "bg-yellow-400",
+    badgeColor: "bg-[#CBAA75]",
   },
   {
     image: "/images/home/Menclothing.png",
@@ -34,7 +34,7 @@ const products = [
     title: "Flower design",
     subtitle: "Stylish color print",
     badge: "Best Seller",
-    badgeColor: "bg-yellow-400",
+    badgeColor: "bg-[#CBAA75]",
   },
 ]
 

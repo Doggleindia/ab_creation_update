@@ -69,7 +69,7 @@ export default function ProductCard({
         <DialogContent className="sm:max-w-md bg-white border border-gray-100 rounded-xl shadow-xl z-[100]">
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Heart className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-orange-500 fill-orange-500/10"}`} />
+              <Heart className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-[#B87D4C] fill-orange-500/10"}`} />
               {isFavorited ? "Remove from Wishlist" : "Add to Wishlist"}
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-500">
@@ -91,7 +91,7 @@ export default function ProductCard({
               className={`flex-1 sm:flex-none text-white text-sm font-semibold py-2.5 px-6 rounded-lg transition ${
                 isFavorited 
                   ? "bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/10" 
-                  : "bg-orange-500 hover:bg-orange-600 shadow-md shadow-orange-500/10"
+                  : "bg-[#171717] hover:bg-[#B87D4C] shadow-md shadow-orange-500/10"
               }`}
             >
               Yes
@@ -102,7 +102,7 @@ export default function ProductCard({
 
       {/* Badge */}
       {badge && (
-        <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded z-10">
+        <span className="absolute top-3 left-3 bg-[#B87D4C] text-white text-xs font-semibold px-3 py-1 rounded z-10">
           {badge}
         </span>
       )}
@@ -133,7 +133,7 @@ export default function ProductCard({
       {/* Content */}
       <div className="p-4 space-y-3">
         <Link href={`/product/${slug}`}>
-          <h3 className="text-sm font-semibold text-gray-900 hover:text-orange-500 transition">
+          <h3 className="text-sm font-semibold text-gray-900 hover:text-[#B87D4C] transition">
             {title}
           </h3>
         </Link>
@@ -151,16 +151,16 @@ export default function ProductCard({
               const colorMap: Record<string, string> = {
                 "Red": "bg-red-500",
                 "Black": "bg-black",
-                "Blue": "bg-blue-500",
+                "Blue": "bg-[#171717]",
                 "White": "bg-white border border-gray-300",
                 "Green": "bg-green-500",
-                "Yellow": "bg-yellow-500",
-                "Purple": "bg-purple-500",
+                "Yellow": "bg-[#CBAA75]",
+                "Purple": "bg-[#171717]",
                 "Pink": "bg-pink-500",
-                "Orange": "bg-orange-500",
+                "Orange": "bg-[#B87D4C]",
                 "Gray": "bg-gray-500",
-                "Navy Blue": "bg-blue-900",
-                "Navy": "bg-blue-900",
+                "Navy Blue": "bg-[#171717]",
+                "Navy": "bg-[#171717]",
               };
               return (
                 <div
@@ -175,10 +175,10 @@ export default function ProductCard({
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
-          <button className="flex-1 bg-white border border-orange-500 text-orange-500 text-xs font-semibold py-2 px-3 rounded hover:bg-orange-50 transition">
+          <button className="flex-1 bg-white border border-[#B87D4C] text-[#B87D4C] text-xs font-semibold py-2 px-3 rounded hover:bg-[#F5F1EA] transition">
             Add to Cart
           </button>
-          <button className="flex-1 bg-orange-500 text-white text-xs font-semibold py-2 px-3 rounded hover:bg-orange-600 transition">
+          <button className="flex-1 bg-[#B87D4C] text-white text-xs font-semibold py-2 px-3 rounded hover:bg-[#171717] transition">
             Customize
           </button>
         </div>

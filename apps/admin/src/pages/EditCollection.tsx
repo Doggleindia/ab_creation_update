@@ -123,7 +123,7 @@ const EditCollection: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
-            <div className="text-4xl text-blue-600 animate-spin">{renderIcon(FiLoader)}</div>
+            <div className="text-4xl text-[#B87D4C] animate-spin">{renderIcon(FiLoader)}</div>
             <p className="text-gray-600">Loading collection...</p>
           </div>
         </div>
@@ -188,7 +188,7 @@ const EditCollection: React.FC = () => {
                 name="name"
                 value={formData.name || 'MENS-COLLECTIONS'}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
               >
                 {collectionNames.map((name) => (
                   <option key={name} value={name}>
@@ -209,7 +209,7 @@ const EditCollection: React.FC = () => {
                 value={formData.slug}
                 onChange={handleInputChange}
                 placeholder="mens-collections"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
               />
               <p className="mt-1 text-xs text-gray-500">URL-friendly slug (lowercase with hyphens)</p>
             </div>
@@ -223,7 +223,7 @@ const EditCollection: React.FC = () => {
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -242,7 +242,7 @@ const EditCollection: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-6 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] disabled:opacity-50 transition-colors"
               >
                 {renderIcon(FiSave)}
                 {loading ? 'Updating...' : 'Update Collection'}

@@ -50,7 +50,7 @@ export default function ProductGallery({
         key={active}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="relative overflow-hidden bg-white border border-[#e8e8e8]"
+        className="relative overflow-hidden bg-white border border-[#E8E6E3]"
       >
         <div className="relative h-[610px] w-full">
           <Image
@@ -86,8 +86,8 @@ export default function ProductGallery({
             onClick={() => setActiveIndex(index)}
             className={`relative h-[120px] border overflow-hidden ${
               activeIndex === index
-                ? "border-[#ff6b00]"
-                : "border-[#e5e5e5]"
+                ? "border-[#B87D4C]"
+                : "border-[#E8E6E3]"
             }`}
           >
             <Image

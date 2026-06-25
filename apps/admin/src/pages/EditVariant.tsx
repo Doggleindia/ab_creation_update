@@ -166,7 +166,7 @@ const EditVariant: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-blue-600 mx-auto mb-4' })}
+            {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-[#B87D4C] mx-auto mb-4' })}
             <p className="text-gray-600">Loading variant...</p>
           </div>
         </div>
@@ -219,7 +219,7 @@ const EditVariant: React.FC = () => {
                     name="color"
                     value={formData.color}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="Red"
                     required
                   />
@@ -234,7 +234,7 @@ const EditVariant: React.FC = () => {
                     name="sku"
                     value={formData.sku}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="MEN-TSHIRT-M-RED"
                   />
                 </div>
@@ -248,7 +248,7 @@ const EditVariant: React.FC = () => {
                     name="addPercentageInBasePrice"
                     value={formData.addPercentageInBasePrice || 0}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="10"
                     min="-100"
                     max="100"
@@ -264,7 +264,7 @@ const EditVariant: React.FC = () => {
                     Images
                   </label>
                   <div className="space-y-3">
-                    <label className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+                    <label className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-[#B87D4C] hover:bg-[#F5F1EA] transition-colors cursor-pointer">
                       <div className="text-center">
                         {renderIcon(FiUpload, { size: 32, className: 'text-gray-400 mx-auto mb-2' })}
                         <p className="text-sm font-medium text-gray-900">Click to select images</p>
@@ -308,7 +308,7 @@ const EditVariant: React.FC = () => {
                     Videos
                   </label>
                   <div className="space-y-3">
-                    <label className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+                    <label className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-[#B87D4C] hover:bg-[#F5F1EA] transition-colors cursor-pointer">
                       <div className="text-center">
                         {renderIcon(FiUpload, { size: 32, className: 'text-gray-400 mx-auto mb-2' })}
                         <p className="text-sm font-medium text-gray-900">Click to select videos</p>
@@ -360,7 +360,7 @@ const EditVariant: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+                  className="px-6 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded-lg transition-colors disabled:opacity-50"
                 >
                   {loading ? 'Updating...' : 'Update Variant'}
                 </button>

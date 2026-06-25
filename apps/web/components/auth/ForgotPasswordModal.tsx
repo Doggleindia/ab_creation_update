@@ -69,14 +69,14 @@ export default function ForgotPasswordModal({
         {!otpSent ? (
           <>
             <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter Email Address" className="mb-4" />
-            <Button onClick={handleSend} className="w-full bg-[#7a3a2e] hover:bg-[#682f25]">Send OTP</Button>
+            <Button onClick={handleSend} className="w-full bg-[#171717] hover:bg-[#B87D4C]">Send OTP</Button>
           </>
         ) : (
           <>
             <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter Email Address" className="mb-4" />
             <Input value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Enter OTP" className="mb-4" />
             <Input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New Password" type="password" className="mb-4" />
-            <Button onClick={handleReset} className="w-full bg-[#7a3a2e] hover:bg-[#682f25]">Reset Password</Button>
+            <Button onClick={handleReset} className="w-full bg-[#171717] hover:bg-[#B87D4C]">Reset Password</Button>
           </>
         )}
 

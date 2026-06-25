@@ -16,7 +16,7 @@ export default function ProductInformation({
     >
       {/* ================= PRODUCT DETAILS ================= */}
       <div className="mt-14">
-        <h3 className="text-[22px] font-bold text-[#1a1a1a]">
+        <h3 className="text-[22px] font-bold text-[#171717]">
           Product Details
         </h3>
 
@@ -39,12 +39,12 @@ export default function ProductInformation({
 
       {/* ================= MATERIAL ================= */}
       <div className="mt-12">
-        <h3 className="text-[22px] font-bold text-[#1a1a1a] uppercase">
+        <h3 className="text-[22px] font-bold text-[#171717] uppercase">
           Material & Care
         </h3>
 
         <div className="mt-5">
-          <h4 className="font-semibold text-[14px] text-[#1a1a1a]">
+          <h4 className="font-semibold text-[14px] text-[#171717]">
             Material:
           </h4>
 
@@ -54,7 +54,7 @@ export default function ProductInformation({
         </div>
 
         <div className="mt-5">
-          <h4 className="font-semibold text-[14px] text-[#1a1a1a]">
+          <h4 className="font-semibold text-[14px] text-[#171717]">
             Care Instructions:
           </h4>
 
@@ -66,13 +66,13 @@ export default function ProductInformation({
 
       {/* ================= SPECS ================= */}
       <div className="mt-12">
-        <h3 className="text-[22px] font-bold text-[#1a1a1a] uppercase">
+        <h3 className="text-[22px] font-bold text-[#171717] uppercase">
           Specifications
         </h3>
 
-        <div className="mt-5 border-t border-[#e5e5e5]">
+        <div className="mt-5 border-t border-[#E8E6E3]">
           {product?.sizes && product.sizes.length > 0 && (
-            <div className="grid grid-cols-2 border-b border-[#e5e5e5] py-3">
+            <div className="grid grid-cols-2 border-b border-[#E8E6E3] py-3">
               <p className="text-[13px] font-semibold text-[#333]">
                 Available Sizes
               </p>
@@ -84,7 +84,7 @@ export default function ProductInformation({
           )}
 
           {product?.category && (
-            <div className="grid grid-cols-2 border-b border-[#e5e5e5] py-3">
+            <div className="grid grid-cols-2 border-b border-[#E8E6E3] py-3">
               <p className="text-[13px] font-semibold text-[#333]">
                 Category
               </p>
@@ -96,7 +96,7 @@ export default function ProductInformation({
           )}
 
           {product?.basePrice && (
-            <div className="grid grid-cols-2 border-b border-[#e5e5e5] py-3">
+            <div className="grid grid-cols-2 border-b border-[#E8E6E3] py-3">
               <p className="text-[13px] font-semibold text-[#333]">
                 Base Price
               </p>
@@ -108,7 +108,7 @@ export default function ProductInformation({
           )}
 
           {product?.discountPercentage > 0 && (
-            <div className="grid grid-cols-2 border-b border-[#e5e5e5] py-3">
+            <div className="grid grid-cols-2 border-b border-[#E8E6E3] py-3">
               <p className="text-[13px] font-semibold text-[#333]">
                 Discount
               </p>
@@ -130,7 +130,7 @@ export default function ProductInformation({
               ].map((item, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-2 border-b border-[#e5e5e5] py-3"
+                  className="grid grid-cols-2 border-b border-[#E8E6E3] py-3"
                 >
                   <p className="text-[13px] font-semibold text-[#333]">
                     {item[0]}
@@ -148,7 +148,7 @@ export default function ProductInformation({
 
       {/* ================= RATINGS & REVIEWS ================= */}
       <div className="mt-16">
-        <h2 className="text-[34px] font-[800] uppercase text-[#1f1f1f] tracking-[-1px]">
+        <h2 className="text-[34px] font-[800] uppercase text-[#171717] tracking-[-1px]">
           Ratings & Reviews
         </h2>
 
@@ -156,7 +156,7 @@ export default function ProductInformation({
         <div className="flex items-start gap-6 mt-6">
           <div>
             <div className="flex items-center gap-3">
-              <h3 className="text-[54px] leading-none font-[800] text-[#1a1a1a]">
+              <h3 className="text-[54px] leading-none font-[800] text-[#171717]">
                 4.3
               </h3>
 
@@ -167,7 +167,7 @@ export default function ProductInformation({
                       key={item}
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
-                      fill="#d97706"
+                      fill="#B87D4C"
                       className="w-4 h-4"
                     >
                       <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321 1.01l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.386a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 21.56a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557L3.04 11.407a.562.562 0 01.321-1.01l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
@@ -177,7 +177,7 @@ export default function ProductInformation({
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="#d1d5db"
+                    fill="#E8E6E3"
                     className="w-4 h-4"
                   >
                     <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321 1.01l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.386a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 21.56a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557L3.04 11.407a.562.562 0 01.321-1.01l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
@@ -211,7 +211,7 @@ export default function ProductInformation({
               star: 3,
               value: "3.2k",
               width: "w-[6%]",
-              color: "bg-[#eab308]",
+              color: "bg-[#CBAA75]",
             },
           ].map((item, index) => (
             <div key={index} className="flex items-center gap-4">
@@ -219,7 +219,7 @@ export default function ProductInformation({
                 {item.star}
               </span>
 
-              <div className="flex-1 h-[4px] bg-[#ececec] rounded-full overflow-hidden">
+              <div className="flex-1 h-[4px] bg-[#E8E6E3] rounded-full overflow-hidden">
                 <div
                   className={`h-full ${item.width} ${item.color}`}
                 />
@@ -249,12 +249,12 @@ export default function ProductInformation({
               date: "SEP 15, 2023",
               review:
                 "Perfect for our corporate event. The team was very helpful with the design approval process. Highly recommended for bulk orders!",
-              bg: "bg-[#d7dcdf]",
+              bg: "bg-[#E8E6E3]",
             },
           ].map((review, index) => (
             <div
               key={index}
-              className="border border-[#ededed] rounded-[14px] p-6 bg-white"
+              className="border border-[#E8E6E3] rounded-[14px] p-6 bg-white"
             >
               {/* HEADER */}
               <div className="flex items-start justify-between">
@@ -266,7 +266,7 @@ export default function ProductInformation({
                   </div>
 
                   <div>
-                    <h4 className="text-[16px] font-[700] text-[#1a1a1a]">
+                    <h4 className="text-[16px] font-[700] text-[#171717]">
                       {review.name}
                     </h4>
 
@@ -276,7 +276,7 @@ export default function ProductInformation({
                           key={item}
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
-                          fill="#d97706"
+                          fill="#B87D4C"
                           className="w-3 h-3"
                         >
                           <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321 1.01l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.386a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 21.56a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557L3.04 11.407a.562.562 0 01.321-1.01l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />

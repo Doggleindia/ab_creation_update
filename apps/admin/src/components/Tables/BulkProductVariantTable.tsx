@@ -49,7 +49,7 @@ const BulkProductVariantTable: React.FC<BulkProductVariantTableProps> = ({ varia
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onView(variant)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                       title="View"
                     >
                       {renderIcon(FiEye, { size: 16 })}

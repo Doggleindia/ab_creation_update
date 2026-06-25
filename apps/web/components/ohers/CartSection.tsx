@@ -303,7 +303,7 @@ export default function CartSection() {
           {/* LEFT – CART TABLE */}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#faf6ef] text-left">
+              <thead className="bg-[#F5F1EA] text-left">
                 <tr>
                   <th className="p-4 font-medium">Product</th>
                   <th className="p-4 font-medium">Price</th>
@@ -377,7 +377,7 @@ export default function CartSection() {
                       <button
                         type="button"
                         onClick={() => handleRemove(item._id)}
-                        className="text-[#c9a24d] hover:opacity-80"
+                        className="text-[#CBAA75] hover:opacity-80"
                         aria-label="Remove"
                         disabled={loading}
                       >
@@ -391,7 +391,7 @@ export default function CartSection() {
           </div>
 
           {/* RIGHT – CART TOTALS */}
-          <div className="bg-[#faf6ef] p-8 rounded-lg h-fit">
+          <div className="bg-[#F5F1EA] p-8 rounded-lg h-fit">
             <h3 className="text-lg font-semibold mb-6">Cart Totals</h3>
             <div className="space-y-4 text-sm">
               <div className="flex justify-between text-muted-foreground">
@@ -400,7 +400,7 @@ export default function CartSection() {
               </div>
               <div className="flex justify-between font-medium">
                 <span>Total</span>
-                <span className="text-[#c9a24d]">{formatPrice(cart.length ? grandTotal : subtotal)}</span>
+                <span className="text-[#CBAA75]">{formatPrice(cart.length ? grandTotal : subtotal)}</span>
               </div>
             </div>
             <Button variant="outline" className="w-full mt-8 border-black" asChild>
@@ -408,19 +408,19 @@ export default function CartSection() {
             </Button>
             {!isLoggedIn ? (
               <div className="mt-8 space-y-4">
-                <div className="p-4 rounded-md border border-[#ECECEC] bg-white text-sm text-center">
+                <div className="p-4 rounded-md border border-[#E8E6E3] bg-white text-sm text-center">
                   <p className="font-semibold text-neutral-800">Please log in to place your order</p>
                   <p className="text-neutral-600 mt-1">
                     Orders are paid from your wallet, so you&apos;ll need an account to check out.
                   </p>
                 </div>
-                <Button className="w-full bg-[#7a3a2e] hover:bg-[#682f25]" asChild>
+                <Button className="w-full bg-[#171717] hover:bg-[#B87D4C]" asChild>
                   <Link href="/login">Log in to continue</Link>
                 </Button>
               </div>
             ) : hasSavedAddress && useSavedAddress ? (
               <div className="mt-8 space-y-4">
-                <div className="p-4 rounded-md border border-[#ECECEC] bg-white text-sm">
+                <div className="p-4 rounded-md border border-[#E8E6E3] bg-white text-sm">
                   <p className="font-semibold text-neutral-800">Deliver to Saved Address:</p>
                   <p className="text-neutral-700 mt-1 font-medium">{profileData?.name}</p>
                   <p className="text-neutral-600">{profileData?.phone}</p>
@@ -430,14 +430,14 @@ export default function CartSection() {
                   <button
                     type="button"
                     onClick={() => setUseSavedAddress(false)}
-                    className="text-xs text-[#7a3a2e] hover:underline mt-2 font-medium block text-left"
+                    className="text-xs text-[#B87D4C] hover:underline mt-2 font-medium block text-left"
                   >
                     Use a different address
                   </button>
                 </div>
                 {checkoutError && <div className="text-sm text-red-600 font-medium">{checkoutError}</div>}
                 <Button
-                  className="w-full bg-[#7a3a2e] hover:bg-[#682f25]"
+                  className="w-full bg-[#171717] hover:bg-[#B87D4C]"
                   onClick={handleCheckout}
                   disabled={loadingCheckout}
                 >
@@ -453,7 +453,7 @@ export default function CartSection() {
                       <button
                         type="button"
                         onClick={() => setUseSavedAddress(true)}
-                        className="text-xs text-[#7a3a2e] hover:underline font-medium"
+                        className="text-xs text-[#B87D4C] hover:underline font-medium"
                       >
                         Use saved address
                       </button>
@@ -490,7 +490,7 @@ export default function CartSection() {
                   {checkoutError && <div className="text-sm text-red-600 font-medium">{checkoutError}</div>}
                 </div>
                 <Button
-                  className="w-full bg-[#7a3a2e] hover:bg-[#682f25]"
+                  className="w-full bg-[#171717] hover:bg-[#B87D4C]"
                   onClick={handleCheckout}
                   disabled={loadingCheckout}
                 >

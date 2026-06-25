@@ -11,7 +11,7 @@ export default function OrderingProcessSection() {
         
         {/* HEADING */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-[44px] font-bold text-[#111827] mb-4 tracking-tight">
+          <h2 className="text-4xl md:text-[44px] font-bold text-[#171717] mb-4 tracking-tight">
             Our Ordering Process
           </h2>
           <p className="text-gray-500 text-[17px]">
@@ -34,16 +34,16 @@ export default function OrderingProcessSection() {
           <div className="flex flex-col space-y-4 pt-2">
             
             {/* Step 1 */}
-            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 0 ? 'border-[#ff6200] bg-white' : 'border-gray-300 bg-white'}`}>
+            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 0 ? 'border-[#B87D4C] bg-white' : 'border-gray-300 bg-white'}`}>
               <div 
                 onClick={() => setActiveStep(activeStep === 0 ? -1 : 0)}
-                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 0 ? 'bg-[#ff6200]' : 'bg-white hover:bg-gray-50'}`}
+                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 0 ? 'bg-[#B87D4C]' : 'bg-white hover:bg-gray-50'}`}
               >
-                <span className={`font-bold text-[17px] ${activeStep === 0 ? 'text-white' : 'text-[#111827]'}`}>
+                <span className={`font-bold text-[17px] ${activeStep === 0 ? 'text-white' : 'text-[#171717]'}`}>
                   Choose Product
                 </span>
                 <div className={`rounded-full w-8 h-8 flex items-center justify-center transition-transform ${activeStep === 0 ? 'bg-white rotate-180' : 'bg-gray-100'}`}>
-                  <ArrowDown className={`w-5 h-5 ${activeStep === 0 ? 'text-black' : 'text-[#111827]'}`} strokeWidth={2.5} />
+                  <ArrowDown className={`w-5 h-5 ${activeStep === 0 ? 'text-black' : 'text-[#171717]'}`} strokeWidth={2.5} />
                 </div>
               </div>
               {activeStep === 0 && (
@@ -59,16 +59,16 @@ export default function OrderingProcessSection() {
             </div>
 
             {/* Step 2 */}
-            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 1 ? 'border-[#ff6200] bg-white' : 'border-gray-300 bg-white'}`}>
+            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 1 ? 'border-[#B87D4C] bg-white' : 'border-gray-300 bg-white'}`}>
               <div 
                 onClick={() => setActiveStep(activeStep === 1 ? -1 : 1)}
-                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 1 ? 'bg-[#ff6200]' : 'bg-white hover:bg-gray-50'}`}
+                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 1 ? 'bg-[#B87D4C]' : 'bg-white hover:bg-gray-50'}`}
               >
-                <span className={`font-bold text-[17px] ${activeStep === 1 ? 'text-white' : 'text-[#111827]'}`}>
+                <span className={`font-bold text-[17px] ${activeStep === 1 ? 'text-white' : 'text-[#171717]'}`}>
                   Design your art
                 </span>
                 <div className={`rounded-full w-8 h-8 flex items-center justify-center transition-transform ${activeStep === 1 ? 'bg-white rotate-180' : 'bg-gray-100'}`}>
-                  <ArrowDown className={`w-5 h-5 ${activeStep === 1 ? 'text-black' : 'text-[#111827]'}`} strokeWidth={2.5} />
+                  <ArrowDown className={`w-5 h-5 ${activeStep === 1 ? 'text-black' : 'text-[#171717]'}`} strokeWidth={2.5} />
                 </div>
               </div>
               {activeStep === 1 && (
@@ -83,16 +83,16 @@ export default function OrderingProcessSection() {
             </div>
 
             {/* Step 3 */}
-            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 2 ? 'border-[#ff6200] bg-white' : 'border-gray-300 bg-white'}`}>
+            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 2 ? 'border-[#B87D4C] bg-white' : 'border-gray-300 bg-white'}`}>
               <div 
                 onClick={() => setActiveStep(activeStep === 2 ? -1 : 2)}
-                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 2 ? 'bg-[#ff6200]' : 'bg-white hover:bg-gray-50'}`}
+                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 2 ? 'bg-[#B87D4C]' : 'bg-white hover:bg-gray-50'}`}
               >
-                <span className={`font-bold text-[17px] ${activeStep === 2 ? 'text-white' : 'text-[#111827]'}`}>
+                <span className={`font-bold text-[17px] ${activeStep === 2 ? 'text-white' : 'text-[#171717]'}`}>
                   Order
                 </span>
                 <div className={`rounded-full w-8 h-8 flex items-center justify-center transition-transform ${activeStep === 2 ? 'bg-white rotate-180' : 'bg-gray-100'}`}>
-                  <ArrowDown className={`w-5 h-5 ${activeStep === 2 ? 'text-black' : 'text-[#111827]'}`} strokeWidth={2.5} />
+                  <ArrowDown className={`w-5 h-5 ${activeStep === 2 ? 'text-black' : 'text-[#171717]'}`} strokeWidth={2.5} />
                 </div>
               </div>
               {activeStep === 2 && (
@@ -106,16 +106,16 @@ export default function OrderingProcessSection() {
             </div>
 
             {/* Step 4 */}
-            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 3 ? 'border-[#ff6200] bg-white' : 'border-gray-300 bg-white'}`}>
+            <div className={`border rounded-[16px] overflow-hidden transition-all ${activeStep === 3 ? 'border-[#B87D4C] bg-white' : 'border-gray-300 bg-white'}`}>
               <div 
                 onClick={() => setActiveStep(activeStep === 3 ? -1 : 3)}
-                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 3 ? 'bg-[#ff6200]' : 'bg-white hover:bg-gray-50'}`}
+                className={`px-6 py-5 flex justify-between items-center cursor-pointer transition-colors ${activeStep === 3 ? 'bg-[#B87D4C]' : 'bg-white hover:bg-gray-50'}`}
               >
-                <span className={`font-bold text-[17px] ${activeStep === 3 ? 'text-white' : 'text-[#111827]'}`}>
+                <span className={`font-bold text-[17px] ${activeStep === 3 ? 'text-white' : 'text-[#171717]'}`}>
                   Delivery/pick up
                 </span>
                 <div className={`rounded-full w-8 h-8 flex items-center justify-center transition-transform ${activeStep === 3 ? 'bg-white rotate-180' : 'bg-gray-100'}`}>
-                  <ArrowDown className={`w-5 h-5 ${activeStep === 3 ? 'text-black' : 'text-[#111827]'}`} strokeWidth={2.5} />
+                  <ArrowDown className={`w-5 h-5 ${activeStep === 3 ? 'text-black' : 'text-[#171717]'}`} strokeWidth={2.5} />
                 </div>
               </div>
               {activeStep === 3 && (

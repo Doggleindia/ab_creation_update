@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
       value: '$24,563',
       change: '+12.5%',
       icon: renderIcon(FiDollarSign, { size: 24 }),
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-[#CBAA75] to-[#B87D4C]'
     },
     {
       label: 'Total Orders',
@@ -49,14 +49,14 @@ const Dashboard: React.FC = () => {
       value: '892',
       change: '+15.3%',
       icon: renderIcon(FiUsers, { size: 24 }),
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-[#CBAA75] to-pink-500'
     },
     {
       label: 'Growth Rate',
       value: '23.5%',
       change: '+4.1%',
       icon: renderIcon(FiTrendingUp, { size: 24 }),
-      color: 'from-orange-500 to-red-500'
+      color: 'from-[#CBAA75] to-red-500'
     }
   ];
 
@@ -127,7 +127,7 @@ const Dashboard: React.FC = () => {
                     >
                       <div className="relative w-full h-48 bg-slate-100 rounded-t-lg overflow-hidden group">
                         <div
-                          className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all hover:from-blue-600 hover:to-blue-500 cursor-pointer"
+                          className="w-full bg-gradient-to-t from-[#CBAA75] to-[#B87D4C] rounded-t-lg transition-all hover:from-[#CBAA75] hover:to-[#B87D4C] cursor-pointer"
                           style={{
                             height: `${(data.revenue / maxRevenue) * 100}%`
                           }}
@@ -159,7 +159,7 @@ const Dashboard: React.FC = () => {
                 <h3 className="text-lg font-bold text-gray-900">Quick Stats</h3>
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#F5F1EA] to-[#F5F1EA] rounded-lg">
                     <div>
                       <p className="text-xs text-gray-600">Conversion Rate</p>
                       <p className="text-lg font-bold text-gray-900">3.24%</p>
@@ -175,7 +175,7 @@ const Dashboard: React.FC = () => {
                     <span className="text-green-500">{renderIcon(FiDollarSign, { size: 24 })}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#F5F1EA] to-pink-50 rounded-lg">
                     <div>
                       <p className="text-xs text-gray-600">Customer Satisfaction</p>
                       <p className="text-lg font-bold text-gray-900">4.8/5.0</p>
@@ -183,12 +183,12 @@ const Dashboard: React.FC = () => {
                     <span className="text-red-500">{renderIcon(FiHeart, { size: 24 })}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#F5F1EA] to-red-50 rounded-lg">
                     <div>
                       <p className="text-xs text-gray-600">Return Rate</p>
                       <p className="text-lg font-bold text-gray-900">2.15%</p>
                     </div>
-                    <span className="text-orange-500">{renderIcon(FiClock, { size: 24 })}</span>
+                    <span className="text-[#B87D4C]">{renderIcon(FiClock, { size: 24 })}</span>
                   </div>
                 </div>
               </div>
@@ -198,7 +198,7 @@ const Dashboard: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
               <div className="flex items-center justify-between p-6 border-b border-slate-100">
                 <h3 className="text-lg font-bold text-gray-900">Recent Orders</h3>
-                <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                <button className="flex items-center gap-2 px-4 py-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors">
                   {renderIcon(FiDownload, { size: 16 })}
                   <span className="text-sm font-medium">Export</span>
                 </button>
@@ -225,7 +225,7 @@ const Dashboard: React.FC = () => {
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                             order.status === 'Completed' ? 'bg-green-100 text-green-700' :
                             order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-blue-100 text-blue-700'
+                            'bg-[#E8E6E3] text-[#B87D4C]'
                           }`}>
                             {order.status}
                           </span>

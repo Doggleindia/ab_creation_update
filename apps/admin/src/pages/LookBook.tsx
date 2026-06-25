@@ -80,7 +80,7 @@ const LookBook: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/lookbook/add')}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center gap-2 px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium"
           >
             {renderIcon(FiPlus, { size: 20 })}
             <span>Add Media</span>
@@ -91,7 +91,7 @@ const LookBook: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-blue-600 mx-auto mb-4' })}
+              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-[#B87D4C] mx-auto mb-4' })}
               <p className="text-gray-600">Loading media...</p>
             </div>
           </div>
@@ -106,7 +106,7 @@ const LookBook: React.FC = () => {
                     placeholder="Search by title, description, or media type..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   />
                 </div>
               </div>
@@ -119,13 +119,13 @@ const LookBook: React.FC = () => {
                 </div>
                 <div className="bg-white rounded-lg shadow p-4">
                   <p className="text-gray-600 text-sm font-medium">Images</p>
-                  <p className="text-2xl font-bold text-blue-600 mt-1">
+                  <p className="text-2xl font-bold text-[#B87D4C] mt-1">
                     {media.filter(m => m.mediaType === 'image').length}
                   </p>
                 </div>
                 <div className="bg-white rounded-lg shadow p-4">
                   <p className="text-gray-600 text-sm font-medium">Videos</p>
-                  <p className="text-2xl font-bold text-purple-600 mt-1">
+                  <p className="text-2xl font-bold text-[#B87D4C] mt-1">
                     {media.filter(m => m.mediaType === 'video').length}
                   </p>
                 </div>

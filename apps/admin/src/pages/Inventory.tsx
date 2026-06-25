@@ -124,7 +124,7 @@ const InventoryPage: React.FC = () => {
           </div>
           <button
             onClick={() => setBulkModal({ isOpen: true })}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center gap-2 px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium"
           >
             {renderIcon(FiUpload, { size: 20 })}
             <span>Bulk Update</span>
@@ -135,7 +135,7 @@ const InventoryPage: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-blue-600 mx-auto mb-4' })}
+              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-[#B87D4C] mx-auto mb-4' })}
               <p className="text-gray-600">Loading inventory...</p>
             </div>
           </div>
@@ -150,7 +150,7 @@ const InventoryPage: React.FC = () => {
                     placeholder="Enter Product ID..."
                     value={selectedProductId}
                     onChange={e => setSelectedProductId(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   />
                 </div>
               <div className="relative">
@@ -160,7 +160,7 @@ const InventoryPage: React.FC = () => {
                   placeholder="Search by variant ID..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
             </div>
@@ -173,7 +173,7 @@ const InventoryPage: React.FC = () => {
               </div>
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
                 <p className="text-gray-600 text-sm font-medium">Total Stock</p>
-                <p className="text-2xl font-bold text-blue-600 mt-1">{totalValue}</p>
+                <p className="text-2xl font-bold text-[#B87D4C] mt-1">{totalValue}</p>
               </div>
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
                 <p className="text-gray-600 text-sm font-medium">Low Stock</p>
@@ -210,7 +210,7 @@ const InventoryPage: React.FC = () => {
               <button
                 onClick={handleBulkUpdate}
                 disabled={updating}
-                className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded disabled:opacity-50"
+                className="px-4 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded disabled:opacity-50"
               >
                 {updating ? 'Updating...' : 'Update'}
               </button>
@@ -241,7 +241,7 @@ const InventoryPage: React.FC = () => {
               value={bulkData}
               onChange={(e) => setBulkData(e.target.value)}
               placeholder="Paste your JSON data here..."
-              className="w-full h-48 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-48 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
             />
           </div>
         </Modal>

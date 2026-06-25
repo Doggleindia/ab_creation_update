@@ -2,7 +2,7 @@
 
 export default function PrintingProcessSection() {
   return (
-    <section className="bg-[#faf6ef] pb-4">
+    <section className="bg-[#F5F1EA] pb-4">
       <div className="max-w-[85%] mx-auto px-4 text-center space-y-6">
         {/* TITLE */}
         <h2 className="text-sm font-semibold capitalize text-gray-900">

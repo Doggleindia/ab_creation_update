@@ -38,19 +38,19 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-[#171717] to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-2000"></div>
+          <div className="absolute top-20 right-20 w-72 h-72 bg-[#B87D4C] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#B87D4C] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-2000"></div>
         </div>
 
         {/* Card */}
         <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
           {/* Header */}
           <div className="mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 mx-auto">
+            <div className="w-16 h-16 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] rounded-lg flex items-center justify-center mb-4 mx-auto">
               <span className="text-2xl font-bold text-white">KT</span>
             </div>
             <h1 className="text-3xl font-bold text-white text-center mb-2">Welcome Back</h1>
@@ -76,7 +76,7 @@ const Login: React.FC = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:bg-white/20 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#B87D4C] focus:bg-white/20 transition-all"
                 />
               </div>
             </div>
@@ -85,7 +85,7 @@ const Login: React.FC = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-gray-200 text-sm font-medium">Password</label>
-                <Link to="/forgot-password" className="text-purple-400 hover:text-purple-300 text-sm font-medium">
+                <Link to="/forgot-password" className="text-[#B87D4C] hover:text-[#B87D4C] text-sm font-medium">
                   Forgot?
                 </Link>
               </div>
@@ -97,7 +97,7 @@ const Login: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:bg-white/20 transition-all"
+                  className="w-full pl-10 pr-10 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#B87D4C] focus:bg-white/20 transition-all"
                 />
                 <button
                   type="button"
@@ -125,7 +125,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-6 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full mt-6 py-3 px-4 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -151,7 +151,7 @@ const Login: React.FC = () => {
           {/* Footer */}
           <p className="text-center text-gray-300">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-purple-400 hover:text-purple-300 font-semibold">
+            <Link to="/signup" className="text-[#B87D4C] hover:text-[#B87D4C] font-semibold">
               Sign Up
             </Link>
           </p>

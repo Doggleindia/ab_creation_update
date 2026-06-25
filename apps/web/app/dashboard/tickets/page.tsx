@@ -136,14 +136,14 @@ export default function TicketsPage() {
           className={`rounded-xl p-4 border ${
             response.type === "ticket_created"
               ? "bg-green-50 border-green-200"
-              : "bg-blue-50 border-blue-200"
+              : "bg-[#F5F1EA] border-[#E8E6E3]"
           }`}
         >
           <div className="flex gap-3">
             {response.type === "ticket_created" ? (
               <CheckCircle2 className="text-green-600 flex-shrink-0" size={20} />
             ) : (
-              <AlertCircle className="text-blue-600 flex-shrink-0" size={20} />
+              <AlertCircle className="text-[#B87D4C] flex-shrink-0" size={20} />
             )}
             
             <div className="flex-1">
@@ -151,7 +151,7 @@ export default function TicketsPage() {
                 className={`font-medium ${
                   response.type === "ticket_created"
                     ? "text-green-900"
-                    : "text-blue-900"
+                    : "text-[#B87D4C]"
                 }`}
               >
                 {response.message}
@@ -164,7 +164,7 @@ export default function TicketsPage() {
               )}
 
               {response.type === "ai_suggestion" && response.aiSuggestion && (
-                <div className="mt-2 text-sm text-blue-800 bg-white/50 p-3 rounded">
+                <div className="mt-2 text-sm text-[#B87D4C] bg-white/50 p-3 rounded">
                   💡 {response.aiSuggestion}
                 </div>
               )}
@@ -184,12 +184,12 @@ export default function TicketsPage() {
       {!showForm ? (
         <Button
           onClick={() => setShowForm(true)}
-          className="bg-[#7a3a2e] hover:bg-[#682f25]"
+          className="bg-[#171717] hover:bg-[#B87D4C]"
         >
           + Create New Ticket
         </Button>
       ) : (
-        <div className="bg-[#faf6ef] rounded-xl p-5 border">
+        <div className="bg-[#F5F1EA] rounded-xl p-5 border">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-medium">Create Support Ticket</h3>
             <button
@@ -265,7 +265,7 @@ export default function TicketsPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#7a3a2e] hover:bg-[#682f25] w-40"
+              className="bg-[#171717] hover:bg-[#B87D4C] w-40"
             >
               {loading ? (
                 <>
@@ -315,7 +315,7 @@ export default function TicketsPage() {
                           href={att.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline"
+                          className="text-xs text-[#B87D4C] hover:underline"
                         >
                           📎 {att.filename}
                         </a>
@@ -334,7 +334,7 @@ export default function TicketsPage() {
                       ticket.status === "resolved"
                         ? "bg-green-100 text-green-700"
                         : ticket.status === "pending"
-                        ? "bg-orange-100 text-orange-700"
+                        ? "bg-[#E8E6E3] text-[#B87D4C]"
                         : "bg-gray-100 text-gray-700"
                     }`}
                   >

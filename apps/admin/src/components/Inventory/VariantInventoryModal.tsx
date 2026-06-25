@@ -115,7 +115,7 @@ const VariantInventoryModal: React.FC<VariantInventoryModalProps> = ({
           <button
             onClick={handleSave}
             disabled={loading || updating}
-            className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 bg-[#171717] text-white hover:bg-[#B87D4C] rounded disabled:opacity-50 flex items-center gap-2"
           >
             {updating ? renderIconLoader() : renderIcon(FiSave, { size: 16 })}
             <span>{updating ? 'Updating...' : 'Save'}</span>
@@ -125,7 +125,7 @@ const VariantInventoryModal: React.FC<VariantInventoryModalProps> = ({
     >
       {loading ? (
         <div className="flex items-center justify-center py-8">
-          {renderIconLoader('animate-spin text-blue-600 mr-2')}
+          {renderIconLoader('animate-spin text-[#B87D4C] mr-2')}
           <span className="text-gray-600">Loading...</span>
         </div>
       ) : (
@@ -141,7 +141,7 @@ const VariantInventoryModal: React.FC<VariantInventoryModalProps> = ({
                 min={0}
                 value={stock}
                 onChange={(e) => setStock(parseInt(e.target.value) || 0)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
               />
             </div>
             <div>
@@ -151,7 +151,7 @@ const VariantInventoryModal: React.FC<VariantInventoryModalProps> = ({
                 min={0}
                 value={reservedStock}
                 onChange={(e) => setReservedStock(parseInt(e.target.value) || 0)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
               />
             </div>
           </div>
@@ -169,7 +169,7 @@ const VariantInventoryModal: React.FC<VariantInventoryModalProps> = ({
 function renderIconLoader(className?: string) {
   // react-icons typing can confuse JSX in some TS setups; render via createElement to avoid TS2786.
   return React.createElement(FiLoader as any, {
-    className: className ?? 'text-blue-600',
+    className: className ?? 'text-[#B87D4C]',
     size: 16,
   });
 }

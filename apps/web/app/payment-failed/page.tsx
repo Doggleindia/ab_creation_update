@@ -110,7 +110,7 @@ function PaymentFailedContent() {
         >
           <Button
             asChild
-            className="w-full sm:w-auto bg-[#7a3a2e] hover:bg-[#682f25] px-8 py-6 rounded-xl font-medium text-white shadow-lg shadow-[#7a3a2e]/10 group transition"
+            className="w-full sm:w-auto bg-[#171717] hover:bg-[#B87D4C] px-8 py-6 rounded-xl font-medium text-white shadow-lg shadow-[#171717]/10 group transition"
           >
             <Link href="/add-to-cart">
               <RefreshCw size={16} className="mr-1.5 animate-spin-hover group-hover:rotate-180 transition-transform duration-500" />
@@ -150,7 +150,7 @@ export default function PaymentFailedPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-b from-rose-50/20 to-white pt-24 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#7a3a2e]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#B87D4C]" />
       </div>
     }>
       <PaymentFailedContent />

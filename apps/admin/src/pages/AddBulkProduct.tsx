@@ -288,7 +288,7 @@ const AddBulkProduct: React.FC = () => {
                     value={formData.id}
                     onChange={handleInputChange}
                     placeholder="e.g., BULK001"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     required
                   />
                 </div>
@@ -300,7 +300,7 @@ const AddBulkProduct: React.FC = () => {
                     value={formData.title}
                     onChange={handleInputChange}
                     placeholder="e.g., Custom Adhesive Pack"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     required
                   />
                 </div>
@@ -315,7 +315,7 @@ const AddBulkProduct: React.FC = () => {
                     value={formData.slug}
                     onChange={handleInputChange}
                     placeholder="e.g., custom-adhesive-pack"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     required
                   />
                 </div>
@@ -325,7 +325,7 @@ const AddBulkProduct: React.FC = () => {
                     name="categoryId"
                     value={formData.categoryId}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     required
                   >
                     <option value="">Select a category</option>
@@ -344,7 +344,7 @@ const AddBulkProduct: React.FC = () => {
                   onChange={handleInputChange}
                   placeholder="Bulk pack for resellers..."
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
 
@@ -364,7 +364,7 @@ const AddBulkProduct: React.FC = () => {
                         e.preventDefault();
                       }
                     }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     required
                   />
                 </div>
@@ -376,7 +376,7 @@ const AddBulkProduct: React.FC = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
@@ -396,7 +396,7 @@ const AddBulkProduct: React.FC = () => {
                     name="uploadYourDesign"
                     value={formData.uploadYourDesign}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   >
                     <option value="optional">Optional</option>
                     <option value="required">Required</option>
@@ -408,7 +408,7 @@ const AddBulkProduct: React.FC = () => {
                     name="anyText"
                     value={formData.anyText}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   >
                     <option value="optional">Optional</option>
                     <option value="required">Required</option>
@@ -429,7 +429,7 @@ const AddBulkProduct: React.FC = () => {
                   value={newCustomizationType}
                   onChange={(e) => setNewCustomizationType(e.target.value as 'DTF' | 'Screen' | 'Embroidery' | 'Heat Transfer')}
                   title="Customization type"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 >
                   <option value="DTF">DTF</option>
                   <option value="Screen">Screen</option>
@@ -447,14 +447,14 @@ const AddBulkProduct: React.FC = () => {
                   min="0"
                   step="1"
                   title="Add percentage"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
                 <button
                   type="button"
                   onClick={addCustomizationType}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="w-full px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                 >
                   Add Type
                 </button>
@@ -490,12 +490,12 @@ const AddBulkProduct: React.FC = () => {
                   onChange={(e) => setNewSize(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSize())}
                   placeholder="Enter size (e.g., S, M, L)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
                 <button
                   type="button"
                   onClick={addSize}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                 >
                   Add
                 </button>
@@ -504,13 +504,13 @@ const AddBulkProduct: React.FC = () => {
                 {formData.sizes.map((size, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2"
+                    className="px-3 py-1 bg-[#E8E6E3] text-[#B87D4C] rounded-full text-sm flex items-center gap-2"
                   >
                     {size}
                     <button
                       type="button"
                       onClick={() => removeSize(idx)}
-                      className="hover:text-blue-900"
+                      className="hover:text-[#B87D4C]"
                     >
                       ×
                     </button>
@@ -531,12 +531,12 @@ const AddBulkProduct: React.FC = () => {
                   onChange={(e) => setNewColor(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addColor())}
                   placeholder="Enter color (e.g., red, blue)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
                 <button
                   type="button"
                   onClick={addColor}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                 >
                   Add
                 </button>
@@ -572,12 +572,12 @@ const AddBulkProduct: React.FC = () => {
                   onChange={(e) => setNewQuantity(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addQuantity())}
                   placeholder="Enter quantity (e.g., 10, 50)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
                 <button
                   type="button"
                   onClick={addQuantity}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                 >
                   Add
                 </button>
@@ -586,13 +586,13 @@ const AddBulkProduct: React.FC = () => {
                 {formData.quantities.map((qty, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm flex items-center gap-2"
+                    className="px-3 py-1 bg-[#E8E6E3] text-[#B87D4C] rounded-full text-sm flex items-center gap-2"
                   >
                     {qty}
                     <button
                       type="button"
                       onClick={() => removeQuantity(idx)}
-                      className="hover:text-purple-900"
+                      className="hover:text-[#B87D4C]"
                     >
                       ×
                     </button>
@@ -615,12 +615,12 @@ const AddBulkProduct: React.FC = () => {
                   placeholder="Enter GSM quantity (e.g., 100, 200)"
                   min="1"
                   step="1"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
                 <button
                   type="button"
                   onClick={addGSMQuantity}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                 >
                   Add
                 </button>
@@ -629,13 +629,13 @@ const AddBulkProduct: React.FC = () => {
                 {formData.gsmQuantity.map((gsm, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm flex items-center gap-2"
+                    className="px-3 py-1 bg-[#E8E6E3] text-[#B87D4C] rounded-full text-sm flex items-center gap-2"
                   >
                     {gsm}
                     <button
                       type="button"
                       onClick={() => removeGSMQuantity(idx)}
-                      className="hover:text-orange-900"
+                      className="hover:text-[#B87D4C]"
                     >
                       ×
                     </button>
@@ -656,12 +656,12 @@ const AddBulkProduct: React.FC = () => {
                   onChange={(e) => setNewProductDetail(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addProductDetail())}
                   placeholder="Enter product detail (e.g., High quality, Durable)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
                 <button
                   type="button"
                   onClick={addProductDetail}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                 >
                   Add
                 </button>
@@ -694,7 +694,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.materialAndCare?.material || ''}
                   onChange={handleMaterialChange}
                   placeholder="e.g., 100% Cotton, Polyester Blend"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
 
@@ -707,12 +707,12 @@ const AddBulkProduct: React.FC = () => {
                     onChange={(e) => setNewCareInstruction(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCareInstruction())}
                     placeholder="e.g., Wash with cold water"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   />
                   <button
                     type="button"
                     onClick={addCareInstruction}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                   >
                     Add
                   </button>
@@ -746,7 +746,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.fabric || ''}
                   onChange={(e) => handleSpecificationChange('fabric', e.target.value)}
                   placeholder="e.g., Cotton, Denim"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -756,7 +756,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.fashionType || ''}
                   onChange={(e) => handleSpecificationChange('fashionType', e.target.value)}
                   placeholder="e.g., Casual, Formal"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -766,7 +766,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.fit || ''}
                   onChange={(e) => handleSpecificationChange('fit', e.target.value)}
                   placeholder="e.g., Slim Fit, Regular Fit"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -776,7 +776,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.type || ''}
                   onChange={(e) => handleSpecificationChange('type', e.target.value)}
                   placeholder="e.g., T-Shirt, Hoodie"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -786,7 +786,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.neck || ''}
                   onChange={(e) => handleSpecificationChange('neck', e.target.value)}
                   placeholder="e.g., Round Neck, V-Neck"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -796,7 +796,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.sleeveLength || ''}
                   onChange={(e) => handleSpecificationChange('sleeveLength', e.target.value)}
                   placeholder="e.g., Short Sleeve, Long Sleeve"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -806,7 +806,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.pattern || ''}
                   onChange={(e) => handleSpecificationChange('pattern', e.target.value)}
                   placeholder="e.g., Solid, Striped"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -816,7 +816,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.occasion || ''}
                   onChange={(e) => handleSpecificationChange('occasion', e.target.value)}
                   placeholder="e.g., Casual, Party Wear"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
               <div>
@@ -826,7 +826,7 @@ const AddBulkProduct: React.FC = () => {
                   value={formData.specifications?.closure || ''}
                   onChange={(e) => handleSpecificationChange('closure', e.target.value)}
                   placeholder="e.g., Button, Zip"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
             </div>
@@ -844,7 +844,7 @@ const AddBulkProduct: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+              className="flex-1 px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium disabled:opacity-50"
             >
               {loading ? 'Creating...' : 'Create Product'}
             </button>

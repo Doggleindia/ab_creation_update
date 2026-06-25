@@ -200,7 +200,7 @@ const AddBulkProductVariant: React.FC = () => {
                     name="id"
                     value={formData.id}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C] uppercase"
                     placeholder="BVAR001"
                     required
                   />
@@ -213,7 +213,7 @@ const AddBulkProductVariant: React.FC = () => {
                     name="sku"
                     value={(formData as any).sku ?? ''}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="BVAR001"
                   />
                   <p className="text-xs text-gray-500 mt-1">If empty, backend will auto-generate SKU.</p>
@@ -225,7 +225,7 @@ const AddBulkProductVariant: React.FC = () => {
                     name="color"
                     value={formData.color}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                     placeholder="red"
                     required
                   />
@@ -246,7 +246,7 @@ const AddBulkProductVariant: React.FC = () => {
                       placeholder="e.g., 100"
                       min="1"
                       step="1"
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addGSMPricingTier())}
                     />
                   </div>
@@ -261,14 +261,14 @@ const AddBulkProductVariant: React.FC = () => {
                       min="0"
                       max="100"
                       step="1"
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addGSMPricingTier())}
                     />
                   </div>
                   <button
                     type="button"
                     onClick={addGSMPricingTier}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
                   >
                     Add Tier
                   </button>
@@ -295,7 +295,7 @@ const AddBulkProductVariant: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-3">Images</label>
-                <label className="flex items-center justify-center w-full px-6 py-10 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+                <label className="flex items-center justify-center w-full px-6 py-10 border-2 border-dashed border-slate-300 rounded-lg hover:border-[#B87D4C] hover:bg-[#F5F1EA] transition-colors cursor-pointer">
                   <div className="text-center">
                     {renderIcon(FiUpload, { size: 28, className: 'text-gray-400 mx-auto mb-2' })}
                     <p className="text-sm font-medium text-gray-900">Click to upload images</p>
@@ -332,7 +332,7 @@ const AddBulkProductVariant: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors disabled:opacity-50"
                 >
                   {loading ? 'Saving...' : 'Save Variant'}
                 </button>

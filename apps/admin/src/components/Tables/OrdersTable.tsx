@@ -40,9 +40,9 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
       case 'Paid':
         return 'bg-green-100 text-green-800';
       case 'Processing':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-[#E8E6E3] text-[#B87D4C]';
       case 'Shipping':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-[#E8E6E3] text-[#B87D4C]';
       case 'Delivered':
         return 'bg-emerald-100 text-emerald-800';
       case 'Cancelled':
@@ -167,7 +167,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                     </button>
                     <button
                       onClick={() => onEdit && onEdit(order)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                       title="Edit order"
                     >
                       {renderIcon(FiEdit2, { size: 18 })}

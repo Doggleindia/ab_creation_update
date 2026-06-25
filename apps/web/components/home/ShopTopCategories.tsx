@@ -61,11 +61,11 @@ export default function ShopTopCategories() {
     fetchCategories();
   }, []);
   return (
-    <section className="bg-[#f8f9fa] py-16 md:py-24">
+    <section className="bg-[#F5F1EA] py-16 md:py-24">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6">
         {/* HEADING */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-[42px] font-bold mb-3 text-[#111827] tracking-tight">
+          <h2 className="text-3xl md:text-[42px] font-bold mb-3 text-[#171717] tracking-tight">
             Shop Our Top Categories
           </h2>
           <p className="text-gray-500 text-[17px]">
@@ -100,14 +100,14 @@ export default function ShopTopCategories() {
           {/* Woman Collection */}
           <div className="relative bg-[#feecd4] overflow-hidden rounded-[24px] h-[280px] md:h-[320px] flex items-center p-8 md:p-12">
             <div className="relative z-10 max-w-[65%]">
-              <h3 className="text-[#111827] text-3xl md:text-[34px] font-bold mb-3 leading-tight">
+              <h3 className="text-[#171717] text-3xl md:text-[34px] font-bold mb-3 leading-tight">
                 Woman collection
               </h3>
               <p className="text-gray-600 text-[15px] mb-8 leading-relaxed">
                 You can choose to design products for <br className="hidden md:block"/> women of all ages
               </p>
               <Link href="/product-collection?collectionSlug=womens-collections">
-                <button className="bg-white text-[#ea580c] px-6 py-2.5 rounded-full font-bold text-[15px] flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm">
+                <button className="bg-white text-[#B87D4C] px-6 py-2.5 rounded-full font-bold text-[15px] flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm">
                   Explore products <span className="text-lg leading-none">&rarr;</span>
                 </button>
               </Link>

@@ -123,7 +123,7 @@ export default function GetInTouchSection() {
               />
             </div>
 
-            <Button type="submit" className="w-40 bg-[#7a3a2e] hover:bg-[#682f25]">
+            <Button type="submit" className="w-40 bg-[#171717] hover:bg-[#B87D4C]">
               Submit
             </Button>
           </form>

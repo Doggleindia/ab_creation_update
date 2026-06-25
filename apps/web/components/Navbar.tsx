@@ -100,7 +100,7 @@ export default function Navbar() {
                   placeholder="Search for products, categories, or collections..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-10 rounded-full border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all text-slate-800 text-base"
+                  className="w-full h-12 pl-12 pr-10 rounded-full border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B87D4C] transition-all text-slate-800 text-base"
                   autoFocus
                 />
                 {searchQuery && (
@@ -129,7 +129,7 @@ export default function Navbar() {
             <>
               {/* Logo - Left */}
               <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-                <span className="text-2xl font-bold text-orange-500">INK & PRESS</span>
+                <span className="text-2xl font-bold text-[#B87D4C]">INK & PRESS</span>
               </Link>
 
               {/* Desktop Menu - Center */}
@@ -141,7 +141,7 @@ export default function Navbar() {
                 >
                   <Link
                     href="/product-collection"
-                    className="text-base font-medium text-slate-800 hover:text-orange-500 transition-colors"
+                    className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors"
                   >
                     Products
                   </Link>
@@ -164,19 +164,19 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-                <Link href="/service" className="text-base font-medium text-slate-800 hover:text-orange-500 transition-colors">
+                <Link href="/service" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
                   Services
                 </Link>
-                <Link href="/contact-us" className="text-base font-medium text-slate-800 hover:text-orange-500 transition-colors">
+                <Link href="/contact-us" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
                   Contact us
                 </Link>
-                <Link href="/look-book" className="text-base font-medium text-slate-800 hover:text-orange-500 transition-colors">
+                <Link href="/look-book" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
                   Look Book
                 </Link>
-                <Link href="/bulk-products" className="text-base font-medium text-slate-800 hover:text-orange-500 transition-colors">
+                <Link href="/bulk-products" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
                   Bulk Order
                 </Link>
-                <Link href="/" className="text-base font-medium text-slate-800 hover:text-orange-500 transition-colors">
+                <Link href="/" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
                   Join as Seller
                 </Link>
               </div>
@@ -230,7 +230,7 @@ export default function Navbar() {
                 </Button>
 
                 {/* Design Now Button */}
-                <Button className="hidden lg:flex bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-full">
+                <Button className="hidden lg:flex bg-[#171717] hover:bg-[#B87D4C] text-white font-medium px-6 py-2 rounded-full">
                   <Link href="/" className="w-full h-full flex items-center justify-center">
                     Design Now
                   </Link>
@@ -289,7 +289,7 @@ export default function Navbar() {
                       <div className="p-6 border-t border-slate-200 bg-slate-50">
                         <div className="space-y-3">
                           <SheetClose asChild>
-                            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium">
+                            <Button className="w-full bg-[#171717] hover:bg-[#B87D4C] text-white font-medium">
                               Design Now
                             </Button>
                           </SheetClose>
@@ -315,7 +315,7 @@ export default function Navbar() {
                       <button
                         key={term}
                         onClick={() => setSearchQuery(term)}
-                        className="px-4 py-2 bg-slate-50 hover:bg-orange-50 text-slate-700 hover:text-orange-600 rounded-full text-sm font-medium transition-colors border border-slate-100"
+                        className="px-4 py-2 bg-slate-50 hover:bg-[#F5F1EA] text-slate-700 hover:text-[#B87D4C] rounded-full text-sm font-medium transition-colors border border-slate-100"
                       >
                         {term}
                       </button>
@@ -329,9 +329,9 @@ export default function Navbar() {
                         key={col._id}
                         href={`/product-collection?collectionSlug=${encodeURIComponent(col.slug)}`}
                         onClick={() => setIsSearchOpen(false)}
-                        className="p-4 bg-slate-50/50 hover:bg-slate-50 rounded-2xl border border-slate-100 hover:border-orange-200 text-center transition group"
+                        className="p-4 bg-slate-50/50 hover:bg-slate-50 rounded-2xl border border-slate-100 hover:border-[#E8E6E3] text-center transition group"
                       >
-                        <span className="text-sm font-semibold text-slate-700 group-hover:text-orange-500 transition-colors">
+                        <span className="text-sm font-semibold text-slate-700 group-hover:text-[#B87D4C] transition-colors">
                           {col.name.replace(/-COLLECTIONS$/i, ' Collection')}
                         </span>
                       </Link>
@@ -357,10 +357,10 @@ export default function Navbar() {
                             setIsSearchOpen(false)
                             setSearchQuery('')
                           }}
-                          className="flex items-center gap-3 p-3 hover:bg-orange-50/50 rounded-xl transition group"
+                          className="flex items-center gap-3 p-3 hover:bg-[#F5F1EA]/50 rounded-xl transition group"
                         >
-                          <Search className="h-4 w-4 text-slate-400 group-hover:text-orange-500" />
-                          <span className="text-sm font-medium text-slate-700 group-hover:text-orange-600">
+                          <Search className="h-4 w-4 text-slate-400 group-hover:text-[#B87D4C]" />
+                          <span className="text-sm font-medium text-slate-700 group-hover:text-[#B87D4C]">
                             {item}
                           </span>
                         </Link>

@@ -106,7 +106,7 @@ export default function WalletPage() {
     return (
       <div className="max-w-4xl space-y-6">
         <h2 className="text-lg font-semibold">Wallet</h2>
-        <div className="bg-[#7a3a2e] text-white rounded-xl p-6 animate-pulse">
+        <div className="bg-[#171717] text-white rounded-xl p-6 animate-pulse">
           <div className="h-4 w-32 bg-white/20 rounded mb-2"></div>
           <div className="h-8 w-40 bg-white/20 rounded"></div>
         </div>
@@ -128,12 +128,12 @@ export default function WalletPage() {
       <h2 className="text-lg font-semibold">Wallet</h2>
 
       {/* BALANCE CARD */}
-      <div className="bg-[#7a3a2e] text-white rounded-xl p-6">
+      <div className="bg-[#171717] text-white rounded-xl p-6">
         <p className="text-sm opacity-80">Available Balance</p>
         <p className="text-3xl font-semibold">₹{balance.toLocaleString("en-IN")}</p>
 
         <Button
-          className="mt-4 bg-white text-[#7a3a2e]"
+          className="mt-4 bg-white text-[#B87D4C]"
           onClick={() => setShowTopUpModal(true)}
         >
           Add Money

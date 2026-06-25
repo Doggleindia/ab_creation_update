@@ -13,7 +13,7 @@ export default function DashboardLayout({
 }) {
     const [showNotifications, setShowNotifications] = useState(true)
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex">
+    <div className="min-h-screen bg-[#F5F1EA] flex">
       {/* SIDEBAR */}
       <Sidebar />
 

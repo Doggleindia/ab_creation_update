@@ -84,7 +84,7 @@ const LookBookTable: React.FC<LookBookTableProps> = ({
       {isUpdating && (
         <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B87D4C] mx-auto mb-2"></div>
             <p className="text-sm text-gray-600">Updating positions...</p>
           </div>
         </div>
@@ -136,12 +136,12 @@ const LookBookTable: React.FC<LookBookTableProps> = ({
                   <div className="flex items-center gap-2">
                     {item.mediaType === 'image' ? (
                       <>
-                        {renderIcon(FiImage, { size: 16, className: 'text-blue-500' })}
+                        {renderIcon(FiImage, { size: 16, className: 'text-[#B87D4C]' })}
                         <span className="text-sm text-gray-600">Image</span>
                       </>
                     ) : (
                       <>
-                        {renderIcon(FiVideo, { size: 16, className: 'text-purple-500' })}
+                        {renderIcon(FiVideo, { size: 16, className: 'text-[#B87D4C]' })}
                         <span className="text-sm text-gray-600">Video</span>
                       </>
                     )}
@@ -155,7 +155,7 @@ const LookBookTable: React.FC<LookBookTableProps> = ({
                   <div className="flex gap-2">
                     <button
                       onClick={() => onEdit && onEdit(item._id)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                       title="Edit media"
                     >
                       {renderIcon(FiEdit2, { size: 18 })}

@@ -51,7 +51,7 @@ const BulkProductTable: React.FC<BulkProductTableProps> = ({ products, onEdit, o
                 <td className="px-6 py-4 text-sm text-gray-600">
                   <div className="flex flex-wrap gap-1">
                     {(product.sizes || []).slice(0, 2).map((size, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                      <span key={idx} className="px-2 py-1 bg-[#E8E6E3] text-[#B87D4C] text-xs rounded">
                         {size}
                       </span>
                     ))}
@@ -88,7 +88,7 @@ const BulkProductTable: React.FC<BulkProductTableProps> = ({ products, onEdit, o
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onView(product)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                       title="View"
                     >
                       {renderIcon(FiEye, { size: 18 })}

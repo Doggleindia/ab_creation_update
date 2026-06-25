@@ -101,7 +101,7 @@ const BulkProductVariants: React.FC = () => {
           </div>
           <button
             onClick={() => navigate(`/bulk-product/${productId}/variants/add`)}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex items-center gap-2 px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium"
           >
             {renderIcon(FiPlus, { size: 20 })}
             <span>Add Variant</span>
@@ -111,7 +111,7 @@ const BulkProductVariants: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-blue-600 mx-auto mb-4' })}
+              {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-[#B87D4C] mx-auto mb-4' })}
               <p className="text-gray-600">Loading bulk product variants...</p>
             </div>
           </div>
@@ -125,7 +125,7 @@ const BulkProductVariants: React.FC = () => {
                   placeholder="Search variants by title, color or SKU..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
             </div>

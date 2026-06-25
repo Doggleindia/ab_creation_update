@@ -501,22 +501,22 @@ export default function ProductFormRight({
     // ================= COLOR HEX MAP =================
   function getColorHex(colorName: string): string {
     const map: Record<string, string> = {
-      black: "#000000",
-      blue: "#2563EB",
+      black: "#171717",
+      blue: "#B87D4C",
       red: "#EF4444",
       white: "#ffffff",
-      navy: "#1E3A8A",
+      navy: "#B87D4C",
       gray: "#9CA3AF",
-      orange: "#ff6b00",
-      royalblue: "#2563EB",
+      orange: "#B87D4C",
+      royalblue: "#B87D4C",
       darkgreen: "#166534",
-      purple: "#7E22CE",
-      pink: "#F9A8D4",
+      purple: "#B87D4C",
+      pink: "#C79280",
       green: "#16A34A",
-      yellow: "#FACC15",
+      yellow: "#CBAA75",
     };
 
-    return map[colorName?.toLowerCase()] || "#E5E5E5";
+    return map[colorName?.toLowerCase()] || "#E8E6E3";
   }
 
 
@@ -545,7 +545,7 @@ export default function ProductFormRight({
               (item) => (
                 <Star
                   key={item}
-                  className="w-[11px] h-[11px] fill-[#FF7A00] text-[#FF7A00]"
+                  className="w-[11px] h-[11px] fill-[#B87D4C] text-[#B87D4C]"
                 />
               )
             )}
@@ -569,9 +569,9 @@ export default function ProductFormRight({
       )}
 
       {/* PRICE */}
-      <div className="mt-5 bg-[#F5F5F5] border border-[#ECECEC] rounded-[4px] px-5 py-4">
+      <div className="mt-5 bg-[#F5F1EA] border border-[#E8E6E3] rounded-[4px] px-5 py-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-[32px] font-[700] tracking-[-0.5px] text-[#111111]">
+          <h2 className="text-[32px] font-[700] tracking-[-0.5px] text-[#171717]">
             ₹ {calculatePrice}
           </h2>
         </div>
@@ -599,7 +599,7 @@ export default function ProductFormRight({
             <button
               type="button"
               onClick={() => setIsDesignerOpen(true)}
-              className="w-full h-[52px] bg-[#FF6B00] hover:bg-[#f45f00] rounded-[4px] text-white text-[14px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer border-0 outline-none"
+              className="w-full h-[52px] bg-[#B87D4C] hover:bg-[#B87D4C] rounded-[4px] text-white text-[14px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer border-0 outline-none"
             >
               <Palette className="w-4 h-4" />
               Customize Design Online
@@ -607,7 +607,7 @@ export default function ProductFormRight({
 
             {/* UPLOAD BUTTON */}
             <label htmlFor="design-upload" className="w-full">
-              <div className="w-full h-[46px] border border-[#ECECEC] hover:bg-neutral-50 rounded-[4px] text-[#444] text-[13px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <div className="w-full h-[46px] border border-[#E8E6E3] hover:bg-neutral-50 rounded-[4px] text-[#444] text-[13px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <Upload className="w-4 h-4" />
                 Upload Existing File
               </div>
@@ -621,7 +621,7 @@ export default function ProductFormRight({
                 (img, index) => (
                   <div
                     key={index}
-                    className="relative w-[82px] h-[82px] rounded-[6px] border border-[#E5E5E5] overflow-hidden bg-white"
+                    className="relative w-[82px] h-[82px] rounded-[6px] border border-[#E8E6E3] overflow-hidden bg-white"
                   >
                     {/* IMAGE */}
                     <img
@@ -649,9 +649,9 @@ export default function ProductFormRight({
       )}
 
       {/* INFO BOX */}
-      <div className="mt-4 border border-[#EFE2D8] bg-[#FFF8F2] rounded-[4px] px-4 py-3 flex flex-col gap-3">
+      <div className="mt-4 border border-[#EFE2D8] bg-[#F5F1EA] rounded-[4px] px-4 py-3 flex flex-col gap-3">
         <div className="flex items-start gap-2">
-          <Info className="w-[14px] h-[14px] text-[#FF6B00] mt-[1px]" />
+          <Info className="w-[14px] h-[14px] text-[#B87D4C] mt-[1px]" />
 
           <p className="text-[10px] leading-[15px] text-[#555] font-medium">
             Design Approval:
@@ -662,7 +662,7 @@ export default function ProductFormRight({
         </div>
 
         <div className="flex items-start gap-2">
-          <Info className="w-[14px] h-[14px] text-[#FF6B00] mt-[1px]" />
+          <Info className="w-[14px] h-[14px] text-[#B87D4C] mt-[1px]" />
 
           <p className="text-[10px] leading-[15px] text-[#555] font-medium">
             No Logo? Place order with
@@ -676,7 +676,7 @@ export default function ProductFormRight({
       {/* CUSTOMIZATION TEXT */}
       {anyTextRequired && (
         <div className="mt-5">
-          <p className="text-[11px] font-semibold text-[#2A2A2A] mb-2">
+          <p className="text-[11px] font-semibold text-[#171717] mb-2">
             Any Text or
             Customization Needed *
           </p>
@@ -689,7 +689,7 @@ export default function ProductFormRight({
                 e.target.value
               )
             }
-            className="w-full h-[84px] border border-[#E7E7E7] rounded-[4px] px-4 py-3 resize-none text-[13px] outline-none focus:border-[#FF6B00]"
+            className="w-full h-[84px] border border-[#E7E7E7] rounded-[4px] px-4 py-3 resize-none text-[13px] outline-none focus:border-[#B87D4C]"
           />
         </div>
       )}
@@ -698,7 +698,7 @@ export default function ProductFormRight({
       {customizationTypes.length >
         0 && (
           <div className="mt-6">
-            <p className="text-[11px] font-bold uppercase text-[#202020]">
+            <p className="text-[11px] font-bold uppercase text-[#171717]">
               Customization Types
             </p>
 
@@ -717,8 +717,8 @@ export default function ProductFormRight({
 
                       selectedCustomization ===
                         type._id
-                        ? "bg-[#111827] border-[#111827] text-white"
-                        : "bg-white border-[#E5E5E5] text-[#555]"
+                        ? "bg-[#171717] border-[#171717] text-white"
+                        : "bg-white border-[#E8E6E3] text-[#555]"
                     )}
                   >
                     {type.type} (+
@@ -738,7 +738,7 @@ export default function ProductFormRight({
         0 && (
           <div className="mt-6">
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-bold uppercase text-[#202020]">
+              <p className="text-[11px] font-bold uppercase text-[#171717]">
                 Quantity:{" "}
                 {selectedQty}
               </p>
@@ -760,8 +760,8 @@ export default function ProductFormRight({
                       "h-[30px] px-3 rounded-[4px] border text-[10px] font-semibold transition-all",
 
                       selectedQty === item
-                        ? "bg-[#111827] border-[#111827] text-white"
-                        : "bg-white border-[#E5E5E5] text-[#555]"
+                        ? "bg-[#171717] border-[#171717] text-white"
+                        : "bg-white border-[#E8E6E3] text-[#555]"
                     )}
                   >
                     {item}
@@ -775,7 +775,7 @@ export default function ProductFormRight({
       {/* GSM QUALITY */}
       {gsmQuantities.length > 0 && (
         <div className="mt-6">
-          <p className="text-[11px] font-bold uppercase text-[#202020]">
+          <p className="text-[11px] font-bold uppercase text-[#171717]">
             GSM Quality
           </p>
 
@@ -793,8 +793,8 @@ export default function ProductFormRight({
                     "h-[30px] px-4 rounded-[4px] border text-[10px] font-semibold transition-all",
 
                     selectedGsm === gsm
-                      ? "bg-[#111827] border-[#111827] text-white"
-                      : "bg-white border-[#E5E5E5] text-[#555]"
+                      ? "bg-[#171717] border-[#171717] text-white"
+                      : "bg-white border-[#E8E6E3] text-[#555]"
                   )}
                 >
                   {gsm} GSM
@@ -810,7 +810,7 @@ export default function ProductFormRight({
         <div className="mt-7">
           <p className="font-bold">
             Color:{" "}
-            <span className="text-orange-500 uppercase">
+            <span className="text-[#B87D4C] uppercase">
               {activeVariant?.color || "Select"}
             </span>
           </p>
@@ -838,7 +838,7 @@ export default function ProductFormRight({
                     className={cn(
                       "w-[66px] h-[66px] rounded border-2 transition-all",
                       activeVariant?._id === variant._id
-                        ? "border-orange-500"
+                        ? "border-[#B87D4C]"
                         : "border-gray-300"
                     )}
                     style={{ backgroundColor: colorHex }}
@@ -869,7 +869,7 @@ export default function ProductFormRight({
                     ? "text-green-600"
                     : isExceeded
                       ? "text-red-500"
-                      : "text-[#FF6B00]"
+                      : "text-[#B87D4C]"
                 )}
               >
                 Select {targetQty} pieces.
@@ -914,7 +914,7 @@ export default function ProductFormRight({
                   ? "bg-green-500"
                   : isExceeded
                     ? "bg-red-500"
-                    : "bg-[#FF6B00]"
+                    : "bg-[#B87D4C]"
               )}
               style={{
                 width: `${Math.min(
@@ -928,7 +928,7 @@ export default function ProductFormRight({
           </div>
 
           {/* SIZE LIST */}
-          <div className="mt-5 border-t border-[#ECECEC]">
+          <div className="mt-5 border-t border-[#E8E6E3]">
             {sizes.map((size: string) => {
               const disableAdd =
                 totalSelected >= targetQty;
@@ -936,7 +936,7 @@ export default function ProductFormRight({
               return (
                 <div
                   key={size}
-                  className="h-[58px] border-b border-[#ECECEC] flex items-center justify-between"
+                  className="h-[58px] border-b border-[#E8E6E3] flex items-center justify-between"
                 >
                   <div className="text-[13px] text-[#333]">
                     {size}
@@ -948,7 +948,7 @@ export default function ProductFormRight({
                       onClick={() =>
                         updateQty(size, "dec")
                       }
-                      className="w-[24px] h-[24px] rounded-full border border-[#D8D8D8] flex items-center justify-center hover:bg-[#F5F5F5]"
+                      className="w-[24px] h-[24px] rounded-full border border-[#E8E6E3] flex items-center justify-center hover:bg-[#F5F1EA]"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
@@ -968,8 +968,8 @@ export default function ProductFormRight({
                         "w-[24px] h-[24px] rounded-full border flex items-center justify-center transition-all",
 
                         disableAdd
-                          ? "border-[#E5E5E5] bg-[#F5F5F5] opacity-50 cursor-not-allowed"
-                          : "border-[#D8D8D8] hover:bg-[#F5F5F5]"
+                          ? "border-[#E8E6E3] bg-[#F5F1EA] opacity-50 cursor-not-allowed"
+                          : "border-[#E8E6E3] hover:bg-[#F5F1EA]"
                       )}
                     >
                       <Plus className="w-3 h-3" />
@@ -992,7 +992,7 @@ export default function ProductFormRight({
             }
             setIsCheckoutOpen(true);
           }}
-          className="w-full h-[58px] rounded-[4px] bg-[#1A1A1A] hover:bg-black text-white text-[14px] font-semibold tracking-wide"
+          className="w-full h-[58px] rounded-[4px] bg-[#171717] hover:bg-black text-white text-[14px] font-semibold tracking-wide"
         >
           <Lock className="w-4 h-4 mr-2" />
           BUY NOW
@@ -1001,7 +1001,7 @@ export default function ProductFormRight({
 
       {/* CHECKOUT DIALOG */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="max-w-md bg-white border border-[#E5E5E5] p-6 text-neutral-900 rounded-lg">
+        <DialogContent className="max-w-md bg-white border border-[#E8E6E3] p-6 text-neutral-900 rounded-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Checkout & Place Order</DialogTitle>
             <DialogDescription className="text-xs text-neutral-500 mt-1">
@@ -1010,7 +1010,7 @@ export default function ProductFormRight({
           </DialogHeader>
 
           {/* ORDER SUMMARY */}
-          <div className="my-4 p-4 rounded bg-[#F9F9F9] border border-[#ECECEC] text-sm space-y-2">
+          <div className="my-4 p-4 rounded bg-[#F9F9F9] border border-[#E8E6E3] text-sm space-y-2">
             <h4 className="font-semibold text-neutral-800 border-b pb-1.5 mb-1.5">Order Summary</h4>
             <div className="flex justify-between">
               <span className="text-neutral-500">Product:</span>
@@ -1030,7 +1030,7 @@ export default function ProductFormRight({
                 <span className="font-medium truncate max-w-[200px]">{customizationText}</span>
               </div>
             )}
-            <div className="flex justify-between text-[#FF6B00] font-bold border-t pt-1.5 mt-1.5">
+            <div className="flex justify-between text-[#B87D4C] font-bold border-t pt-1.5 mt-1.5">
               <span>Total Price:</span>
               <span>₹ {calculatePrice}</span>
             </div>
@@ -1039,14 +1039,14 @@ export default function ProductFormRight({
           {/* DELIVERY DETAILS FORM */}
           {!isLoggedIn ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-md border border-[#ECECEC] bg-white text-sm text-center">
+              <div className="p-4 rounded-md border border-[#E8E6E3] bg-white text-sm text-center">
                 <p className="font-semibold text-neutral-800">Please log in to place your order</p>
                 <p className="text-neutral-600 mt-1">
                   Orders are paid from your wallet, so you&apos;ll need an account to check out.
                 </p>
               </div>
               <Button
-                className="w-full h-[48px] bg-[#1A1A1A] hover:bg-black text-white rounded font-semibold text-sm"
+                className="w-full h-[48px] bg-[#171717] hover:bg-black text-white rounded font-semibold text-sm"
                 onClick={() => router.push("/login")}
               >
                 Log in to continue
@@ -1054,7 +1054,7 @@ export default function ProductFormRight({
             </div>
           ) : hasSavedAddress && useSavedAddress ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-md border border-[#ECECEC] bg-white text-sm">
+              <div className="p-4 rounded-md border border-[#E8E6E3] bg-white text-sm">
                 <p className="font-semibold text-neutral-800">Deliver to Saved Address:</p>
                 <p className="text-neutral-700 mt-1 font-medium">{profileData?.name}</p>
                 <p className="text-neutral-600">{profileData?.phone}</p>
@@ -1064,14 +1064,14 @@ export default function ProductFormRight({
                 <button
                   type="button"
                   onClick={() => setUseSavedAddress(false)}
-                  className="text-xs text-[#FF6B00] hover:underline mt-2 font-medium block text-left"
+                  className="text-xs text-[#B87D4C] hover:underline mt-2 font-medium block text-left"
                 >
                   Use a different address
                 </button>
               </div>
               {checkoutError && <div className="text-sm text-red-600 font-medium">{checkoutError}</div>}
               <Button
-                className="w-full h-[48px] bg-[#1A1A1A] hover:bg-black text-white rounded font-semibold text-sm"
+                className="w-full h-[48px] bg-[#171717] hover:bg-black text-white rounded font-semibold text-sm"
                 onClick={handlePlaceBulkOrder}
                 disabled={loadingCheckout}
               >
@@ -1086,7 +1086,7 @@ export default function ProductFormRight({
                   <button
                     type="button"
                     onClick={() => setUseSavedAddress(true)}
-                    className="text-xs text-[#FF6B00] hover:underline font-medium"
+                    className="text-xs text-[#B87D4C] hover:underline font-medium"
                   >
                     Use saved address
                   </button>
@@ -1098,40 +1098,40 @@ export default function ProductFormRight({
                   placeholder="Phone"
                   value={deliveryDetails.phone}
                   onChange={(e) => setDeliveryDetails((d) => ({ ...d, phone: e.target.value }))}
-                  className="h-[38px] text-xs border-[#ECECEC]"
+                  className="h-[38px] text-xs border-[#E8E6E3]"
                 />
                 <Input
                   placeholder="Address"
                   value={deliveryDetails.address}
                   onChange={(e) => setDeliveryDetails((d) => ({ ...d, address: e.target.value }))}
-                  className="h-[38px] text-xs border-[#ECECEC]"
+                  className="h-[38px] text-xs border-[#E8E6E3]"
                 />
                 <div className="flex gap-2">
                   <Input
                     placeholder="City"
                     value={deliveryDetails.city}
                     onChange={(e) => setDeliveryDetails((d) => ({ ...d, city: e.target.value }))}
-                    className="h-[38px] text-xs border-[#ECECEC]"
+                    className="h-[38px] text-xs border-[#E8E6E3]"
                   />
                   <Input
                     placeholder="State"
                     value={deliveryDetails.state}
                     onChange={(e) => setDeliveryDetails((d) => ({ ...d, state: e.target.value }))}
-                    className="h-[38px] text-xs border-[#ECECEC]"
+                    className="h-[38px] text-xs border-[#E8E6E3]"
                   />
                 </div>
                 <Input
                   placeholder="Pincode"
                   value={deliveryDetails.pincode}
                   onChange={(e) => setDeliveryDetails((d) => ({ ...d, pincode: e.target.value }))}
-                  className="h-[38px] text-xs border-[#ECECEC]"
+                  className="h-[38px] text-xs border-[#E8E6E3]"
                 />
               </div>
 
               {checkoutError && <div className="text-sm text-red-600 font-medium">{checkoutError}</div>}
               
               <Button
-                className="w-full h-[48px] bg-[#1A1A1A] hover:bg-black text-white rounded font-semibold text-sm"
+                className="w-full h-[48px] bg-[#171717] hover:bg-black text-white rounded font-semibold text-sm"
                 onClick={handlePlaceBulkOrder}
                 disabled={loadingCheckout}
               >

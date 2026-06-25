@@ -4,7 +4,7 @@ import Image from "next/image"
 
 export default function ServiceSection() {
   return (
-    <section className="bg-[#faf6ef] py-20">
+    <section className="bg-[#F5F1EA] py-20">
       <div className="max-w-6xl mx-auto px-4 space-y-20">
         {/* HEADER */}
         <div className="text-center">

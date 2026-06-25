@@ -33,7 +33,7 @@ export default function ProductPage({
   }, [product, images]);
 
   return (
-    <div className="bg-[#f6f6f6] min-h-screen">
+    <div className="bg-[#F5F1EA] min-h-screen">
       {/* Breadcrumb */}
       <Breadcrumbs 
         customSegments={[
@@ -60,7 +60,7 @@ export default function ProductPage({
         </div>
 
         {/* PRODUCT INFORMATION */}
-        <div className="mt-8 pt-4 border-t border-[#e5e5e5] grid grid-cols-1 lg:grid-cols-[620px_1fr] gap-[40px]">
+        <div className="mt-8 pt-4 border-t border-[#E8E6E3] grid grid-cols-1 lg:grid-cols-[620px_1fr] gap-[40px]">
           <div></div>
           <div className="max-w-[480px]">
             <ProductInformation product={product} />

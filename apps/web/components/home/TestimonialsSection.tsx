@@ -33,7 +33,7 @@ export default function TestimonialsSection() {
       <div className="max-w-[1240px] mx-auto px-4">
         {/* HEADING */}
         <div className="text-center">
-          <h2 className="text-[#111827] text-[38px] md:text-[58px] font-bold leading-[110%] tracking-[-2px]">
+          <h2 className="text-[#171717] text-[38px] md:text-[58px] font-bold leading-[110%] tracking-[-2px]">
             What Our Clients think
           </h2>
 
@@ -73,7 +73,7 @@ export default function TestimonialsSection() {
               </div>
 
               {/* TITLE */}
-              <h3 className="text-[#222222] text-[20px] leading-[34px] font-bold max-w-[320px]">
+              <h3 className="text-[#171717] text-[20px] leading-[34px] font-bold max-w-[320px]">
                 {item.title}
               </h3>
 
@@ -94,7 +94,7 @@ export default function TestimonialsSection() {
                 </div>
 
                 <div>
-                  <h4 className="text-[#222222] text-[18px] leading-none font-bold">
+                  <h4 className="text-[#171717] text-[18px] leading-none font-bold">
                     {item.name}
                   </h4>
 
@@ -116,11 +116,11 @@ export default function TestimonialsSection() {
               min-w-[184px]
               rounded-full
               border-2
-              border-[#FF6600]
+              border-[#B87D4C]
               bg-transparent
-              hover:bg-[#FF6600]
+              hover:bg-[#B87D4C]
               hover:text-white
-              text-[#FF6600]
+              text-[#B87D4C]
               text-[20px]
               font-semibold
               px-10

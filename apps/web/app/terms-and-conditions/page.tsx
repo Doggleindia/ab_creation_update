@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 export default function TermsAndConditionsPage() {
   return (
     <div className="min-h-screen bg-white">
-      <div className="bg-[#fbf4ea]">
+      <div className="bg-[#F5F1EA]">
         <div className="max-w-5xl mx-auto px-6 py-12">
           <p className="text-xs uppercase tracking-[0.2em] text-gray-600">Policies</p>
           <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">

@@ -66,8 +66,8 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
     if (!status) return "bg-gray-100 text-gray-700";
     const statusLower = status.toLowerCase();
     if (statusLower === "pending") return "bg-yellow-100 text-yellow-700";
-    if (statusLower === "processing") return "bg-blue-100 text-blue-700";
-    if (statusLower === "shipped") return "bg-purple-100 text-purple-700";
+    if (statusLower === "processing") return "bg-[#E8E6E3] text-[#B87D4C]";
+    if (statusLower === "shipped") return "bg-[#E8E6E3] text-[#B87D4C]";
     if (statusLower === "delivered") return "bg-green-100 text-green-700";
     if (statusLower === "cancelled") return "bg-red-100 text-red-700";
     return "bg-gray-100 text-gray-700";
@@ -107,12 +107,12 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-neutral-900">Order #{order.orderId || order._id}</h2>
-        <Link href="/dashboard/orders" className="text-sm text-[#7a3a2e] hover:underline font-semibold">
+        <Link href="/dashboard/orders" className="text-sm text-[#B87D4C] hover:underline font-semibold">
           Back to orders
         </Link>
       </div>
 
-      <div className="bg-[#faf6ef] p-6 rounded-lg space-y-6 border border-[#EFECE6]">
+      <div className="bg-[#F5F1EA] p-6 rounded-lg space-y-6 border border-[#EFECE6]">
         {/* Statuses Header */}
         <div className="flex flex-wrap gap-4 justify-between items-center border-b pb-4">
           <div className="space-y-1">
@@ -140,7 +140,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
         {/* Delivery Details */}
         <div className="border-b pb-6">
           <h4 className="font-bold text-neutral-800 mb-3">Delivery Details</h4>
-          <div className="bg-white p-4 rounded border border-[#ECECEC] text-sm space-y-1.5">
+          <div className="bg-white p-4 rounded border border-[#E8E6E3] text-sm space-y-1.5">
             <div><span className="text-muted-foreground">Full Name:</span> <span className="font-semibold text-neutral-800">{displayName}</span></div>
             <div><span className="text-muted-foreground">Phone Number:</span> <span className="font-semibold text-neutral-800">{order.phoneNumber}</span></div>
             <div><span className="text-muted-foreground">Email:</span> <span className="font-semibold text-neutral-800">{displayEmail}</span></div>
@@ -156,8 +156,8 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
         {/* Order Item */}
         <div>
           <h4 className="font-bold text-neutral-800 mb-3">Ordered Item</h4>
-          <div className="bg-white p-4 rounded border border-[#ECECEC] flex items-start gap-4">
-            <div className="w-20 h-20 rounded bg-neutral-100 flex items-center justify-center shrink-0 overflow-hidden relative border border-[#ECECEC]">
+          <div className="bg-white p-4 rounded border border-[#E8E6E3] flex items-start gap-4">
+            <div className="w-20 h-20 rounded bg-neutral-100 flex items-center justify-center shrink-0 overflow-hidden relative border border-[#E8E6E3]">
               {order.productId?.image || order.productId?.images?.[0] ? (
                 <img 
                   src={order.productId?.image || order.productId?.images?.[0]} 
@@ -185,7 +185,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
             </div>
 
             <div className="text-right">
-              <span className="text-base font-bold text-[#7a3a2e]">₹ {order.totalAmount}</span>
+              <span className="text-base font-bold text-[#B87D4C]">₹ {order.totalAmount}</span>
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
         {/* Grand Total */}
         <div className="flex justify-between items-center pt-4 border-t">
           <span className="text-sm font-semibold text-neutral-700">Total Amount:</span>
-          <span className="text-lg font-black text-[#7a3a2e]">₹ {order.totalAmount}</span>
+          <span className="text-lg font-black text-[#B87D4C]">₹ {order.totalAmount}</span>
         </div>
       </div>
     </div>

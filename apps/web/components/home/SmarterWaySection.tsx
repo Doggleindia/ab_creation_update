@@ -39,7 +39,7 @@ export default function SmarterWaySection() {
       <div className="max-w-[1400px] mx-auto px-6">
         {/* HEADING */}
         <div className="text-center mb-16">
-          <p className="text-[#ea580c] text-[13px] font-bold tracking-[0.2em] uppercase mb-5">
+          <p className="text-[#B87D4C] text-[13px] font-bold tracking-[0.2em] uppercase mb-5">
             Why Choose Us
           </p>
           <h2 className="text-4xl md:text-[44px] font-bold mb-6 text-white tracking-tight">
@@ -58,13 +58,13 @@ export default function SmarterWaySection() {
             return (
               <div
                 key={feature.number}
-                className="bg-[#18181b] border border-[#ea580c] rounded-[16px] p-8 flex flex-col"
+                className="bg-[#18181b] border border-[#B87D4C] rounded-[16px] p-8 flex flex-col"
               >
                 <div className="flex justify-between items-start mb-14">
-                  <span className="text-2xl font-bold text-[#ea580c] leading-none">
+                  <span className="text-2xl font-bold text-[#B87D4C] leading-none">
                     {feature.number}
                   </span>
-                  <Icon className="w-[26px] h-[26px] text-[#ea580c]" strokeWidth={2} />
+                  <Icon className="w-[26px] h-[26px] text-[#B87D4C]" strokeWidth={2} />
                 </div>
                 <h3 className="text-[22px] font-bold mb-4 text-white">
                   {feature.title}

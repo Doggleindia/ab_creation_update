@@ -93,7 +93,7 @@ const WalletPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg">
+            <div className="p-2 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] rounded-lg">
               {renderIcon(FiBriefcase, { size: 32, color: 'white' })}
             </div>
             <div>
@@ -103,7 +103,7 @@ const WalletPage: React.FC = () => {
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+            className="flex items-center gap-2 px-6 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-semibold"
           >
             {renderIcon(FiPlus, { size: 20 })}
             Add Funds
@@ -114,41 +114,41 @@ const WalletPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
           {/* Current Balance */}
-          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-[#B87D4C]">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[11px] text-gray-600 font-semibold uppercase mb-0.5">
                   Current Balance
                 </p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-[#B87D4C]">
                   ${wallet.currentBalance.toLocaleString()}
                 </p>
                 <p className="text-[10px] text-gray-500 mt-1">
                   Updated: {wallet.lastUpdated}
                 </p>
               </div>
-              <div className="p-2 bg-blue-100 rounded-full">
-                {renderIcon(FiBriefcase, { size: 22, color: "#3B82F6" })}
+              <div className="p-2 bg-[#E8E6E3] rounded-full">
+                {renderIcon(FiBriefcase, { size: 22, color: "#B87D4C" })}
               </div>
             </div>
           </div>
 
           {/* Total Credits */}
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-md shadow-sm p-4 border-l-2 border-blue-500">
+          <div className="bg-gradient-to-br from-[#F5F1EA] to-[#F5F1EA] rounded-md shadow-sm p-4 border-l-2 border-[#B87D4C]">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[11px] text-gray-600 font-semibold uppercase mb-0.5">
                   Total Credits
                 </p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-[#B87D4C]">
                   ${wallet.totalCredit.toLocaleString()}
                 </p>
                 <p className="text-[10px] text-gray-500 mt-1">
                   {wallet.transactions.filter(t => t.type === "Credit").length} txns
                 </p>
               </div>
-              <div className="p-2 bg-blue-100 rounded-full">
-                {renderIcon(FiArrowDownCircle, { size: 22, color: "#0EA5E9" })}
+              <div className="p-2 bg-[#E8E6E3] rounded-full">
+                {renderIcon(FiArrowDownCircle, { size: 22, color: "#B87D4C" })}
               </div>
             </div>
           </div>
@@ -183,7 +183,7 @@ const WalletPage: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between text-xs">
                 <span className="text-gray-600">Total Credits</span>
-                <span className="font-semibold text-blue-600">
+                <span className="font-semibold text-[#B87D4C]">
                   ${wallet.totalCredit.toLocaleString()}
                 </span>
               </div>
@@ -193,9 +193,9 @@ const WalletPage: React.FC = () => {
                   -${wallet.totalDebit.toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between bg-blue-50 p-2 rounded border border-blue-200 text-sm">
+              <div className="flex justify-between bg-[#F5F1EA] p-2 rounded border border-[#E8E6E3] text-sm">
                 <span className="font-semibold">Net Balance</span>
-                <span className="font-bold text-blue-600">
+                <span className="font-bold text-[#B87D4C]">
                   ${wallet.currentBalance.toLocaleString()}
                 </span>
               </div>
@@ -219,7 +219,7 @@ const WalletPage: React.FC = () => {
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full">
                   <div
-                    className="h-full bg-blue-500 rounded-full"
+                    className="h-full bg-[#B87D4C] rounded-full"
                     style={{ width: `${creditPercentage}%` }}
                   />
                 </div>
@@ -262,7 +262,7 @@ const WalletPage: React.FC = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-blue-500 to-cyan-600 p-6 flex items-center justify-between">
+            <div className="sticky top-0 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] p-6 flex items-center justify-between">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 {renderIcon(FiPlus, { size: 24, color: 'white' })}
                 Add Funds to Wallet
@@ -311,7 +311,7 @@ const WalletPage: React.FC = () => {
                         value={formData.amount}
                         onChange={handleInputChange}
                         placeholder="Enter amount"
-                        className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
                         step="100"
                         min="0"
                         required
@@ -328,7 +328,7 @@ const WalletPage: React.FC = () => {
                       name="bankAccount"
                       value={formData.bankAccount}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
                       required
                     >
                       <option value="">-- Choose Bank Account --</option>
@@ -350,7 +350,7 @@ const WalletPage: React.FC = () => {
                       value={formData.accountHolder}
                       onChange={handleInputChange}
                       placeholder="Enter account holder name"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent"
                       required
                     />
                   </div>
@@ -366,7 +366,7 @@ const WalletPage: React.FC = () => {
                       onChange={handleInputChange}
                       placeholder="Enter transaction description or notes"
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B87D4C] focus:border-transparent resize-none"
                     />
                   </div>
 
@@ -375,15 +375,15 @@ const WalletPage: React.FC = () => {
                     <p className="text-xs text-gray-600 mb-2 uppercase font-semibold">Transaction Summary</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">Amount to transfer:</span>
-                      <span className="text-lg font-bold text-blue-600">
+                      <span className="text-lg font-bold text-[#B87D4C]">
                         ${formData.amount ? parseFloat(formData.amount).toLocaleString() : '0'}
                       </span>
                     </div>
                   </div>
 
                   {/* Info Message */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-xs text-blue-800">
+                  <div className="bg-[#F5F1EA] border border-[#E8E6E3] rounded-lg p-4">
+                    <p className="text-xs text-[#B87D4C]">
                       <strong>Note:</strong> Bank transfers typically process within 1-2 business days. You will receive a confirmation email once the transaction is complete.
                     </p>
                   </div>
@@ -407,7 +407,7 @@ const WalletPage: React.FC = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={submitStatus === 'loading'}
-                  className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-6 py-2 text-sm font-semibold text-white bg-[#171717] rounded-lg hover:bg-[#B87D4C] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {submitStatus === 'loading' ? 'Processing...' : 'Transfer Funds'}
                 </button>

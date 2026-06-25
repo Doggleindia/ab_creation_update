@@ -30,9 +30,9 @@ const ContactTable: React.FC<ContactTableProps> = ({
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'new':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-[#E8E6E3] text-[#B87D4C]';
       case 'reviewed':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-[#E8E6E3] text-[#B87D4C]';
       case 'resolved':
         return 'bg-green-100 text-green-800';
       default:
@@ -99,7 +99,7 @@ const ContactTable: React.FC<ContactTableProps> = ({
                     {onView && (
                       <button
                         onClick={() => onView(contact)}
-                        className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                        className="p-2 hover:bg-[#F5F1EA] text-[#B87D4C] rounded-lg transition-colors"
                         title="View details"
                       >
                         {renderIcon(FiEye, { size: 18 })}

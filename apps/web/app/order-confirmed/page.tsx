@@ -63,7 +63,7 @@ function OrderConfirmedContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#faf6ef]/30 to-white pt-24 pb-16 flex flex-col justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-[#F5F1EA]/30 to-white pt-24 pb-16 flex flex-col justify-between">
       <div className="max-w-3xl mx-auto px-4 w-full">
         
         {/* SUCCESS ICON & HEADER */}
@@ -109,9 +109,9 @@ function OrderConfirmedContent() {
           className="bg-white rounded-2xl border border-neutral-100 shadow-xl shadow-neutral-100/50 overflow-hidden mb-8"
         >
           {/* Top banner / highlight */}
-          <div className="bg-[#faf6ef] px-6 py-4 border-b border-neutral-100 flex flex-wrap justify-between items-center gap-4">
+          <div className="bg-[#F5F1EA] px-6 py-4 border-b border-neutral-100 flex flex-wrap justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-sm font-medium text-neutral-700">
-              <Calendar size={16} className="text-[#c9a24d]" />
+              <Calendar size={16} className="text-[#CBAA75]" />
               <span>Estimated Delivery: {new Date(Date.now() + 4 * 86400000).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}</span>
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
@@ -142,7 +142,7 @@ function OrderConfirmedContent() {
 
               <div>
                 <span className="text-xs text-neutral-400 uppercase tracking-wider block mb-1">Amount Paid</span>
-                <span className="text-lg font-bold text-[#7a3a2e]">
+                <span className="text-lg font-bold text-[#B87D4C]">
                   {formatPrice(amount)}
                 </span>
               </div>
@@ -188,12 +188,12 @@ function OrderConfirmedContent() {
 
                   {/* Step 2 */}
                   <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-2 md:w-1/4">
-                    <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-amber-500/20 animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-[#CBAA75] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-amber-500/20 animate-pulse">
                       2
                     </div>
                     <div className="text-left">
                       <div className="text-xs font-semibold text-neutral-800">Processing</div>
-                      <div className="text-[10px] text-amber-600">Preparing Custom Prints</div>
+                      <div className="text-[10px] text-[#B87D4C]">Preparing Custom Prints</div>
                     </div>
                   </div>
 
@@ -234,7 +234,7 @@ function OrderConfirmedContent() {
         >
           <Button
             asChild
-            className="w-full sm:w-auto bg-[#7a3a2e] hover:bg-[#682f25] px-8 py-6 rounded-xl font-medium text-white shadow-lg shadow-[#7a3a2e]/10 group transition"
+            className="w-full sm:w-auto bg-[#171717] hover:bg-[#B87D4C] px-8 py-6 rounded-xl font-medium text-white shadow-lg shadow-[#171717]/10 group transition"
           >
             <Link href={orderId ? `/dashboard/orders/${orderId}` : `/dashboard/orders`}>
               Track Order Status
@@ -273,8 +273,8 @@ function OrderConfirmedContent() {
 export default function OrderConfirmedPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-[#faf6ef]/30 to-white pt-24 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#7a3a2e]" />
+      <div className="min-h-screen bg-gradient-to-b from-[#F5F1EA]/30 to-white pt-24 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#B87D4C]" />
       </div>
     }>
       <OrderConfirmedContent />

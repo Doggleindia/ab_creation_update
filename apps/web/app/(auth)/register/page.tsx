@@ -58,7 +58,7 @@ export default function RegisterPage() {
                 I have read and understood the Privacy Information Notice.
               </label>
 
-              <Button type="submit" className="w-44 bg-[#7a3a2e] hover:bg-[#682f25]">
+              <Button type="submit" className="w-44 bg-[#171717] hover:bg-[#B87D4C]">
                 CREATE ACCOUNT
               </Button>
             </form>

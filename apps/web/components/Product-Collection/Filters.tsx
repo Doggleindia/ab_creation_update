@@ -137,7 +137,7 @@ export default function Filters({ onFilterChange, activeFilters = {} }: FiltersP
           </div>
           <button
             onClick={handleClearAll}
-            className="text-sm text-orange-500 font-medium hover:text-orange-600 transition"
+            className="text-sm text-[#B87D4C] font-medium hover:text-[#B87D4C] transition"
           >
             Clear All
           </button>

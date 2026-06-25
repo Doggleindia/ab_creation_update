@@ -146,7 +146,7 @@ const EditCategory: React.FC = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter category name"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   required
                 />
               </div>
@@ -162,7 +162,7 @@ const EditCategory: React.FC = () => {
                   value={formData.slug}
                   onChange={handleInputChange}
                   placeholder="Enter slug"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                   required
                 />
               </div>
@@ -177,7 +177,7 @@ const EditCategory: React.FC = () => {
                 name="collectionId"
                 value={formData.collectionId}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
               >
                 <option value="">Select a collection</option>
                 {collections.map((collection) => (
@@ -196,7 +196,7 @@ const EditCategory: React.FC = () => {
               <div className="space-y-3">
                 {/* Existing Images */}
                 {formData.images && formData.images.map((image, index) => (
-                  <div key={`existing-${index}`} className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div key={`existing-${index}`} className="flex items-center gap-2 p-3 bg-[#F5F1EA] rounded-lg border border-[#E8E6E3]">
                     <span className="flex-1 text-sm text-gray-600 truncate">{image}</span>
                     <button
                       type="button"
@@ -229,7 +229,7 @@ const EditCategory: React.FC = () => {
                   </div>
                 ))}
 
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-[#B87D4C] transition-colors">
                   <input
                     type="file"
                     multiple
@@ -255,7 +255,7 @@ const EditCategory: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-medium"
+                className="px-6 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] disabled:bg-gray-400 transition-colors font-medium"
               >
                 {loading ? 'Updating...' : 'Update Category'}
               </button>

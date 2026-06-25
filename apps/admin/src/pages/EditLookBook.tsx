@@ -81,7 +81,7 @@ const EditLookBook: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-blue-600 mx-auto mb-4' })}
+            {renderIcon(FiLoader, { size: 32, className: 'animate-spin text-[#B87D4C] mx-auto mb-4' })}
             <p className="text-gray-600">Loading media...</p>
           </div>
         </div>
@@ -132,7 +132,7 @@ const EditLookBook: React.FC = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="Photo/Video ka title"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
 
@@ -142,7 +142,7 @@ const EditLookBook: React.FC = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? 'Updating...' : 'Update Details'}
               </button>
@@ -156,7 +156,7 @@ const EditLookBook: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Current Media</h3>
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                  media.mediaType === 'image' ? 'bg-blue-500' : 'bg-purple-500'
+                  media.mediaType === 'image' ? 'bg-[#B87D4C]' : 'bg-[#B87D4C]'
                 }`}>
                   {media.mediaType === 'image' ? 'Image' : 'Video'}
                 </span>
@@ -187,8 +187,8 @@ const EditLookBook: React.FC = () => {
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
+            <div className="bg-[#F5F1EA] border border-[#E8E6E3] rounded-lg p-4">
+              <p className="text-sm text-[#B87D4C]">
                 ℹ️ <strong>Note:</strong> You can only edit the title. To change the media file, delete this item and upload a new one.
               </p>
             </div>

@@ -6,7 +6,7 @@ export default function CollectionPage() {
   return (
     <section className="bg-white">
       {/* Breadcrumb */}
-      <div className="bg-[#faf6ef] px-6 py-4 text-sm text-muted-foreground">
+      <div className="bg-[#F5F1EA] px-6 py-4 text-sm text-muted-foreground">
         Home <span className="mx-2">{">"}</span> Collection page
       </div>
 

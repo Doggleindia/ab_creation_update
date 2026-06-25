@@ -27,12 +27,12 @@ export default function CollectionHero({
       <div className="absolute inset-0 bg-black/30" />
 
       {/* Content */}
-      <div className="relative z-10 flex h-full text-[#000000] flex-col items-center justify-center text-white">
-        <h1 className="text-3xl text-[#000000] md:text-3xl font-semibold tracking-wide">
+      <div className="relative z-10 flex h-full text-[#171717] flex-col items-center justify-center text-white">
+        <h1 className="text-3xl text-[#171717] md:text-3xl font-semibold tracking-wide">
           {title}
         </h1>
 
-        <p className="mt-2 text-lg text-[#000000] ">
+        <p className="mt-2 text-lg text-[#171717] ">
           Home <span className="mx-1">/</span> {title}
         </p>
       </div>

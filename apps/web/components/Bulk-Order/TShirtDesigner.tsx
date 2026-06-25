@@ -75,15 +75,15 @@ interface TShirtDesignerProps {
 }
 
 const PRESET_COLORS = [
-  { name: "Deep Charcoal", hex: "#111111" },
+  { name: "Deep Charcoal", hex: "#171717" },
   { name: "Heather Grey", hex: "#7F8C8D" },
   { name: "Crisp White", hex: "#FFFFFF" },
-  { name: "Classic Navy", hex: "#0F172A" },
-  { name: "Royal Blue", hex: "#1E3A8A" },
+  { name: "Classic Navy", hex: "#171717" },
+  { name: "Royal Blue", hex: "#B87D4C" },
   { name: "Crimson Red", hex: "#991B1B" },
   { name: "Forest Green", hex: "#065F46" },
   { name: "Pastel Pink", hex: "#FBCFE8" },
-  { name: "Mustard Yellow", hex: "#EAB308" }
+  { name: "Mustard Yellow", hex: "#CBAA75" }
 ];
 
 const FONTS = [
@@ -102,8 +102,8 @@ const FONTS = [
 // ==========================================
 
 const TShirtSVG = ({ color, side }: { color: string; side: DesignSide }) => {
-  const isDark = color.toLowerCase() === "#111111" || color.toLowerCase() === "#0f172a" || color.toLowerCase() === "#1e3a8a" || color.toLowerCase() === "#991b1b" || color.toLowerCase() === "#065f46";
-  const innerNeckColor = isDark ? "#2A2A2A" : "#D3D3D3";
+  const isDark = color.toLowerCase() === "#171717" || color.toLowerCase() === "#171717" || color.toLowerCase() === "#B87D4C" || color.toLowerCase() === "#991b1b" || color.toLowerCase() === "#065f46";
+  const innerNeckColor = isDark ? "#171717" : "#E8E6E3";
 
   return (
     <svg viewBox="0 0 500 500" className="w-full h-full drop-shadow-[0_25px_35px_rgba(0,0,0,0.5)]">
@@ -111,17 +111,17 @@ const TShirtSVG = ({ color, side }: { color: string; side: DesignSide }) => {
         {/* Soft realistic contours and shading */}
         <radialGradient id="shirt-glow" cx="50%" cy="30%" r="65%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity={isDark ? "0.08" : "0.2"} />
-          <stop offset="60%" stopColor="#000000" stopOpacity="0.08" />
-          <stop offset="100%" stopColor="#000000" stopOpacity={isDark ? "0.45" : "0.22"} />
+          <stop offset="60%" stopColor="#171717" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="#171717" stopOpacity={isDark ? "0.45" : "0.22"} />
         </radialGradient>
         {/* Sleeve shading left */}
         <linearGradient id="sleeve-fold-left" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#000000" stopOpacity="0.3" />
+          <stop offset="0%" stopColor="#171717" stopOpacity="0.3" />
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
         </linearGradient>
         {/* Sleeve shading right */}
         <linearGradient id="sleeve-fold-right" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#000000" stopOpacity="0.3" />
+          <stop offset="0%" stopColor="#171717" stopOpacity="0.3" />
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
         </linearGradient>
       </defs>
@@ -161,7 +161,7 @@ const TShirtSVG = ({ color, side }: { color: string; side: DesignSide }) => {
           <path
             d="M 180 57 Q 250 82 320 57 Q 250 87 180 57 Z"
             fill="none"
-            stroke={isDark ? "#3A3A3A" : "#C0C0C0"}
+            stroke={isDark ? "#3A3A3A" : "#E8E6E3"}
             strokeWidth="3.5"
             opacity="0.6"
           />
@@ -174,18 +174,18 @@ const TShirtSVG = ({ color, side }: { color: string; side: DesignSide }) => {
           <path
             d="M 180 57 Q 250 67 320 57"
             fill="none"
-            stroke={isDark ? "#262626" : "#E2E8F0"}
+            stroke={isDark ? "#171717" : "#E8E6E3"}
             strokeWidth="5"
             opacity="0.8"
           />
           {/* Shoulder Blade contour folds */}
-          <path d="M 190 85 Q 250 110 310 85" fill="none" stroke="#000000" strokeWidth="1.5" opacity="0.12" />
+          <path d="M 190 85 Q 250 110 310 85" fill="none" stroke="#171717" strokeWidth="1.5" opacity="0.12" />
         </>
       )}
 
       {/* Sleeve Seams */}
-      <path d="M 135 117 L 152 190" stroke="#000000" strokeWidth="1.5" opacity="0.15" fill="none" />
-      <path d="M 365 117 L 348 190" stroke="#000000" strokeWidth="1.5" opacity="0.15" fill="none" />
+      <path d="M 135 117 L 152 190" stroke="#171717" strokeWidth="1.5" opacity="0.15" fill="none" />
+      <path d="M 365 117 L 348 190" stroke="#171717" strokeWidth="1.5" opacity="0.15" fill="none" />
 
       {/* Armpit seam highlights */}
       <path d="M 135 117 Q 95 140 88 165" fill="none" stroke="url(#sleeve-fold-left)" strokeWidth="3" opacity="0.5" />
@@ -193,8 +193,8 @@ const TShirtSVG = ({ color, side }: { color: string; side: DesignSide }) => {
 
       {/* Subtle creases / fabric folds for photorealism */}
       <path d="M 110 380 Q 180 395 240 375" fill="none" stroke="#ffffff" strokeWidth="1" opacity={isDark ? "0.06" : "0.15"} />
-      <path d="M 390 390 Q 320 405 260 385" fill="none" stroke="#000000" strokeWidth="1" opacity="0.1" />
-      <path d="M 160 210 Q 250 225 340 210" fill="none" stroke="#000000" strokeWidth="1.2" opacity="0.08" />
+      <path d="M 390 390 Q 320 405 260 385" fill="none" stroke="#171717" strokeWidth="1" opacity="0.1" />
+      <path d="M 160 210 Q 250 225 340 210" fill="none" stroke="#171717" strokeWidth="1.2" opacity="0.08" />
     </svg>
   );
 };
@@ -320,7 +320,7 @@ export default function TShirtDesigner({
   const [historyIndex, setHistoryIndex] = useState<{ front: number; back: number }>({ front: 0, back: 0 });
 
   // Canvas View State
-  const [tshirtColor, setTshirtColor] = useState("#111111");
+  const [tshirtColor, setTshirtColor] = useState("#171717");
   const [zoom, setZoom] = useState(1);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [previewSide, setPreviewSide] = useState<"front" | "back" | "both">("both");
@@ -560,7 +560,7 @@ export default function TShirtDesigner({
       width: 25,
       height: 25,
       shapeType,
-      fillColor: "#FF6B00"
+      fillColor: "#B87D4C"
     });
   };
 
@@ -703,8 +703,8 @@ export default function TShirtDesigner({
       if (!ctx) return resolve("");
 
       // Render realistic T-shirt visual with contours, gradients, and shading onto a transparent canvas
-      const isDark = tshirtColor.toLowerCase() === "#111111" || tshirtColor.toLowerCase() === "#0f172a" || tshirtColor.toLowerCase() === "#1e3a8a" || tshirtColor.toLowerCase() === "#991b1b" || tshirtColor.toLowerCase() === "#065f46";
-      const innerNeckColor = isDark ? "#2A2A2A" : "#D3D3D3";
+      const isDark = tshirtColor.toLowerCase() === "#171717" || tshirtColor.toLowerCase() === "#171717" || tshirtColor.toLowerCase() === "#B87D4C" || tshirtColor.toLowerCase() === "#991b1b" || tshirtColor.toLowerCase() === "#065f46";
+      const innerNeckColor = isDark ? "#171717" : "#E8E6E3";
 
       const svgString = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="1024" height="1024">
@@ -712,17 +712,17 @@ export default function TShirtDesigner({
             <!-- Soft realistic contours and shading -->
             <radialGradient id="shirt-glow" cx="50%" cy="30%" r="65%">
               <stop offset="0%" stop-color="#ffffff" stop-opacity="${isDark ? "0.08" : "0.2"}" />
-              <stop offset="60%" stop-color="#000000" stop-opacity="0.08" />
-              <stop offset="100%" stop-color="#000000" stop-opacity="${isDark ? "0.45" : "0.22"}" />
+              <stop offset="60%" stop-color="#171717" stop-opacity="0.08" />
+              <stop offset="100%" stop-color="#171717" stop-opacity="${isDark ? "0.45" : "0.22"}" />
             </radialGradient>
             <!-- Sleeve shading left -->
             <linearGradient id="sleeve-fold-left" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#000000" stop-opacity="0.3" />
+              <stop offset="0%" stop-color="#171717" stop-opacity="0.3" />
               <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
             </linearGradient>
             <!-- Sleeve shading right -->
             <linearGradient id="sleeve-fold-right" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#000000" stop-opacity="0.3" />
+              <stop offset="0%" stop-color="#171717" stop-opacity="0.3" />
               <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
             </linearGradient>
           </defs>
@@ -750,7 +750,7 @@ export default function TShirtDesigner({
             <path
               d="M 180 57 Q 250 82 320 57 Q 250 87 180 57 Z"
               fill="none"
-              stroke="${isDark ? "#3A3A3A" : "#C0C0C0"}"
+              stroke="${isDark ? "#3A3A3A" : "#E8E6E3"}"
               stroke-width="3.5"
               opacity="0.6"
             />
@@ -761,17 +761,17 @@ export default function TShirtDesigner({
             <path
               d="M 180 57 Q 250 67 320 57"
               fill="none"
-              stroke="${isDark ? "#262626" : "#E2E8F0"}"
+              stroke="${isDark ? "#171717" : "#E8E6E3"}"
               stroke-width="5"
               opacity="0.8"
             />
             <!-- Shoulder Blade contour folds -->
-            <path d="M 190 85 Q 250 110 310 85" fill="none" stroke="#000000" stroke-width="1.5" opacity="0.12" />
+            <path d="M 190 85 Q 250 110 310 85" fill="none" stroke="#171717" stroke-width="1.5" opacity="0.12" />
           `}
 
           <!-- Sleeve Seams -->
-          <path d="M 135 117 L 152 190" stroke="#000000" stroke-width="1.5" opacity="0.15" fill="none" />
-          <path d="M 365 117 L 348 190" stroke="#000000" stroke-width="1.5" opacity="0.15" fill="none" />
+          <path d="M 135 117 L 152 190" stroke="#171717" stroke-width="1.5" opacity="0.15" fill="none" />
+          <path d="M 365 117 L 348 190" stroke="#171717" stroke-width="1.5" opacity="0.15" fill="none" />
 
           <!-- Armpit seam highlights -->
           <path d="M 135 117 Q 95 140 88 165" fill="none" stroke="url(#sleeve-fold-left)" stroke-width="3" opacity="0.5" />
@@ -779,8 +779,8 @@ export default function TShirtDesigner({
 
           <!-- Subtle creases / fabric folds for photorealism -->
           <path d="M 110 380 Q 180 395 240 375" fill="none" stroke="#ffffff" stroke-width="1" opacity="${isDark ? "0.06" : "0.15"}" />
-          <path d="M 390 390 Q 320 405 260 385" fill="none" stroke="#000000" stroke-width="1" opacity="0.1" />
-          <path d="M 160 210 Q 250 225 340 210" fill="none" stroke="#000000" stroke-width="1.2" opacity="0.08" />
+          <path d="M 390 390 Q 320 405 260 385" fill="none" stroke="#171717" stroke-width="1" opacity="0.1" />
+          <path d="M 160 210 Q 250 225 340 210" fill="none" stroke="#171717" stroke-width="1.2" opacity="0.08" />
         </svg>
       `;
 
@@ -857,7 +857,7 @@ export default function TShirtDesigner({
               ctx.stroke();
             }
           } else if (el.type === "shape") {
-            ctx.fillStyle = el.fillColor || "#FF6B00";
+            ctx.fillStyle = el.fillColor || "#B87D4C";
             if (el.shapeType === "rect") {
               ctx.fillRect(-elW / 2, -elH / 2, elW, elH);
             } else if (el.shapeType === "circle") {
@@ -923,15 +923,15 @@ export default function TShirtDesigner({
       const doc = new jsPDF("p", "mm", "a4");
 
       // Colors
-      const orangeColor = "#FF6B00";
-      const slate900 = "#0F172A";
+      const orangeColor = "#B87D4C";
+      const slate900 = "#171717";
 
       // 1. BRANDING HEADER
       doc.setFillColor(15, 23, 42); // Slate 900
       doc.rect(0, 0, 210, 38, "F");
 
       // Vibrant Accent brand border
-      doc.setFillColor(255, 107, 0); // #FF6B00
+      doc.setFillColor(255, 107, 0); // #B87D4C
       doc.rect(0, 35, 210, 3, "F");
 
       // Brand Title
@@ -1335,7 +1335,7 @@ export default function TShirtDesigner({
               </button>
 
               <div className="text-center mb-10">
-                <span className="text-xs font-semibold uppercase tracking-widest text-[#FF6B00]">Custom Playground</span>
+                <span className="text-xs font-semibold uppercase tracking-widest text-[#B87D4C]">Custom Playground</span>
                 <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white md:text-4xl">
                   Which side do you want to design?
                 </h2>
@@ -1350,45 +1350,45 @@ export default function TShirtDesigner({
                 {/* FRONT CARD */}
                 <div
                   onClick={() => handleSelectSideMode("front")}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#FF6B00] hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-950/20"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-950/20"
                 >
                   <div className="mx-auto mb-6 h-48 w-44 opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all">
-                    <TShirtSVG color="#111111" side="front" />
+                    <TShirtSVG color="#171717" side="front" />
                   </div>
                   <h3 className="text-lg font-bold text-white">Front Only</h3>
                   <p className="mt-1 text-xs text-neutral-400">Customize chest-side graphic workspace only.</p>
-                  <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-[#FF6B00]/40 pointer-events-none transition-all" />
+                  <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-[#B87D4C]/40 pointer-events-none transition-all" />
                 </div>
 
                 {/* BACK CARD */}
                 <div
                   onClick={() => handleSelectSideMode("back")}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#FF6B00] hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-950/20"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-neutral-900 hover:shadow-lg hover:shadow-orange-950/20"
                 >
                   <div className="mx-auto mb-6 h-48 w-44 opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all">
-                    <TShirtSVG color="#111111" side="back" />
+                    <TShirtSVG color="#171717" side="back" />
                   </div>
                   <h3 className="text-lg font-bold text-white">Back Only</h3>
                   <p className="mt-1 text-xs text-neutral-400">Customize rear-shoulder blade print workspace only.</p>
-                  <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-[#FF6B00]/40 pointer-events-none transition-all" />
+                  <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-[#B87D4C]/40 pointer-events-none transition-all" />
                 </div>
 
                 {/* BOTH FRONT & BACK CARD */}
                 <div
                   onClick={() => handleSelectSideMode("both")}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#FF6B00] hover:bg-[#FF6B00]/5 hover:shadow-lg hover:shadow-orange-950/30"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-center transition-all hover:border-[#B87D4C] hover:bg-[#B87D4C]/5 hover:shadow-lg hover:shadow-orange-950/30"
                 >
                   <div className="mx-auto mb-6 flex h-48 w-44 items-center justify-center gap-1 opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all">
                     <div className="w-1/2 scale-90 -translate-x-2">
-                      <TShirtSVG color="#111111" side="front" />
+                      <TShirtSVG color="#171717" side="front" />
                     </div>
                     <div className="w-1/2 scale-90 translate-x-2">
-                      <TShirtSVG color="#111111" side="back" />
+                      <TShirtSVG color="#171717" side="back" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold text-[#FF6B00]">Front & Back</h3>
+                  <h3 className="text-lg font-bold text-[#B87D4C]">Front & Back</h3>
                   <p className="mt-1 text-xs text-neutral-400">Full designer suite for both front chest and back layers.</p>
-                  <div className="absolute inset-0 rounded-2xl border-2 border-dashed border-neutral-800 group-hover:border-[#FF6B00] pointer-events-none transition-all" />
+                  <div className="absolute inset-0 rounded-2xl border-2 border-dashed border-neutral-800 group-hover:border-[#B87D4C] pointer-events-none transition-all" />
                 </div>
 
               </div>
@@ -1424,7 +1424,7 @@ export default function TShirtDesigner({
                       setCurrentSide("front");
                       setSelectedElementId(null);
                     }}
-                    className={`rounded-md px-4 py-1 text-xs font-semibold transition-all ${currentSide === "front" ? "bg-[#FF6B00] text-white shadow-md" : "text-neutral-400 hover:text-white"
+                    className={`rounded-md px-4 py-1 text-xs font-semibold transition-all ${currentSide === "front" ? "bg-[#B87D4C] text-white shadow-md" : "text-neutral-400 hover:text-white"
                       }`}
                   >
                     Front Design
@@ -1434,7 +1434,7 @@ export default function TShirtDesigner({
                       setCurrentSide("back");
                       setSelectedElementId(null);
                     }}
-                    className={`rounded-md px-4 py-1 text-xs font-semibold transition-all ${currentSide === "back" ? "bg-[#FF6B00] text-white shadow-md" : "text-neutral-400 hover:text-white"
+                    className={`rounded-md px-4 py-1 text-xs font-semibold transition-all ${currentSide === "back" ? "bg-[#B87D4C] text-white shadow-md" : "text-neutral-400 hover:text-white"
                       }`}
                   >
                     Back Design
@@ -1467,7 +1467,7 @@ export default function TShirtDesigner({
                 {/* Preview */}
                 <button
                   onClick={() => setIsPreviewModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#FF6B00]/40 bg-[#FF6B00]/10 px-3.5 py-1.5 text-xs font-semibold text-[#FF6B00] hover:bg-[#FF6B00]/20 hover:border-[#FF6B00] transition-all shadow-md shadow-orange-950/5"
+                  className="flex items-center gap-1.5 rounded-lg border border-[#B87D4C]/40 bg-[#B87D4C]/10 px-3.5 py-1.5 text-xs font-semibold text-[#B87D4C] hover:bg-[#B87D4C]/20 hover:border-[#B87D4C] transition-all shadow-md shadow-orange-950/5"
                 >
                   <Eye className="h-3.5 w-3.5" /> Preview Design
                 </button>
@@ -1478,13 +1478,13 @@ export default function TShirtDesigner({
                   className="flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900 px-3.5 py-1.5 text-xs font-semibold text-neutral-300 hover:border-neutral-700 hover:text-white hover:bg-neutral-800 transition-all shadow-md"
                   title="Export High-Fidelity Design PDF Sheet"
                 >
-                  <FileDown className="h-3.5 w-3.5 text-[#FF6B00]" /> Export PDF Spec
+                  <FileDown className="h-3.5 w-3.5 text-[#B87D4C]" /> Export PDF Spec
                 </button>
 
                 {/* Finish & Save */}
                 <button
                   onClick={handleSaveDesign}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#FF6B00] px-4 py-1.5 text-xs font-bold text-white hover:bg-[#f45f00] transition-all shadow-lg shadow-orange-950/20"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#B87D4C] px-4 py-1.5 text-xs font-bold text-white hover:bg-[#B87D4C] transition-all shadow-lg shadow-orange-950/20"
                 >
                   <Save className="h-3.5 w-3.5" /> Save Design
                 </button>
@@ -1507,7 +1507,7 @@ export default function TShirtDesigner({
                 <div className="flex flex-col gap-4 border-b md:border-b-0 md:border-r border-neutral-800 p-3 items-center w-full md:w-[72px]">
                   <button
                     onClick={() => setActiveTab("upload")}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "upload" ? "bg-[#FF6B00]/10 text-[#FF6B00]" : "text-neutral-400 hover:text-white"
+                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "upload" ? "bg-[#B87D4C]/10 text-[#B87D4C]" : "text-neutral-400 hover:text-white"
                       }`}
                   >
                     <Upload className="h-5 w-5" />
@@ -1516,7 +1516,7 @@ export default function TShirtDesigner({
 
                   <button
                     onClick={() => setActiveTab("text")}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "text" ? "bg-[#FF6B00]/10 text-[#FF6B00]" : "text-neutral-400 hover:text-white"
+                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "text" ? "bg-[#B87D4C]/10 text-[#B87D4C]" : "text-neutral-400 hover:text-white"
                       }`}
                   >
                     <Type className="h-5 w-5" />
@@ -1525,7 +1525,7 @@ export default function TShirtDesigner({
 
                   <button
                     onClick={() => setActiveTab("shapes")}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "shapes" ? "bg-[#FF6B00]/10 text-[#FF6B00]" : "text-neutral-400 hover:text-white"
+                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "shapes" ? "bg-[#B87D4C]/10 text-[#B87D4C]" : "text-neutral-400 hover:text-white"
                       }`}
                   >
                     <Square className="h-5 w-5" />
@@ -1534,7 +1534,7 @@ export default function TShirtDesigner({
 
                   <button
                     onClick={() => setActiveTab("layers")}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "layers" ? "bg-[#FF6B00]/10 text-[#FF6B00]" : "text-neutral-400 hover:text-white"
+                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "layers" ? "bg-[#B87D4C]/10 text-[#B87D4C]" : "text-neutral-400 hover:text-white"
                       }`}
                   >
                     <Layers className="h-5 w-5" />
@@ -1557,9 +1557,9 @@ export default function TShirtDesigner({
                           handleImageUpload(e);
                         }}
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex flex-col items-center justify-center border border-dashed border-neutral-800 hover:border-[#FF6B00] rounded-xl p-6 bg-neutral-900/30 cursor-pointer transition-all gap-2 text-center group"
+                        className="flex flex-col items-center justify-center border border-dashed border-neutral-800 hover:border-[#B87D4C] rounded-xl p-6 bg-neutral-900/30 cursor-pointer transition-all gap-2 text-center group"
                       >
-                        <Upload className="h-8 w-8 text-neutral-500 group-hover:text-[#FF6B00] transition-all" />
+                        <Upload className="h-8 w-8 text-neutral-500 group-hover:text-[#B87D4C] transition-all" />
                         <span className="text-xs font-semibold text-neutral-300">Drag & Drop file</span>
                         <span className="text-[10px] text-neutral-500">Supports PNG, JPG, SVG</span>
                         <input
@@ -1596,7 +1596,7 @@ export default function TShirtDesigner({
                       <h4 className="text-sm font-bold text-neutral-200">Typography Tools</h4>
                       <button
                         onClick={handleAddText}
-                        className="w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-white font-bold hover:border-[#FF6B00] hover:text-[#FF6B00] transition-all text-xs flex items-center justify-center gap-1.5"
+                        className="w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-white font-bold hover:border-[#B87D4C] hover:text-[#B87D4C] transition-all text-xs flex items-center justify-center gap-1.5"
                       >
                         <Plus className="h-4 w-4" /> Add Text Layer
                       </button>
@@ -1613,35 +1613,35 @@ export default function TShirtDesigner({
                       <div className="grid grid-cols-2 gap-2.5">
                         <button
                           onClick={() => handleAddShape("rect")}
-                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#FF6B00] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
+                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#B87D4C] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Square className="h-5 w-5 text-neutral-400 group-hover:text-white" />
                           <span className="text-[10px] text-neutral-400">Rectangle</span>
                         </button>
                         <button
                           onClick={() => handleAddShape("circle")}
-                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#FF6B00] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
+                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#B87D4C] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Circle className="h-5 w-5 text-neutral-400 group-hover:text-white" />
                           <span className="text-[10px] text-neutral-400">Circle</span>
                         </button>
                         <button
                           onClick={() => handleAddShape("star")}
-                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#FF6B00] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
+                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#B87D4C] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Star className="h-5 w-5 text-neutral-400 group-hover:text-white" />
                           <span className="text-[10px] text-neutral-400">Star</span>
                         </button>
                         <button
                           onClick={() => handleAddShape("triangle")}
-                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#FF6B00] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
+                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#B87D4C] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <TriangleIcon className="h-5 w-5 text-neutral-400 group-hover:text-white" />
                           <span className="text-[10px] text-neutral-400">Triangle</span>
                         </button>
                         <button
                           onClick={() => handleAddShape("heart")}
-                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#FF6B00] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
+                          className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#B87D4C] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Heart className="h-5 w-5 text-neutral-400 group-hover:text-white" />
                           <span className="text-[10px] text-neutral-400">Heart</span>
@@ -1663,7 +1663,7 @@ export default function TShirtDesigner({
                               key={el.id}
                               onClick={() => setSelectedElementId(el.id)}
                               className={`flex items-center justify-between rounded-lg p-2 border transition-all cursor-pointer ${selectedElementId === el.id
-                                ? "border-[#FF6B00] bg-[#FF6B00]/5 text-[#FF6B00]"
+                                ? "border-[#B87D4C] bg-[#B87D4C]/5 text-[#B87D4C]"
                                 : "border-neutral-800 bg-neutral-900/40 text-neutral-300 hover:bg-neutral-900"
                                 }`}
                             >
@@ -1696,7 +1696,7 @@ export default function TShirtDesigner({
               </aside>
 
               {/* 3. CENTER CANVAS (PLAYGROUND WORKSPACE) */}
-              <main className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden bg-neutral-900 bg-[radial-gradient(#262626_1px,transparent_1px)] [background-size:16px_16px]">
+              <main className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden bg-neutral-900 bg-[radial-gradient(#171717_1px,transparent_1px)] [background-size:16px_16px]">
 
                 {/* Zoom indicator / scale buttons overlay */}
                 <div className="absolute bottom-6 left-6 flex items-center rounded-xl bg-neutral-950 border border-neutral-800 shadow-xl p-1 z-35 gap-1">
@@ -1745,9 +1745,9 @@ export default function TShirtDesigner({
                   {/* Absolute aligned inside the T-shirt chest/back grid: left 32%, top 25%, width 36%, height 46% */}
                   <div
                     ref={canvasRef}
-                    className="absolute left-[32%] top-[25%] w-[36%] h-[46%] border-2 border-dashed border-[#FF6B00]/40 rounded-lg z-40 transition-colors hover:border-[#FF6B00]/70"
+                    className="absolute left-[32%] top-[25%] w-[36%] h-[46%] border-2 border-dashed border-[#B87D4C]/40 rounded-lg z-40 transition-colors hover:border-[#B87D4C]/70"
                   >
-                    <div className="absolute top-1 left-2 text-[8px] font-bold text-[#FF6B00] uppercase tracking-wider opacity-60">
+                    <div className="absolute top-1 left-2 text-[8px] font-bold text-[#B87D4C] uppercase tracking-wider opacity-60">
                       Printable Area
                     </div>
 
@@ -1767,7 +1767,7 @@ export default function TShirtDesigner({
                             transform: `rotate(${el.rotation}deg)`,
                             zIndex: el.zIndex
                           }}
-                          className={`group flex items-center justify-center ${isSelected ? "ring-2 ring-[#FF6B00] cursor-move" : "hover:ring-1 hover:ring-neutral-500 cursor-pointer"
+                          className={`group flex items-center justify-center ${isSelected ? "ring-2 ring-[#B87D4C] cursor-move" : "hover:ring-1 hover:ring-neutral-500 cursor-pointer"
                             }`}
                           onMouseDown={(e) => handleInteractionStart(e, el, "drag")}
                           onTouchStart={(e) => handleInteractionStart(e, el, "drag")}
@@ -1829,18 +1829,18 @@ export default function TShirtDesigner({
                               <div
                                 onMouseDown={(e) => handleInteractionStart(e, el, "rotate")}
                                 onTouchStart={(e) => handleInteractionStart(e, el, "rotate")}
-                                className="absolute -top-7 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full border border-neutral-700 bg-neutral-900 hover:bg-[#FF6B00] text-neutral-300 hover:text-white flex items-center justify-center cursor-alias shadow-lg"
+                                className="absolute -top-7 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full border border-neutral-700 bg-neutral-900 hover:bg-[#B87D4C] text-neutral-300 hover:text-white flex items-center justify-center cursor-alias shadow-lg"
                                 title="Rotate"
                               >
                                 <RotateCcw className="h-2.5 w-2.5 rotate-45" />
                               </div>
-                              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-[1.5px] h-2 bg-[#FF6B00]" />
+                              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-[1.5px] h-2 bg-[#B87D4C]" />
 
                               {/* SCALE CORNER GRAB HANDLE */}
                               <div
                                 onMouseDown={(e) => handleInteractionStart(e, el, "resize")}
                                 onTouchStart={(e) => handleInteractionStart(e, el, "resize")}
-                                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white bg-[#FF6B00] cursor-se-resize shadow-md"
+                                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white bg-[#B87D4C] cursor-se-resize shadow-md"
                                 title="Scale"
                               />
 
@@ -1904,7 +1904,7 @@ export default function TShirtDesigner({
                       {/* Product T-Shirt Colors */}
                       <div className="flex flex-col gap-2.5">
                         <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1">
-                          <Palette className="h-3.5 w-3.5 text-[#FF6B00]" /> Product T-Shirt Color
+                          <Palette className="h-3.5 w-3.5 text-[#B87D4C]" /> Product T-Shirt Color
                         </label>
 
                         <div className="grid grid-cols-5 gap-2 mt-1">
@@ -1914,7 +1914,7 @@ export default function TShirtDesigner({
                               onClick={() => setTshirtColor(c.hex)}
                               style={{ backgroundColor: c.hex }}
                               className={`aspect-square rounded-full border-2 transition-all relative ${tshirtColor.toLowerCase() === c.hex.toLowerCase()
-                                ? "border-[#FF6B00] scale-110 shadow-lg shadow-orange-950/40"
+                                ? "border-[#B87D4C] scale-110 shadow-lg shadow-orange-950/40"
                                 : "border-neutral-800 hover:scale-105"
                                 }`}
                               title={c.name}
@@ -1965,7 +1965,7 @@ export default function TShirtDesigner({
                         </span>
                         <button
                           onClick={() => setSelectedElementId(null)}
-                          className="text-[10px] font-semibold text-[#FF6B00] hover:underline"
+                          className="text-[10px] font-semibold text-[#B87D4C] hover:underline"
                         >
                           Deselect
                         </button>
@@ -1982,7 +1982,7 @@ export default function TShirtDesigner({
                               type="text"
                               value={activeElement.content}
                               onChange={(e) => updateElementProperties(activeElement.id, { content: e.target.value })}
-                              className="w-full bg-neutral-900 border border-neutral-800 focus:border-[#FF6B00] rounded-lg px-3 py-2 text-xs font-medium text-white outline-none select-text"
+                              className="w-full bg-neutral-900 border border-neutral-800 focus:border-[#B87D4C] rounded-lg px-3 py-2 text-xs font-medium text-white outline-none select-text"
                             />
                           </div>
 
@@ -1992,7 +1992,7 @@ export default function TShirtDesigner({
                             <select
                               value={activeElement.fontFamily || "Outfit"}
                               onChange={(e) => updateElementProperties(activeElement.id, { fontFamily: e.target.value })}
-                              className="w-full bg-neutral-900 border border-neutral-800 focus:border-[#FF6B00] rounded-lg px-2.5 py-2 text-xs font-medium text-white outline-none"
+                              className="w-full bg-neutral-900 border border-neutral-800 focus:border-[#B87D4C] rounded-lg px-2.5 py-2 text-xs font-medium text-white outline-none"
                             >
                               {FONTS.map((font) => (
                                 <option key={font} value={font}>
@@ -2041,21 +2041,21 @@ export default function TShirtDesigner({
                               <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5">
                                 <button
                                   onClick={() => updateElementProperties(activeElement.id, { align: "left" })}
-                                  className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "left" ? "bg-neutral-800 text-[#FF6B00]" : "text-neutral-400 hover:text-white"
+                                  className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "left" ? "bg-neutral-800 text-[#B87D4C]" : "text-neutral-400 hover:text-white"
                                     }`}
                                 >
                                   <AlignLeft className="h-3.5 w-3.5" />
                                 </button>
                                 <button
                                   onClick={() => updateElementProperties(activeElement.id, { align: "center" })}
-                                  className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "center" ? "bg-neutral-800 text-[#FF6B00]" : "text-neutral-400 hover:text-white"
+                                  className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "center" ? "bg-neutral-800 text-[#B87D4C]" : "text-neutral-400 hover:text-white"
                                     }`}
                                 >
                                   <AlignCenter className="h-3.5 w-3.5" />
                                 </button>
                                 <button
                                   onClick={() => updateElementProperties(activeElement.id, { align: "right" })}
-                                  className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "right" ? "bg-neutral-800 text-[#FF6B00]" : "text-neutral-400 hover:text-white"
+                                  className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "right" ? "bg-neutral-800 text-[#B87D4C]" : "text-neutral-400 hover:text-white"
                                     }`}
                                 >
                                   <AlignRight className="h-3.5 w-3.5" />
@@ -2072,7 +2072,7 @@ export default function TShirtDesigner({
                               <button
                                 onClick={() => updateElementProperties(activeElement.id, { bold: !activeElement.bold })}
                                 className={`flex-1 flex justify-center py-2.5 border rounded-lg transition-all ${activeElement.bold
-                                  ? "border-[#FF6B00] bg-[#FF6B00]/5 text-[#FF6B00] font-bold"
+                                  ? "border-[#B87D4C] bg-[#B87D4C]/5 text-[#B87D4C] font-bold"
                                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white"
                                   }`}
                               >
@@ -2081,7 +2081,7 @@ export default function TShirtDesigner({
                               <button
                                 onClick={() => updateElementProperties(activeElement.id, { italic: !activeElement.italic })}
                                 className={`flex-1 flex justify-center py-2.5 border rounded-lg transition-all ${activeElement.italic
-                                  ? "border-[#FF6B00] bg-[#FF6B00]/5 text-[#FF6B00]"
+                                  ? "border-[#B87D4C] bg-[#B87D4C]/5 text-[#B87D4C]"
                                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white"
                                   }`}
                               >
@@ -2090,7 +2090,7 @@ export default function TShirtDesigner({
                               <button
                                 onClick={() => updateElementProperties(activeElement.id, { underline: !activeElement.underline })}
                                 className={`flex-1 flex justify-center py-2.5 border rounded-lg transition-all ${activeElement.underline
-                                  ? "border-[#FF6B00] bg-[#FF6B00]/5 text-[#FF6B00]"
+                                  ? "border-[#B87D4C] bg-[#B87D4C]/5 text-[#B87D4C]"
                                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white"
                                   }`}
                               >
@@ -2131,13 +2131,13 @@ export default function TShirtDesigner({
                             <div className="flex items-center gap-2 mt-1 bg-neutral-900 border border-neutral-800 rounded-lg p-2">
                               <input
                                 type="color"
-                                value={activeElement.fillColor || "#FF6B00"}
+                                value={activeElement.fillColor || "#B87D4C"}
                                 onChange={(e) => updateElementProperties(activeElement.id, { fillColor: e.target.value })}
                                 className="w-6 h-6 rounded-md border-0 bg-transparent cursor-pointer"
                               />
                               <input
                                 type="text"
-                                value={activeElement.fillColor || "#FF6B00"}
+                                value={activeElement.fillColor || "#B87D4C"}
                                 onChange={(e) => updateElementProperties(activeElement.id, { fillColor: e.target.value })}
                                 className="bg-transparent text-xs font-semibold uppercase tracking-wider text-neutral-300 outline-none w-full"
                               />
@@ -2172,7 +2172,7 @@ export default function TShirtDesigner({
                             max="360"
                             value={activeElement.rotation}
                             onChange={(e) => updateElementProperties(activeElement.id, { rotation: Number(e.target.value) })}
-                            className="w-full h-1 bg-neutral-800 accent-[#FF6B00] rounded-lg cursor-pointer"
+                            className="w-full h-1 bg-neutral-800 accent-[#B87D4C] rounded-lg cursor-pointer"
                           />
                           <span className="text-xs font-bold text-neutral-300 w-8 text-right font-mono">
                             {activeElement.rotation}°
@@ -2220,7 +2220,7 @@ export default function TShirtDesigner({
 
                 {/* Header Info */}
                 <div className="text-center mb-6">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-[#FF6B00]">Mockup Showcase</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-[#B87D4C]">Mockup Showcase</span>
                   <h3 className="mt-1 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
                     High-Fidelity Preview
                   </h3>
@@ -2234,21 +2234,21 @@ export default function TShirtDesigner({
                   <div className="flex items-center rounded-xl bg-neutral-900 p-1 border border-neutral-800 shadow-inner">
                     <button
                       onClick={() => setPreviewSide("front")}
-                      className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "front" ? "bg-[#FF6B00] text-white shadow-md" : "text-neutral-400 hover:text-white"
+                      className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "front" ? "bg-[#B87D4C] text-white shadow-md" : "text-neutral-400 hover:text-white"
                         }`}
                     >
                       Front View
                     </button>
                     <button
                       onClick={() => setPreviewSide("back")}
-                      className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "back" ? "bg-[#FF6B00] text-white shadow-md" : "text-neutral-400 hover:text-white"
+                      className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "back" ? "bg-[#B87D4C] text-white shadow-md" : "text-neutral-400 hover:text-white"
                         }`}
                     >
                       Back View
                     </button>
                     <button
                       onClick={() => setPreviewSide("both")}
-                      className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "both" ? "bg-[#FF6B00] text-white shadow-md" : "text-neutral-400 hover:text-white"
+                      className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "both" ? "bg-[#B87D4C] text-white shadow-md" : "text-neutral-400 hover:text-white"
                         }`}
                     >
                       Front & Back
@@ -2327,7 +2327,7 @@ export default function TShirtDesigner({
               >
                 {/* Header Info */}
                 <div className="text-center mb-6">
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#FF6B00]">Confirm Apparel Technical Specifications</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#B87D4C]">Confirm Apparel Technical Specifications</span>
                   <h3 className="mt-1 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
                     Review Your Custom Layout
                   </h3>
@@ -2367,7 +2367,7 @@ export default function TShirtDesigner({
                   {/* Right Column: HD Print Inspector (Col 5) */}
                   <div className="lg:col-span-5 flex flex-col items-center justify-between bg-neutral-900/60 rounded-2xl border border-neutral-800/80 p-6 relative overflow-hidden">
                     <div className="absolute top-4 left-4 flex items-center gap-1.5 text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                      <Layers className="h-3.5 w-3.5 text-[#FF6B00]" /> HD Detail Inspector
+                      <Layers className="h-3.5 w-3.5 text-[#B87D4C]" /> HD Detail Inspector
                     </div>
 
                     {/* Toggle if both sides are designed */}
@@ -2375,14 +2375,14 @@ export default function TShirtDesigner({
                       <div className="mt-6 flex items-center rounded-xl bg-neutral-950 p-1 border border-neutral-800 shadow-inner z-10">
                         <button
                           onClick={() => setInspectSide("front")}
-                          className={`rounded-lg px-4 py-1.5 text-[10px] font-extrabold uppercase transition-all ${inspectSide === "front" ? "bg-[#FF6B00] text-white shadow-md" : "text-neutral-400 hover:text-white"
+                          className={`rounded-lg px-4 py-1.5 text-[10px] font-extrabold uppercase transition-all ${inspectSide === "front" ? "bg-[#B87D4C] text-white shadow-md" : "text-neutral-400 hover:text-white"
                             }`}
                         >
                           Inspect Front
                         </button>
                         <button
                           onClick={() => setInspectSide("back")}
-                          className={`rounded-lg px-4 py-1.5 text-[10px] font-extrabold uppercase transition-all ${inspectSide === "back" ? "bg-[#FF6B00] text-white shadow-md" : "text-neutral-400 hover:text-white"
+                          className={`rounded-lg px-4 py-1.5 text-[10px] font-extrabold uppercase transition-all ${inspectSide === "back" ? "bg-[#B87D4C] text-white shadow-md" : "text-neutral-400 hover:text-white"
                             }`}
                         >
                           Inspect Back
@@ -2394,7 +2394,7 @@ export default function TShirtDesigner({
                     <div className="relative flex items-center justify-center my-6 py-6 w-full">
 
                       {/* Curved Technical Dashed SVG Arrow pointing from Mockup to Magnifier */}
-                      <svg viewBox="0 0 100 100" className="absolute top-[40%] -left-6 w-14 h-14 pointer-events-none select-none text-[#FF6B00] hidden lg:block drop-shadow-[0_0_8px_rgba(255,107,0,0.4)]">
+                      <svg viewBox="0 0 100 100" className="absolute top-[40%] -left-6 w-14 h-14 pointer-events-none select-none text-[#B87D4C] hidden lg:block drop-shadow-[0_0_8px_rgba(255,107,0,0.4)]">
                         <path
                           d="M 10,80 Q 25,25 80,40"
                           fill="none"
@@ -2407,7 +2407,7 @@ export default function TShirtDesigner({
                       </svg>
 
                       {/* THE MAGNIFIER GLASS */}
-                      <div className="relative w-64 h-64 rounded-full border-4 border-[#FF6B00] shadow-[0_0_35px_rgba(255,107,0,0.25),inset_0_0_20px_rgba(0,0,0,0.8)] overflow-hidden bg-neutral-950 flex items-center justify-center z-10 transition-transform duration-300 hover:scale-105">
+                      <div className="relative w-64 h-64 rounded-full border-4 border-[#B87D4C] shadow-[0_0_35px_rgba(255,107,0,0.25),inset_0_0_20px_rgba(0,0,0,0.8)] overflow-hidden bg-neutral-950 flex items-center justify-center z-10 transition-transform duration-300 hover:scale-105">
 
                         {/* Circular grid lines simulating target/lens view */}
                         <div className="absolute inset-0 border border-neutral-700/10 rounded-full scale-75 pointer-events-none z-20" />
@@ -2429,7 +2429,7 @@ export default function TShirtDesigner({
                       </div>
 
                       {/* Technical specifications tag absolute-placed below circle */}
-                      <span className="absolute bottom-1 bg-[#FF6B00] text-black font-extrabold text-[8px] uppercase tracking-widest px-2.5 py-0.5 rounded-full z-15 shadow-md">
+                      <span className="absolute bottom-1 bg-[#B87D4C] text-black font-extrabold text-[8px] uppercase tracking-widest px-2.5 py-0.5 rounded-full z-15 shadow-md">
                         250% HD Zoom Lens
                       </span>
                     </div>
@@ -2466,7 +2466,7 @@ export default function TShirtDesigner({
                   </button>
                   <button
                     onClick={handleFinalSave}
-                    className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-[#FF6B00] to-[#f45f00] text-white px-7 py-2.5 text-xs font-bold transition-all hover:scale-[1.02] shadow-lg shadow-orange-950/30 flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-[#B87D4C] to-[#B87D4C] text-white px-7 py-2.5 text-xs font-bold transition-all hover:scale-[1.02] shadow-lg shadow-orange-950/30 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Check className="h-4 w-4" /> Yes, Confirm & Save
                   </button>

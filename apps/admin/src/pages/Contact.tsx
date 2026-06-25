@@ -70,9 +70,9 @@ const ContactPage: React.FC = () => {
   const getStatusBadgeColor = (status?: string) => {
     switch (status) {
       case 'new':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-[#E8E6E3] text-[#B87D4C]';
       case 'reviewed':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-[#E8E6E3] text-[#B87D4C]';
       case 'resolved':
         return 'bg-green-100 text-green-800';
       default:
@@ -86,7 +86,7 @@ const ContactPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+            <div className="p-2 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] rounded-lg">
               {renderIcon(FiMessageSquare, { size: 24, color: 'white' })}
             </div>
             <div>
@@ -98,17 +98,17 @@ const ContactPage: React.FC = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#B87D4C]">
             <p className="text-sm text-gray-600 mb-1">Total Messages</p>
             <p className="text-2xl font-bold text-gray-900">{contacts.length}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#B87D4C]">
             <p className="text-sm text-gray-600 mb-1">New Messages</p>
-            <p className="text-2xl font-bold text-blue-600">{contacts.filter(c => c.status === 'new').length}</p>
+            <p className="text-2xl font-bold text-[#B87D4C]">{contacts.filter(c => c.status === 'new').length}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#B87D4C]">
             <p className="text-sm text-gray-600 mb-1">Under Review</p>
-            <p className="text-2xl font-bold text-purple-600">{contacts.filter(c => c.status === 'reviewed').length}</p>
+            <p className="text-2xl font-bold text-[#B87D4C]">{contacts.filter(c => c.status === 'reviewed').length}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
             <p className="text-sm text-gray-600 mb-1">Resolved</p>
@@ -131,7 +131,7 @@ const ContactPage: React.FC = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-blue-500 to-purple-600 p-6 flex items-center justify-between">
+            <div className="sticky top-0 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] p-6 flex items-center justify-between">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 {renderIcon(FiMessageSquare, { size: 24, color: 'white' })}
                 Message Details
@@ -169,8 +169,8 @@ const ContactPage: React.FC = () => {
               {/* Sender Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    {renderIcon(FiUser, { size: 20, color: '#3B82F6' })}
+                  <div className="p-2 bg-[#E8E6E3] rounded-lg">
+                    {renderIcon(FiUser, { size: 20, color: '#B87D4C' })}
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Name</p>
@@ -178,8 +178,8 @@ const ContactPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    {renderIcon(FiMail, { size: 20, color: '#3B82F6' })}
+                  <div className="p-2 bg-[#E8E6E3] rounded-lg">
+                    {renderIcon(FiMail, { size: 20, color: '#B87D4C' })}
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Email</p>
@@ -190,8 +190,8 @@ const ContactPage: React.FC = () => {
 
               {/* Date */}
               <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  {renderIcon(FiCalendar, { size: 20, color: '#A855F7' })}
+                <div className="p-2 bg-[#E8E6E3] rounded-lg">
+                  {renderIcon(FiCalendar, { size: 20, color: '#B87D4C' })}
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase">Date Submitted</p>

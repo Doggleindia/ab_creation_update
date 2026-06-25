@@ -135,7 +135,7 @@ const AddLookBook: React.FC = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="Photo/Video ka title"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
 
@@ -150,7 +150,7 @@ const AddLookBook: React.FC = () => {
                   name="mediaType"
                   value={formData.mediaType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 >
                   <option value="image">Image</option>
                   <option value="video">Video</option>
@@ -161,7 +161,7 @@ const AddLookBook: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Processing...' : 'Add Media'}
               </button>
@@ -179,7 +179,7 @@ const AddLookBook: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-900 mb-3">
                   File Upload
                 </label>
-                <label className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+                <label className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-[#B87D4C] hover:bg-[#F5F1EA] transition-colors cursor-pointer">
                   <div className="text-center">
                     {renderIcon(FiUpload, { size: 32, className: 'text-gray-400 mx-auto mb-2' })}
                     <p className="text-sm font-medium text-gray-900">Click to select a photo or video</p>
@@ -203,7 +203,7 @@ const AddLookBook: React.FC = () => {
                   type="text"
                   onChange={handleUrlInput}
                   placeholder={formData.mediaType === 'image' ? 'Image URL' : 'Video URL'}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
                 />
               </div>
             </div>

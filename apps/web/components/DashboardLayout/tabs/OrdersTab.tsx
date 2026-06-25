@@ -1,6 +1,6 @@
 export default function OrdersTab() {
   return (
-    <div className="bg-[#faf6ef] rounded-xl p-6">
+    <div className="bg-[#F5F1EA] rounded-xl p-6">
       <div className="flex justify-between mb-4">
         <div>
           <p className="font-medium">#96459761</p>
@@ -18,7 +18,7 @@ export default function OrdersTab() {
             <div key={step} className="flex flex-col items-center">
               <div
                 className={`h-3 w-3 rounded-full ${
-                  i < 2 ? "bg-[#7a3a2e]" : "bg-gray-300"
+                  i < 2 ? "bg-[#171717]" : "bg-gray-300"
                 }`}
               />
               <span className="mt-2">{step}</span>

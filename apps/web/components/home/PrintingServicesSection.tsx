@@ -30,7 +30,7 @@ export default function PrintingServicesSection() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-16 md:py-24">
       {/* HEADING */}
-      <h2 className="text-3xl md:text-[40px] font-bold text-center mb-4 text-[#111827]">
+      <h2 className="text-3xl md:text-[40px] font-bold text-center mb-4 text-[#171717]">
         Our Printing Services
       </h2>
       <p className="text-center text-gray-500 mb-12 text-lg max-w-2xl mx-auto">
@@ -55,7 +55,7 @@ export default function PrintingServicesSection() {
 
             {/* CONTENT */}
             <div className="p-6 md:p-8 flex flex-col flex-grow">
-              <h3 className="text-xl font-bold mb-3 text-[#111827]">
+              <h3 className="text-xl font-bold mb-3 text-[#171717]">
                 {service.title}
               </h3>
               <p className="text-gray-500 mb-6 leading-relaxed text-[15px] flex-grow">
@@ -64,7 +64,7 @@ export default function PrintingServicesSection() {
 
               <Link 
                 href={`/service/${service.id}`}
-                className="inline-flex items-center text-[#f97316] font-bold hover:text-orange-600 transition-colors"
+                className="inline-flex items-center text-[#f97316] font-bold hover:text-[#B87D4C] transition-colors"
               >
                 Read more
                 <svg

@@ -93,7 +93,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                   <div className="flex gap-2">
                     <button
                       onClick={() => onEdit && onEdit(user)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                       title="Edit user"
                     >
                       {renderIcon(FiEdit2, { size: 18 })}

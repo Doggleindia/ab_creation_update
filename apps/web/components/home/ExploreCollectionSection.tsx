@@ -64,11 +64,11 @@ const collectionItems = [
 
 export default function ExploreCollectionSection() {
   return (
-    <section className="bg-[#F5F5F5] py-20 lg:py-28">
+    <section className="bg-[#F5F1EA] py-20 lg:py-28">
       <div className="max-w-[1320px] mx-auto px-4">
         {/* HEADING */}
         <div className="text-center mb-14">
-          <h2 className="text-[#111827] text-[34px] sm:text-[48px] font-bold leading-[110%] tracking-[-1px]">
+          <h2 className="text-[#171717] text-[34px] sm:text-[48px] font-bold leading-[110%] tracking-[-1px]">
             Explore our Collection
           </h2>
 

@@ -32,22 +32,22 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6">Shop</h4>
             <ul className="space-y-3 text-gray-300 text-sm">
               <li>
-                <Link href="/product-collection?category=t-shirts" className="hover:text-orange-500 transition-colors">
+                <Link href="/product-collection?category=t-shirts" className="hover:text-[#B87D4C] transition-colors">
                   T-Shirts
                 </Link>
               </li>
               <li>
-                <Link href="/product-collection?category=hoodies" className="hover:text-orange-500 transition-colors">
+                <Link href="/product-collection?category=hoodies" className="hover:text-[#B87D4C] transition-colors">
                   Hoodies
                 </Link>
               </li>
               <li>
-                <Link href="/product-collection?category=business-wear" className="hover:text-orange-500 transition-colors">
+                <Link href="/product-collection?category=business-wear" className="hover:text-[#B87D4C] transition-colors">
                   Business Wear
                 </Link>
               </li>
               <li>
-                <Link href="/product-collection?category=accessories" className="hover:text-orange-500 transition-colors">
+                <Link href="/product-collection?category=accessories" className="hover:text-[#B87D4C] transition-colors">
                   Accessories
                 </Link>
               </li>
@@ -59,22 +59,22 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6">Support</h4>
             <ul className="space-y-3 text-gray-300 text-sm">
               <li>
-                <Link href="/dashboard/orders" className="hover:text-orange-500 transition-colors">
+                <Link href="/dashboard/orders" className="hover:text-[#B87D4C] transition-colors">
                   Track Order
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-orange-500 transition-colors">
+                <Link href="/" className="hover:text-[#B87D4C] transition-colors">
                   Shipping Policy
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-orange-500 transition-colors">
+                <Link href="/" className="hover:text-[#B87D4C] transition-colors">
                   Sustainability
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-orange-500 transition-colors">
+                <Link href="/" className="hover:text-[#B87D4C] transition-colors">
                   Affiliates
                 </Link>
               </li>
@@ -94,11 +94,11 @@ export default function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-[#B87D4C]"
               />
               <button
                 type="submit"
-                className="bg-orange-500 hover:bg-orange-600 transition-colors text-white font-semibold px-6 py-2 rounded"
+                className="bg-[#171717] hover:bg-[#B87D4C] transition-colors text-white font-semibold px-6 py-2 rounded"
               >
                 Join
               </button>
@@ -117,10 +117,10 @@ export default function Footer() {
           © 2024 PrintStudio. Precision Crafted Goods.
         </p>
         <div className="flex gap-6 text-sm text-gray-400 mt-4 md:mt-0">
-          <Link href="/privacy-policy" className="hover:text-orange-500 transition-colors">
+          <Link href="/privacy-policy" className="hover:text-[#B87D4C] transition-colors">
             Privacy
           </Link>
-          <Link href="/terms-and-conditions" className="hover:text-orange-500 transition-colors">
+          <Link href="/terms-and-conditions" className="hover:text-[#B87D4C] transition-colors">
             Terms
           </Link>
         </div>

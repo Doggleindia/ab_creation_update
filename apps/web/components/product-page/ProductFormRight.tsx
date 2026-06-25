@@ -228,22 +228,22 @@ export default function ProductFormRight({
   // ================= COLOR HEX MAP =================
   function getColorHex(colorName: string): string {
     const map: Record<string, string> = {
-      black: "#000000",
-      blue: "#2563EB",
+      black: "#171717",
+      blue: "#B87D4C",
       red: "#EF4444",
       white: "#ffffff",
-      navy: "#1E3A8A",
+      navy: "#B87D4C",
       gray: "#9CA3AF",
-      orange: "#ff6b00",
-      royalblue: "#2563EB",
+      orange: "#B87D4C",
+      royalblue: "#B87D4C",
       darkgreen: "#166534",
-      purple: "#7E22CE",
-      pink: "#F9A8D4",
+      purple: "#B87D4C",
+      pink: "#C79280",
       green: "#16A34A",
-      yellow: "#FACC15",
+      yellow: "#CBAA75",
     };
 
-    return map[colorName?.toLowerCase()] || "#E5E5E5";
+    return map[colorName?.toLowerCase()] || "#E8E6E3";
   }
 
   return (
@@ -253,7 +253,7 @@ export default function ProductFormRight({
       className="w-full"
     >
       {/* TITLE */}
-      <h1 className="text-[28px] font-bold text-[#1a1a1a]">
+      <h1 className="text-[28px] font-bold text-[#171717]">
         {product?.title || "Product Title"}
       </h1>
 
@@ -266,7 +266,7 @@ export default function ProductFormRight({
       {/* ================= PRICE ================= */}
       <div className="mt-5 bg-[#f3f3f3] border border-[#ebebeb] rounded-sm px-5 py-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-[34px] font-[700] text-[#1a1a1a]">
+          <h2 className="text-[34px] font-[700] text-[#171717]">
             ₹ {discountedPrice}.00
           </h2>
 
@@ -276,7 +276,7 @@ export default function ProductFormRight({
                 ₹ {variantPrice.toFixed(0)}.00
               </span>
 
-              <span className="bg-[#ff6b00] text-white text-[10px] px-2 py-[2px] rounded-sm font-semibold">
+              <span className="bg-[#B87D4C] text-white text-[10px] px-2 py-[2px] rounded-sm font-semibold">
                 SAVE {discountPercentage}%
               </span>
             </>
@@ -336,7 +336,7 @@ export default function ProductFormRight({
       <div className="mt-7">
         <p className="font-bold">
           Color:{" "}
-          <span className="text-orange-500 uppercase">
+          <span className="text-[#B87D4C] uppercase">
             {selectedColor}
           </span>
         </p>
@@ -360,7 +360,7 @@ export default function ProductFormRight({
                   className={cn(
                     "w-[66px] h-[66px] rounded border-2",
                     selectedColor === colorName
-                      ? "border-orange-500"
+                      ? "border-[#B87D4C]"
                       : "border-gray-300"
                   )}
                   style={{ backgroundColor: colorHex }}

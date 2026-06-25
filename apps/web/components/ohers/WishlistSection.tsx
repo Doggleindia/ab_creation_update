@@ -43,9 +43,9 @@ export default function WishlistSection() {
 
   if (wishlist.length === 0) {
     return (
-      <section className="bg-[#FAF9F6] py-28 text-center min-h-[60vh] flex flex-col justify-center items-center px-4">
+      <section className="bg-[#F5F1EA] py-28 text-center min-h-[60vh] flex flex-col justify-center items-center px-4">
         <div className="relative mb-6">
-          <div className="absolute -inset-1 rounded-full bg-orange-100 blur-md animate-ping opacity-75"></div>
+          <div className="absolute -inset-1 rounded-full bg-[#E8E6E3] blur-md animate-ping opacity-75"></div>
           <div className="relative bg-white border border-slate-100 p-6 rounded-full shadow-lg">
             <Heart className="h-12 w-12 text-slate-300 stroke-[1.5]" />
           </div>
@@ -54,7 +54,7 @@ export default function WishlistSection() {
         <p className="text-slate-500 max-w-md mb-8 text-base leading-relaxed">
           Tap the heart icon on any product you like while browsing and they will appear here. Save your favorites for later!
         </p>
-        <Button asChild className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-full shadow-md hover:shadow-lg transition duration-300 group">
+        <Button asChild className="bg-[#171717] hover:bg-[#B87D4C] text-white font-semibold px-8 py-3 rounded-full shadow-md hover:shadow-lg transition duration-300 group">
           <Link href="/product-collection" className="flex items-center gap-2">
             Continue Shopping
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -65,7 +65,7 @@ export default function WishlistSection() {
   }
 
   return (
-    <section className="bg-[#FAF9F6] py-16 min-h-[60vh]">
+    <section className="bg-[#F5F1EA] py-16 min-h-[60vh]">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
           <div>
@@ -115,7 +115,7 @@ export default function WishlistSection() {
                 {/* Content */}
                 <div className="p-5 flex-grow flex flex-col justify-between">
                   <div className="space-y-1">
-                    <h3 className="text-base font-semibold text-slate-800 line-clamp-1 group-hover:text-orange-500 transition duration-200">
+                    <h3 className="text-base font-semibold text-slate-800 line-clamp-1 group-hover:text-[#B87D4C] transition duration-200">
                       {item.title}
                     </h3>
                     {item.description && (
@@ -136,7 +136,7 @@ export default function WishlistSection() {
 
               {/* Action Button */}
               <div className="p-5 pt-0">
-                <Button asChild className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 rounded-xl transition duration-300 shadow-sm">
+                <Button asChild className="w-full bg-[#171717] hover:bg-[#B87D4C] text-white font-medium py-3 rounded-xl transition duration-300 shadow-sm">
                   <Link href={`/product/${item.slug}`}>
                     Select Options & Order
                   </Link>

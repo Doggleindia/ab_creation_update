@@ -44,7 +44,7 @@ export default function OrderSummary({
         <li className="font-medium text-black">TOTAL TO PAY: ₹{total.toFixed(2)}</li>
       </ul>
 
-      <Button className="mt-6 w-full bg-[#7a3a2e] hover:bg-[#682f25]">
+      <Button className="mt-6 w-full bg-[#171717] hover:bg-[#B87D4C]">
         Proceed To Payment
       </Button>
     </div>

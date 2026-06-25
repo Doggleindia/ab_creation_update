@@ -80,7 +80,7 @@ const InventoryTable: React.FC<InventoryTableProps> = ({ inventories, onUpdate, 
                         type="number"
                         value={editData.stock}
                         onChange={(e) => handleInputChange('stock', parseInt(e.target.value) || 0)}
-                        className="w-20 px-2 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-20 px-2 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B87D4C]"
                         min="0"
                       />
                     ) : (
@@ -93,7 +93,7 @@ const InventoryTable: React.FC<InventoryTableProps> = ({ inventories, onUpdate, 
                         type="number"
                         value={editData.reservedStock}
                         onChange={(e) => handleInputChange('reservedStock', parseInt(e.target.value) || 0)}
-                        className="w-20 px-2 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-20 px-2 py-1 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#B87D4C]"
                         min="0"
                       />
                     ) : (
@@ -135,7 +135,7 @@ const InventoryTable: React.FC<InventoryTableProps> = ({ inventories, onUpdate, 
                       ) : (
                         <button
                           onClick={() => handleEdit(inventory)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors"
                           title="Edit"
                         >
                           {renderIcon(FiEdit2, { size: 16 })}

@@ -44,7 +44,7 @@ const Orders: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
           <p className="text-gray-600 mt-1">Manage and track customer orders</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors">
           {renderIcon(FiPlus, { size: 20 })}
           <span>New Order</span>
         </button>
@@ -61,7 +61,7 @@ const Orders: React.FC = () => {
               placeholder="Search by order ID, customer name, or email..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
             />
           </div>
         </div>
@@ -74,7 +74,7 @@ const Orders: React.FC = () => {
               onClick={() => setFilterStatus(status)}
               className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
                 filterStatus === status
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#171717] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -99,11 +99,11 @@ const Orders: React.FC = () => {
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-gray-600 text-sm font-medium">Processing</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{getStatusStats('Processing')}</p>
+          <p className="text-2xl font-bold text-[#B87D4C] mt-1">{getStatusStats('Processing')}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-gray-600 text-sm font-medium">Shipping</p>
-          <p className="text-2xl font-bold text-purple-600 mt-1">{getStatusStats('Shipping')}</p>
+          <p className="text-2xl font-bold text-[#B87D4C] mt-1">{getStatusStats('Shipping')}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-gray-600 text-sm font-medium">Delivered</p>

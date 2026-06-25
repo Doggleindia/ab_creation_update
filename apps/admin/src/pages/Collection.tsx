@@ -89,7 +89,7 @@ const CollectionPage: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/collection/add')}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors"
           >
             {renderIcon(FiPlus)}
             Add Collection
@@ -114,7 +114,7 @@ const CollectionPage: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center h-96 bg-white rounded-lg">
             <div className="flex flex-col items-center gap-3">
-              <div className="text-4xl text-blue-600 animate-spin">{renderIcon(FiLoader)}</div>
+              <div className="text-4xl text-[#B87D4C] animate-spin">{renderIcon(FiLoader)}</div>
               <p className="text-gray-600">Loading collections...</p>
             </div>
           </div>

@@ -194,7 +194,7 @@ export default function ProfilePage() {
             {editing && (
               <div className="flex items-center gap-3">
                 <Button
-                  className="mt-2 bg-[#7a3a2e] hover:bg-[#682f25]"
+                  className="mt-2 bg-[#171717] hover:bg-[#B87D4C]"
                   onClick={handleSave}
                   disabled={saving}
                 >

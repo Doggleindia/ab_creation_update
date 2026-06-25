@@ -61,7 +61,7 @@ const Customers: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
           <p className="text-gray-600 mt-1">Manage and view customer information</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors">
           {renderIcon(FiPlus, { size: 20 })}
           <span>Add Customer</span>
         </button>
@@ -76,7 +76,7 @@ const Customers: React.FC = () => {
               placeholder="Search by name or email..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B87D4C]"
           />
         </div>
       </div>
@@ -89,7 +89,7 @@ const Customers: React.FC = () => {
         </div>
         <div className="bg-white rounded-lg shadow p-4">
             <p className="text-gray-600 text-sm font-medium">Total Wishlist Items</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+          <p className="text-2xl font-bold text-[#B87D4C] mt-1">
               {wishlistAnalytics?.analytics.reduce((sum, item) => sum + item.wishlistCount, 0) || 0}
           </p>
         </div>
@@ -101,7 +101,7 @@ const Customers: React.FC = () => {
         </div>
         <div className="bg-white rounded-lg shadow p-4">
             <p className="text-gray-600 text-sm font-medium">Most Popular Category</p>
-            <p className="text-2xl font-bold text-purple-600 mt-1">
+            <p className="text-2xl font-bold text-[#B87D4C] mt-1">
               {wishlistAnalytics?.analytics.reduce((max, item) =>
                 item.wishlistCount > max.wishlistCount ? item : max,
                 wishlistAnalytics.analytics[0]
@@ -139,7 +139,7 @@ const Customers: React.FC = () => {
                         <p className="text-sm text-gray-600">{item.category}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[#E8E6E3] text-[#B87D4C]">
                           {item.wishlistCount}
                         </span>
                       </td>

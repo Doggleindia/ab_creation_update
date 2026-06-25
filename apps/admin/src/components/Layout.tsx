@@ -37,7 +37,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, path, active, onClick })
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
       active
-        ? 'bg-blue-50 text-blue-600 font-medium'
+        ? 'bg-[#F5F1EA] text-[#B87D4C] font-medium'
         : 'text-gray-700 hover:bg-slate-100'
     }`}
   >
@@ -86,7 +86,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         {/* Sidebar Header */}
         <div className="h-16 flex items-center gap-4 px-6 border-b border-slate-200">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] rounded-lg flex items-center justify-center">
             <span className="text-lg font-bold text-white">KT</span>
           </div>
           <h1 className="text-lg font-bold text-gray-800">Admin</h1>
