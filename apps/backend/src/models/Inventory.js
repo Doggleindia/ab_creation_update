@@ -28,8 +28,7 @@ const inventorySchema = new mongoose.Schema(
   }
 );
 
-// Indexes for performance
-inventorySchema.index({ variantId: 1 });
+// variantId is already uniquely indexed via `unique: true` on the field
 
 // Virtual for availableStock
 inventorySchema.virtual('availableStock').get(function() {

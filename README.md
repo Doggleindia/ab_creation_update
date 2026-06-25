@@ -42,6 +42,19 @@ npm start
 
 See each app's required environment variables in its `.env.example`.
 
+### Running from the repo root
+
+Convenience scripts in the root `package.json` delegate to each app (no
+workspace hoisting — every app keeps its own `node_modules`):
+
+```bash
+npm run install:all     # install deps in all three apps
+npm run dev:backend     # start the API (nodemon)
+npm run dev:web         # start the storefront (Next.js)
+npm run dev:admin       # start the admin panel (CRA)
+npm run build:all       # production build of web + admin
+```
+
 ## Notes
 
 - This monorepo was consolidated from three separate repositories

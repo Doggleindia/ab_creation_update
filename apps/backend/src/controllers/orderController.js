@@ -276,6 +276,207 @@ export const buyNow = async (req, res) => {
 };
 
 /**
+ * Resolve a single cart line into the data needed to place an order.
+ * Read-only (no writes); throws AppError on any problem so the whole
+ * checkout can be aborted atomically.
+ */
+const resolveCheckoutItem = async (item) => {
+  const { productId, productType, variantId, color, size, quantity } = item;
+
+  if (!productId || !productType) {
+    throw new AppError("Each item needs productId and productType.", 400);
+  }
+  if (!["ready", "bulk"].includes(productType)) {
+    throw new AppError("Invalid productType. Must be 'ready' or 'bulk'.", 400);
+  }
+
+  const qty = parseInt(quantity, 10);
+  if (isNaN(qty) || qty <= 0) {
+    throw new AppError("Each item quantity must be a positive integer.", 400);
+  }
+
+  let resolvedVariantId;
+  let resolvedColor = color;
+  let resolvedSize = size;
+  let totalAmount = 0;
+
+  if (productType === "ready") {
+    const product = await Product.findById(productId);
+    if (!product) throw new AppError("Product not found.", 404);
+
+    let variant;
+    if (variantId) variant = await Variant.findOne({ _id: variantId, productId });
+    else if (color) variant = await Variant.findOne({ productId, color });
+    else variant = await Variant.findOne({ productId });
+    if (!variant) throw new AppError("No matching variant found for the product.", 400);
+
+    resolvedVariantId = variant._id;
+    resolvedColor = variant.color;
+    if (!resolvedSize) {
+      resolvedSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : "OS";
+    }
+
+    const basePrice = product.basePrice;
+    const priceAdjustment = variant.addPercentageInBasePrice || 0;
+    const adjustedUnitPrice = basePrice + (basePrice * priceAdjustment) / 100;
+    const subtotal = adjustedUnitPrice * qty;
+    const discount = (subtotal * (product.discountPercentage || 0)) / 100;
+    totalAmount = subtotal - discount;
+  } else {
+    const bulkProduct = await BulkProduct.findById(productId);
+    if (!bulkProduct) throw new AppError("Bulk product not found.", 404);
+
+    let variant;
+    if (variantId) variant = await BulkProductVariant.findOne({ _id: variantId, bulkProductId: productId });
+    else if (color) variant = await BulkProductVariant.findOne({ bulkProductId: productId, color });
+    else variant = await BulkProductVariant.findOne({ bulkProductId: productId });
+    if (!variant) throw new AppError("No matching variant found for the bulk product.", 400);
+
+    resolvedVariantId = variant._id;
+    resolvedColor = variant.color;
+    if (!resolvedSize) {
+      resolvedSize = bulkProduct.sizes && bulkProduct.sizes.length > 0 ? bulkProduct.sizes[0] : "OS";
+    }
+
+    const tier = variant.gsmPricingTiers.find((t) => t.gsmQuantity === qty);
+    if (!tier) {
+      const allowed = variant.gsmPricingTiers.map((t) => t.gsmQuantity).join(", ");
+      throw new AppError(`Invalid quantity for bulk product. Allowed: ${allowed}.`, 400);
+    }
+    const addPercentage = tier.addPercentage || 0;
+    totalAmount = (bulkProduct.basePrice + (bulkProduct.basePrice * addPercentage) / 100) * qty;
+  }
+
+  return {
+    productId,
+    productType,
+    qty,
+    resolvedVariantId,
+    resolvedColor,
+    resolvedSize,
+    totalAmount,
+    customDesign: item.customDesign,
+    anyText: item.anyText,
+  };
+};
+
+/**
+ * Place a whole cart in ONE transaction: reserve all stock, charge the wallet
+ * once, and create all order documents together. If anything fails (e.g.
+ * insufficient stock or balance) the entire checkout rolls back — no partial
+ * orders and no double charges.
+ * POST /api/orders/checkout
+ */
+export const checkoutCart = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { items, shippingAddress, phoneNumber } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Cart is empty." });
+    }
+
+    const finalShippingAddress = shippingAddress || req.user.address;
+    const finalPhoneNumber = phoneNumber || req.user.phone;
+    if (!finalShippingAddress || !finalPhoneNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipping address and phone number are required.",
+      });
+    }
+    const { street, city, state, pincode } = finalShippingAddress;
+    if (!street || !city || !state || !pincode) {
+      return res.status(400).json({
+        success: false,
+        message: "shippingAddress must contain street, city, state, and pincode.",
+      });
+    }
+
+    // Resolve every line first (read-only). Any AppError aborts the checkout.
+    let resolved;
+    try {
+      resolved = await Promise.all(items.map((it) => resolveCheckoutItem(it)));
+    } catch (resolveErr) {
+      if (resolveErr instanceof AppError) {
+        return res.status(resolveErr.statusCode).json({ success: false, message: resolveErr.message });
+      }
+      throw resolveErr;
+    }
+
+    const grandTotal = resolved.reduce((sum, r) => sum + r.totalAmount, 0);
+
+    const batchId = `${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    let createdOrders;
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        // Reserve stock for every ready item
+        for (const r of resolved) {
+          if (r.productType === "ready") {
+            const reserved = await Inventory.findOneAndUpdate(
+              { variantId: r.resolvedVariantId, stock: { $gte: r.qty } },
+              { $inc: { stock: -r.qty } },
+              { new: true, session }
+            );
+            if (!reserved) {
+              throw new AppError("Insufficient stock for one of the items.", 400);
+            }
+          }
+        }
+
+        // Charge the wallet ONCE for the whole cart
+        await deductFromUserWallet(userId, grandTotal, `PAY-CART-${batchId}`, session);
+        await creditToAdminWallet(grandTotal, `APAY-CART-${batchId}`, session);
+
+        // Create all order documents together
+        const docs = resolved.map((r, i) => ({
+          orderId: `ORD-${batchId}-${i + 1}`,
+          userId,
+          productType: r.productType,
+          productId: r.productId,
+          productModel: r.productType === "ready" ? "Product" : "BulkProduct",
+          variantId: r.resolvedVariantId,
+          variantModel: r.productType === "ready" ? "Variant" : "BulkProductVariant",
+          color: r.resolvedColor,
+          size: r.resolvedSize,
+          quantity: r.qty,
+          totalAmount: r.totalAmount,
+          shippingAddress: finalShippingAddress,
+          phoneNumber: finalPhoneNumber,
+          customDesign: r.customDesign,
+          anyText: r.anyText,
+          orderStatus: "pending",
+          paymentStatus: "paid",
+        }));
+        createdOrders = await Order.create(docs, { session, ordered: true });
+      });
+    } catch (txErr) {
+      if (txErr instanceof AppError) {
+        return res.status(txErr.statusCode).json({ success: false, message: txErr.message });
+      }
+      if (txErr.message === "Insufficient balance") {
+        return res.status(402).json({
+          success: false,
+          message: "Insufficient wallet balance. Please recharge your wallet.",
+        });
+      }
+      throw txErr;
+    } finally {
+      session.endSession();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Order placed successfully.",
+      data: { orders: createdOrders, grandTotal, orderId: createdOrders[0]?.orderId },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
  * Get logged-in user order history
  */
 export const getUserOrderHistory = async (req, res) => {

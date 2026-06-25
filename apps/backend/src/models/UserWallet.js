@@ -17,7 +17,6 @@ const userWalletSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for faster queries
-userWalletSchema.index({ userId: 1 });
+// userId is already uniquely indexed via `unique: true` on the field
 
 export default mongoose.model('UserWallet', userWalletSchema);

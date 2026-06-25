@@ -40,7 +40,7 @@ walletTransactionSchema.index({ userId: 1 });
 walletTransactionSchema.index({ adminId: 1 });
 walletTransactionSchema.index({ type: 1 });
 walletTransactionSchema.index({ status: 1 });
-walletTransactionSchema.index({ requestId: 1 });
+// requestId is already uniquely indexed via `unique: true` on the field
 walletTransactionSchema.index({ createdAt: -1 });
 
 export default mongoose.model('WalletTransaction', walletTransactionSchema);

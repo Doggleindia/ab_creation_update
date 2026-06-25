@@ -115,40 +115,31 @@ export default function CartSection() {
         throw new Error("Please complete the delivery details (address, city, state, pincode, phone number).")
       }
 
-      // Loop over cart and place orders via Buy Now API
-      const orderPromises = cart.map((item) => {
-        const payload: any = {
-          productId: item.productId,
-          productType: "ready" as const,
-          variantId: item.variantId || undefined,
-          color: item.snapshot.color || undefined,
-          size: item.snapshot.size || undefined,
-          quantity: item.quantity,
-          shippingAddress: {
-            street,
-            city,
-            state,
-            pincode,
-          },
+      // Place the whole cart in one atomic request (all-or-nothing).
+      const response = await api.checkoutCart(
+        {
+          items: cart.map((item) => ({
+            productId: item.productId,
+            productType: "ready" as const,
+            variantId: item.variantId || undefined,
+            color: item.snapshot.color || undefined,
+            size: item.snapshot.size || undefined,
+            quantity: item.quantity,
+          })),
+          shippingAddress: { street, city, state, pincode },
           phoneNumber: phone,
-        }
+        },
+        token
+      )
 
-        return api.buyNowOrder(payload, token)
-      })
+      const orderId = response?.data?.orderId || response?.data?.orders?.[0]?._id
 
-      const responses = await Promise.all(orderPromises)
-      
-      const firstResponse = responses[0]
-      const orderId = firstResponse?.data?.orderId || firstResponse?.data?._id
-
-      // Clear cart
-      if (token) {
-        try {
-          const deletePromises = cart.map((item) => api.removeFromCart(item._id, token))
-          await Promise.all(deletePromises)
-        } catch (deleteError) {
-          console.error("Failed to clear cart items on backend", deleteError)
-        }
+      // Clear cart (the order already succeeded atomically server-side)
+      try {
+        const deletePromises = cart.map((item) => api.removeFromCart(item._id, token))
+        await Promise.all(deletePromises)
+      } catch (deleteError) {
+        console.error("Failed to clear cart items on backend", deleteError)
       }
       setCartState([])
       setLocalCart([])

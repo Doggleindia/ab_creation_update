@@ -95,7 +95,7 @@ const orderSchema = new mongoose.Schema(
 );
 
 orderSchema.index({ userId: 1 });
-orderSchema.index({ orderId: 1 }, { unique: true });
+// orderId is already uniquely indexed via `unique: true` on the field
 orderSchema.index({ productType: 1 });
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ createdAt: -1 });

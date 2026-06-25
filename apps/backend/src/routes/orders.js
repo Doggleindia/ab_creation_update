@@ -1,6 +1,7 @@
 import express from "express";
 import {
   buyNow,
+  checkoutCart,
   getUserOrderHistory,
   getAdminUserOrderHistory,
   getAdminAllOrders,
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // User Routes — purchases require login (wallet payment), no guest checkout
 router.post("/buynow", userAuth, buyNow);
+router.post("/checkout", userAuth, checkoutCart); // atomic multi-item cart checkout
 router.get("/history", userAuth, getUserOrderHistory);
 router.get("/:orderId", userAuth, getOrderById);
 

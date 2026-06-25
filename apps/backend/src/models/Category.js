@@ -41,9 +41,7 @@ const categorySchema = new mongoose.Schema({
     toObject: { virtuals: true },
 }, );
 
-// Indexes for performance
-categorySchema.index({ id: 1 });
-categorySchema.index({ slug: 1 });
+// id and slug are already indexed via `unique: true` on their fields
 
 // Virtual for products count
 categorySchema.virtual('productsCount', {

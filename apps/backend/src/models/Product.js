@@ -179,8 +179,7 @@ const productSchema = new mongoose.Schema({
     toObject: { virtuals: true },
 }, );
 
-// Indexes for performance
-productSchema.index({ id: 1 });
+// Indexes for performance (id is already indexed via `unique: true`)
 productSchema.index({ categoryId: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ sizes: 1 });

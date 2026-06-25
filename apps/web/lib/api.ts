@@ -311,6 +311,38 @@ export const getOrderById = async (orderId: string, token?: string) => {
   return res.data;
 };
 
+// Place an entire cart in one atomic request. The backend reserves all stock,
+// charges the wallet once, and creates all orders in a single transaction —
+// so a partial failure (e.g. low balance) rolls everything back.
+export const checkoutCart = async (
+  checkoutData: {
+    items: {
+      productId: string;
+      productType: "ready" | "bulk";
+      variantId?: string;
+      color?: string;
+      size?: string;
+      quantity: number;
+      customDesign?: string;
+      anyText?: string;
+    }[];
+    shippingAddress: {
+      street: string;
+      city: string;
+      state: string;
+      pincode: string;
+      country?: string;
+    };
+    phoneNumber: string;
+  },
+  token?: string
+) => {
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await api.post("/api/orders/checkout", checkoutData, { headers });
+  return res.data;
+};
+
 export const buyNowOrder = async (
   orderData: {
     productId: string;

@@ -1,0 +1,17 @@
+{
+  "name": "ab-creations",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KT Adhesives monorepo — storefront (web), admin panel, and backend API",
+  "scripts": {
+    "dev:backend": "npm --prefix apps/backend run dev",
+    "start:backend": "npm --prefix apps/backend run start",
+    "dev:web": "npm --prefix apps/web run dev",
+    "build:web": "npm --prefix apps/web run build",
+    "start:web": "npm --prefix apps/web run start",
+    "dev:admin": "npm --prefix apps/admin start",
+    "build:admin": "npm --prefix apps/admin run build",
+    "build:all": "npm run build:web && npm run build:admin",
+    "install:all": "npm --prefix apps/backend install && npm --prefix apps/web install && npm --prefix apps/admin install"
+  }
+}

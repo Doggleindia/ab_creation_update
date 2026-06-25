@@ -35,9 +35,7 @@ const collectionSchema = new mongoose.Schema(
   },
 );
 
-// Indexes for performance
-collectionSchema.index({ id: 1 });
-collectionSchema.index({ slug: 1 });
+// Indexes for performance (id and slug are already indexed via `unique: true`)
 collectionSchema.index({ status: 1 });
 
 export default mongoose.model('Collection', collectionSchema);

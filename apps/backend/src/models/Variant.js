@@ -58,7 +58,7 @@ const variantSchema = new mongoose.Schema(
 // Indexes for performance
 variantSchema.index({ id: 1 });
 variantSchema.index({ productId: 1, id: 1 }, { unique: true });
-variantSchema.index({ sku: 1 });
+// sku is already uniquely indexed via `unique: true` on the field
 
 // Virtual for inventory
 variantSchema.virtual("inventory", {
