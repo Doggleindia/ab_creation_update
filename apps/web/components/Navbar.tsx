@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { Menu, Search, User, ShoppingCart, Heart, X } from 'lucide-react'
@@ -128,8 +129,15 @@ export default function Navbar() {
           ) : (
             <>
               {/* Logo - Left */}
-              <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-                <span className="text-2xl font-bold text-[#171717]">INK &amp; PRESS</span>
+              <Link href="/" className="flex items-center flex-shrink-0">
+                <Image
+                  src="/ab-creation-logo.png"
+                  alt="AB Creation"
+                  width={64}
+                  height={64}
+                  className="h-14 w-auto"
+                  priority
+                />
               </Link>
 
               {/* Desktop Menu - Center */}

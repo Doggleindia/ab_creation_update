@@ -15,8 +15,8 @@ const inter = Inter({
 
 
 export const metadata: Metadata = {
-   title: 'KT Adhesives Admin',
-  description: 'User Panel',
+  title: 'AB Creation — Custom Apparel & Printing',
+  description: 'Premium custom apparel and printing. Shop ready-made printed tees or bring your own design.',
 };
 
 export default function RootLayout({

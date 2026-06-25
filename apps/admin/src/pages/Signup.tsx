@@ -74,8 +74,8 @@ const Signup: React.FC = () => {
         <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
           {/* Header */}
           <div className="mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-2xl font-bold text-white">KT</span>
+            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 mx-auto p-2 shadow-lg">
+              <img src="/ab-creation-logo.png" alt="AB Creation" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-3xl font-bold text-white text-center mb-2">Create Account</h1>
             <p className="text-gray-300 text-center">Join us today and get started</p>

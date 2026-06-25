@@ -21,7 +21,7 @@ export default function Footer() {
 
           {/* LEFT SECTION - BRAND INFO */}
           <div>
-            <h3 className="text-2xl font-bold mb-4 text-[#CBAA75]">PrintStudio</h3>
+            <h3 className="text-2xl font-bold mb-4 text-[#CBAA75] tracking-[0.15em]">AB CREATION</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
               Precision crafted custom apparel for creative teams and modern brands.
             </p>
@@ -114,7 +114,7 @@ export default function Footer() {
       {/* BOTTOM BAR */}
       <div className="container mx-auto max-w-screen-2xl px-4 md:px-6 lg:px-8 py-6 flex flex-col md:flex-row items-center justify-between">
         <p className="text-gray-400 text-sm">
-          © 2024 PrintStudio. Precision Crafted Goods.
+          © 2024 AB Creation. Precision Crafted Goods.
         </p>
         <div className="flex gap-6 text-sm text-gray-400 mt-4 md:mt-0">
           <Link href="/privacy-policy" className="hover:text-[#CBAA75] transition-colors">

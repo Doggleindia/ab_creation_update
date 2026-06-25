@@ -4,7 +4,7 @@ import CollectionHero from "@/components/Product-Collection/CollectionHero";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const metadata = {
-  title: "My Wishlist | INK & PRESS",
+  title: "My Wishlist | AB Creation",
   description: "Browse and order from your favorite items saved in your wishlist.",
 };
 
