@@ -241,7 +241,7 @@ export default function ProductInformation({
               date: "OCT 20, 2023",
               review:
                 "Extremely comfortable and stylish. The padding is really good for all-day wear. The print quality on the polo is excellent and hasn't faded after several washes.",
-              bg: "bg-[#f7d9c9]",
+              bg: "bg-[#F5F1EA]",
             },
             {
               initials: "SK",

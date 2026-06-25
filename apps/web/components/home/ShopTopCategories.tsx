@@ -98,7 +98,7 @@ export default function ShopTopCategories() {
           </div>
 
           {/* Woman Collection */}
-          <div className="relative bg-[#feecd4] overflow-hidden rounded-[24px] h-[280px] md:h-[320px] flex items-center p-8 md:p-12">
+          <div className="relative bg-[#F5F1EA] overflow-hidden rounded-[24px] h-[280px] md:h-[320px] flex items-center p-8 md:p-12">
             <div className="relative z-10 max-w-[65%]">
               <h3 className="text-[#171717] text-3xl md:text-[34px] font-bold mb-3 leading-tight">
                 Woman collection

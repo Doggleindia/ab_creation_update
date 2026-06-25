@@ -8,7 +8,7 @@ export default function ChooseHowToShop() {
     <section className="w-full py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Beige Box */}
-        <div className="bg-[#F9F1E6] rounded-xl px-8 py-10 lg:px-14 lg:py-14 flex flex-col lg:flex-row items-center justify-between gap-10">
+        <div className="bg-[#F5F1EA] rounded-xl px-8 py-10 lg:px-14 lg:py-14 flex flex-col lg:flex-row items-center justify-between gap-10">
           
           {/* LEFT CONTENT */}
           <div className="max-w-xl">
@@ -27,7 +27,7 @@ export default function ChooseHowToShop() {
   href="/design-your-own"
   className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md 
     bg-[linear-gradient(98.51deg,#C79280_1.39%,#B87D4C_100%)]
-    hover:bg-[linear-gradient(98.51deg,#E89985_1.39%,#8B4F42_100%)]
+    hover:bg-[linear-gradient(98.51deg,#C79280_1.39%,#B87D4C_100%)]
     text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 
     transition-all duration-300"
 >
@@ -40,7 +40,7 @@ export default function ChooseHowToShop() {
   href="/products"
   className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md 
     bg-[#CBAA75] border 
-    hover:bg-[#C76B4E] hover:text-white hover:shadow-xl 
+    hover:bg-[#B87D4C] hover:text-white hover:shadow-xl 
     shadow-lg transform hover:-translate-y-0.5 
     transition-all duration-300"
 >

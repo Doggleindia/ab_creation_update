@@ -75,7 +75,7 @@ export default function ChooseYourStyle() {
 
             <Link
               href="/service/:all-products"
-              className="inline-flex float-end items-center justify-center px-6 py-3 text-xs font-semibold tracking-wide uppercase rounded-md bg-[#F5B75A] text-black hover:bg-[#eaa94d] transition"
+              className="inline-flex float-end items-center justify-center px-6 py-3 text-xs font-semibold tracking-wide uppercase rounded-md bg-[#CBAA75] text-black hover:bg-[#CBAA75] transition"
             >
               Explore All Products
             </Link>

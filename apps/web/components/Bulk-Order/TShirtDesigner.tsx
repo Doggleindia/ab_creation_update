@@ -82,7 +82,7 @@ const PRESET_COLORS = [
   { name: "Royal Blue", hex: "#B87D4C" },
   { name: "Crimson Red", hex: "#991B1B" },
   { name: "Forest Green", hex: "#065F46" },
-  { name: "Pastel Pink", hex: "#FBCFE8" },
+  { name: "Pastel Pink", hex: "#C79280" },
   { name: "Mustard Yellow", hex: "#CBAA75" }
 ];
 

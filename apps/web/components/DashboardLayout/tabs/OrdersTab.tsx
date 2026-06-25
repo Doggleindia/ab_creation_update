@@ -3,7 +3,7 @@ export default function OrdersTab() {
     <div className="bg-[#F5F1EA] rounded-xl p-6">
       <div className="flex justify-between mb-4">
         <div>
-          <p className="font-medium">#96459761</p>
+          <p className="font-medium">#B87D4C61</p>
           <p className="text-xs text-muted-foreground">
             Order placed on 17 Jan, 2021
           </p>

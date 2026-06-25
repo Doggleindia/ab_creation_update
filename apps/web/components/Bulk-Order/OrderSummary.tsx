@@ -29,7 +29,7 @@ export default function OrderSummary({
   total,
 }: OrderSummaryProps) {
   return (
-    <div className="rounded-md bg-[#f6efe5] p-6 text-sm">
+    <div className="rounded-md bg-[#F5F1EA] p-6 text-sm">
       <h4 className="mb-4 font-semibold">ORDER SUMMARY</h4>
 
       <ul className="space-y-2 text-muted-foreground">

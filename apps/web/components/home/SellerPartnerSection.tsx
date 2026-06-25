@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function SellerPartnerSection() {
   return (
-    <section className="w-full bg-[#F3EEE8] overflow-hidden">
+    <section className="w-full bg-[#F5F1EA] overflow-hidden">
       <div className="max-w-[1440px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center min-h-[420px]">
           
@@ -27,7 +27,7 @@ export default function SellerPartnerSection() {
                   min-w-[146px]
                   rounded-full
                   bg-[#B87D4C]
-                  hover:bg-[#e85d00]
+                  hover:bg-[#B87D4C]
                   text-white
                   text-[15px]
                   font-semibold

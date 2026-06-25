@@ -649,7 +649,7 @@ export default function ProductFormRight({
       )}
 
       {/* INFO BOX */}
-      <div className="mt-4 border border-[#EFE2D8] bg-[#F5F1EA] rounded-[4px] px-4 py-3 flex flex-col gap-3">
+      <div className="mt-4 border border-[#F5F1EA] bg-[#F5F1EA] rounded-[4px] px-4 py-3 flex flex-col gap-3">
         <div className="flex items-start gap-2">
           <Info className="w-[14px] h-[14px] text-[#B87D4C] mt-[1px]" />
 
@@ -905,7 +905,7 @@ export default function ProductFormRight({
           </div>
 
           {/* PROGRESS */}
-          <div className="w-full h-[5px] bg-[#EFE7E1] rounded-full mt-3 overflow-hidden">
+          <div className="w-full h-[5px] bg-[#F5F1EA] rounded-full mt-3 overflow-hidden">
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-300",

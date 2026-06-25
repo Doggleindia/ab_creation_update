@@ -64,7 +64,7 @@ export default function PrintingServicesSection() {
 
               <Link 
                 href={`/service/${service.id}`}
-                className="inline-flex items-center text-[#f97316] font-bold hover:text-[#B87D4C] transition-colors"
+                className="inline-flex items-center text-[#B87D4C] font-bold hover:text-[#171717] transition-colors"
               >
                 Read more
                 <svg

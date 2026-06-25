@@ -112,7 +112,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
         </Link>
       </div>
 
-      <div className="bg-[#F5F1EA] p-6 rounded-lg space-y-6 border border-[#EFECE6]">
+      <div className="bg-[#F5F1EA] p-6 rounded-lg space-y-6 border border-[#F5F1EA]">
         {/* Statuses Header */}
         <div className="flex flex-wrap gap-4 justify-between items-center border-b pb-4">
           <div className="space-y-1">

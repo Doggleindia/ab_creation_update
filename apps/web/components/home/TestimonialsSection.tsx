@@ -29,7 +29,7 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="bg-[#F4EEE6] py-24 lg:py-32">
+    <section className="bg-[#F5F1EA] py-24 lg:py-32">
       <div className="max-w-[1240px] mx-auto px-4">
         {/* HEADING */}
         <div className="text-center">

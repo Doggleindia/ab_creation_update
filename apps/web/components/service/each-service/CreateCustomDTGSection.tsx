@@ -46,7 +46,7 @@ export default function CreateCustomDTGSection() {
           <div className="space-y-8">
             {features.map((item, i) => (
               <div key={i} className="flex gap-4">
-                <div className="mt-1 text-[#f4b860]">
+                <div className="mt-1 text-[#CBAA75]">
                   <Check size={18} />
                 </div>
                 <div>
