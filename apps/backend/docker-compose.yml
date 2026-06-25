@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: kt-adhesives-backend
+    ports:
+      - "5500:5500"
+    environment:
+      - MONGO_URI=mongodb+srv://doggle2025:doggleRishabh%402025@dogglework.yl8vk.mongodb.net/kt-adhesives
+      - PORT=5500
+      - EMAIL_USER=govinddixit9680a@gmail.com
+      - EMAIL_PASS=xyha upod ldnt hhrq
+      - JWT_SECRET=kt-adhesives
+      - JWT_EXPIRATION=24d
+      - REFRESH_SECRET=kt-adhesives
+      - JWT_REFRESH_SECRET=kt-adhesives
+      - NODE_ENV=http://localhost:5500
+      - AWS_ACCESS_S3_KEY_ID=AKIAUP6FHUIN246NXV3W
+      - AWS_SECRET_S3_ACCESS_KEY=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
+      - AWS_REGION=eu-north-1
+      - AWS_BUCKET_NAME=rrumidaimond
+    volumes:
+      - .:/app
+    restart: always
+

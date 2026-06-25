@@ -1,0 +1,103 @@
+import mongoose from "mongoose";
+
+const orderSchema = new mongoose.Schema(
+  {
+    orderId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
+    productType: {
+      type: String,
+      required: true,
+      enum: ["ready", "bulk"],
+    },
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "productModel",
+    },
+    productModel: {
+      type: String,
+      required: true,
+      enum: ["Product", "BulkProduct"],
+    },
+    variantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "variantModel",
+    },
+    variantModel: {
+      type: String,
+      required: true,
+      enum: ["Variant", "BulkProductVariant"],
+    },
+    color: {
+      type: String,
+      required: true,
+    },
+    size: {
+      type: String,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    shippingAddress: {
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      pincode: { type: String, required: true },
+      country: { type: String, default: "India" },
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
+    guestName: {
+      type: String,
+    },
+    guestEmail: {
+      type: String,
+    },
+    customDesign: {
+      type: String,
+    },
+    anyText: {
+      type: String,
+    },
+    orderStatus: {
+      type: String,
+      required: true,
+      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+      default: "pending",
+    },
+    paymentStatus: {
+      type: String,
+      required: true,
+      enum: ["pending", "paid", "failed"],
+      default: "pending",
+    },
+  },
+  { timestamps: true }
+);
+
+orderSchema.index({ userId: 1 });
+orderSchema.index({ orderId: 1 }, { unique: true });
+orderSchema.index({ productType: 1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ createdAt: -1 });
+
+export default mongoose.model("Order", orderSchema);
