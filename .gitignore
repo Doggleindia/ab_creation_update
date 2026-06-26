@@ -3,6 +3,10 @@ node_modules/
 **/node_modules/
 .pnp
 .pnp.js
+# Lockfile omitted: a Windows-generated npm lockfile breaks Linux CI builds via
+# the npm optional-deps bug (Rollup native binaries, npm/cli#4828). Each env
+# resolves its own platform binaries on install.
+/package-lock.json
 
 # ---- Build / output ----
 **/.next/
