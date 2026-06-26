@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 interface HeroServicesProps {
   title: string;
@@ -37,8 +38,8 @@ export default function HeroServices({
         <p className="mt-2 text-lg text-[#171717] w-[61%] text-center">{description}</p>
 
         <p className="mt-3 text-lg text-[#171717] ">
-         <Button className="p-5 mt-2 service-btn bg-[#171717] font-semibold text-white hover:bg-[#333333]">
-          Start Your DTF Order
+         <Button asChild className="p-5 mt-2 service-btn bg-[#171717] font-semibold text-white hover:bg-[#333333]">
+          <Link href="/design-editor">Start Your DTF Order</Link>
           </Button>
         </p>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function LookbookSection() {
   return (
@@ -19,9 +20,9 @@ export default function LookbookSection() {
 
       {/* CTA */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <button className="bg-white px-8 py-3 text-sm font-semibold tracking-wide shadow-md hover:bg-gray-100 transition">
+        <Link href="/look-book" className="bg-white px-8 py-3 text-sm font-semibold tracking-wide shadow-md hover:bg-gray-100 transition">
           OUR LOOKBOOK
-        </button>
+        </Link>
       </div>
     </section>
   );

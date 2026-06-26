@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 export default function OfferBanner() {
@@ -12,8 +13,8 @@ export default function OfferBanner() {
           (products only, excl. shipping).
         </p>
 
-        <Button className="mt-4 bg-[#171717] hover:bg-[#B87D4C]">
-          ORDER NOW
+        <Button asChild className="mt-4 bg-[#171717] hover:bg-[#B87D4C]">
+          <Link href="/product-collection">ORDER NOW</Link>
         </Button>
       </div>
 

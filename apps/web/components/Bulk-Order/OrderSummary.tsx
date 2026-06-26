@@ -18,6 +18,8 @@ interface OrderSummaryProps {
   printPlacements: string[];
   quantity: string;
   total: number;
+  onProceed?: () => void;
+  submitting?: boolean;
 }
 
 export default function OrderSummary({
@@ -27,6 +29,8 @@ export default function OrderSummary({
   printPlacements,
   quantity,
   total,
+  onProceed,
+  submitting,
 }: OrderSummaryProps) {
   return (
     <div className="rounded-md bg-[#F5F1EA] p-6 text-sm">
@@ -44,8 +48,12 @@ export default function OrderSummary({
         <li className="font-medium text-black">TOTAL TO PAY: ₹{total.toFixed(2)}</li>
       </ul>
 
-      <Button className="mt-6 w-full bg-[#171717] hover:bg-[#B87D4C]">
-        Proceed To Payment
+      <Button
+        onClick={onProceed}
+        disabled={submitting || !onProceed}
+        className="mt-6 w-full bg-[#171717] hover:bg-[#B87D4C]"
+      >
+        {submitting ? "Placing order..." : "Proceed To Payment"}
       </Button>
     </div>
   );

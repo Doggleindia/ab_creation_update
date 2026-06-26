@@ -65,7 +65,7 @@ const CategoryPage: React.FC = () => {
   };
 
   const handleView = (category: CategoryWithParent) => {
-    console.log('View category:', category);
+    navigate(`/category/edit/${category.id}`, { state: { category } });
   };
 
   return (

@@ -69,7 +69,7 @@ const VariantPage: React.FC = () => {
   };
 
   const handleView = (variant: Variant) => {
-    console.log('View variant:', variant);
+    navigate(`/variant/edit/${variant._id}?productId=${productId}`, { state: { variant, productId } });
   };
 
   if (!productId) {

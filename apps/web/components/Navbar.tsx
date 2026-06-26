@@ -184,7 +184,7 @@ export default function Navbar() {
                 <Link href="/bulk-products" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
                   Bulk Order
                 </Link>
-                <Link href="/" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
+                <Link href="/become-a-seller" className="text-base font-medium text-slate-800 hover:text-[#B87D4C] transition-colors">
                   Join as Seller
                 </Link>
               </div>
@@ -238,10 +238,8 @@ export default function Navbar() {
                 </Button>
 
                 {/* Design Now Button */}
-                <Button className="hidden lg:flex bg-[#171717] hover:bg-[#B87D4C] text-white font-medium px-6 py-2 rounded-full">
-                  <Link href="/" className="w-full h-full flex items-center justify-center">
-                    Design Now
-                  </Link>
+                <Button asChild className="hidden lg:flex bg-[#171717] hover:bg-[#B87D4C] text-white font-medium px-6 py-2 rounded-full">
+                  <Link href="/design-editor">Design Now</Link>
                 </Button>
 
                 {/* Mobile Menu Button */}
@@ -286,7 +284,7 @@ export default function Navbar() {
                           </Link>
                         </SheetClose>
                         <SheetClose asChild>
-                          <Link href="/" className="block p-3 text-lg font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-all">
+                          <Link href="/become-a-seller" className="block p-3 text-lg font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-all">
                             Join as Seller
                           </Link>
                         </SheetClose>
@@ -297,9 +295,9 @@ export default function Navbar() {
                       <div className="p-6 border-t border-slate-200 bg-slate-50">
                         <div className="space-y-3">
                           <SheetClose asChild>
-                            <Button className="w-full bg-[#171717] hover:bg-[#B87D4C] text-white font-medium">
+                            <Link href="/design-editor" className="inline-flex items-center justify-center w-full h-10 rounded-md px-4 py-2 text-sm font-medium bg-[#171717] hover:bg-[#B87D4C] text-white transition-colors">
                               Design Now
-                            </Button>
+                            </Link>
                           </SheetClose>
                         </div>
                       </div>

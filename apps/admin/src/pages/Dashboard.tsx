@@ -79,6 +79,21 @@ const Dashboard: React.FC = () => {
     { id: '#12341', customer: 'Tom Brown', amount: '$1,699', status: 'Completed', date: '2025-01-15' }
   ];
 
+  const handleExport = () => {
+    const headers = ['Order ID', 'Customer', 'Amount', 'Status', 'Date'];
+    const rows = recentOrders.map(o => [o.id, o.customer, o.amount, o.status, o.date]);
+    const csv = [headers, ...rows]
+      .map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recent-orders.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Layout>
       <div className="space-y-8">
@@ -198,7 +213,7 @@ const Dashboard: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
               <div className="flex items-center justify-between p-6 border-b border-slate-100">
                 <h3 className="text-lg font-bold text-gray-900">Recent Orders</h3>
-                <button className="flex items-center gap-2 px-4 py-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors">
+                <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors">
                   {renderIcon(FiDownload, { size: 16 })}
                   <span className="text-sm font-medium">Export</span>
                 </button>

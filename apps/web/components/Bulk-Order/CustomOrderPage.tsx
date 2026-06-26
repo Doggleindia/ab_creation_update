@@ -253,6 +253,8 @@ export default function CustomOrderPage() {
               printPlacements={printPlacements}
               quantity={totalQuantity.toString()}
               total={total}
+              onProceed={handleSubmit}
+              submitting={submitting}
             />
           </div>
 

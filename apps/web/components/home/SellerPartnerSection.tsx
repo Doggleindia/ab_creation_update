@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function SellerPartnerSection() {
@@ -22,6 +23,7 @@ export default function SellerPartnerSection() {
             {/* BUTTONS */}
             <div className="flex flex-wrap items-center gap-4 mt-10">
               <Button
+                asChild
                 className="
                   h-[52px]
                   min-w-[146px]
@@ -35,10 +37,11 @@ export default function SellerPartnerSection() {
                   px-8
                 "
               >
-                Join Now
+                <Link href="/become-a-seller">Join Now</Link>
               </Button>
 
               <Button
+                asChild
                 variant="outline"
                 className="
                   h-[52px]
@@ -53,7 +56,7 @@ export default function SellerPartnerSection() {
                   px-8
                 "
               >
-                Contact us
+                <Link href="/contact-us">Contact us</Link>
               </Button>
             </div>
           </div>

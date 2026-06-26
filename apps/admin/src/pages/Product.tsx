@@ -63,7 +63,7 @@ const ProductPage: React.FC = () => {
   };
 
   const handleView = (product: Product) => {
-    console.log('View product:', product);
+    navigate(`/product/edit/${product._id}`, { state: { product } });
   };
 
   return (

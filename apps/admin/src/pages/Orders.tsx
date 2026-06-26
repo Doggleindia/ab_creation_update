@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FiPlus, FiSearch } from 'react-icons/fi';
+import { FiSearch } from 'react-icons/fi';
 import Layout from '../components/Layout';
 import OrdersTable from '../components/Tables/OrdersTable';
+import Modal from '../components/Modal';
 import { renderIcon } from '../utils/iconRenderer';
 import { dummyOrders } from '../utils/dummyData';
 import { Order, OrderStatus } from '../types/models';
@@ -12,6 +13,7 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>(dummyOrders);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewOrder, setViewOrder] = useState<Order | null>(null);
 
   const orderStatuses: FilterStatus[] = ['All', 'Paid', 'Processing', 'Shipping', 'Delivered', 'Cancelled'];
 
@@ -19,15 +21,10 @@ const Orders: React.FC = () => {
     return orders.filter(o => o.status === status).length;
   };
 
-  const handleView = (order: Order) => {
-    console.log('View order:', order);
-    // TODO: Implement order details modal
-  };
+  const handleView = (order: Order) => setViewOrder(order);
 
-  const handleEdit = (order: Order) => {
-    console.log('Edit order:', order);
-    // TODO: Implement edit order modal
-  };
+  // No dedicated edit form yet — open the same detail view.
+  const handleEdit = (order: Order) => setViewOrder(order);
 
   const handleDelete = (orderId: string) => {
     if (window.confirm('Are you sure you want to delete this order?')) {
@@ -44,10 +41,6 @@ const Orders: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
           <p className="text-gray-600 mt-1">Manage and track customer orders</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors">
-          {renderIcon(FiPlus, { size: 20 })}
-          <span>New Order</span>
-        </button>
       </div>
 
       {/* Filters */}
@@ -122,6 +115,52 @@ const Orders: React.FC = () => {
         onDelete={handleDelete}
       />
       </div>
+
+      {/* Order detail modal */}
+      <Modal
+        isOpen={!!viewOrder}
+        onClose={() => setViewOrder(null)}
+        title={viewOrder ? `Order ${viewOrder.orderNumber}` : 'Order'}
+        type="success"
+      >
+        {viewOrder && (
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="grid grid-cols-2 gap-2">
+              <span className="text-gray-500">Customer</span>
+              <span className="font-medium text-right">{viewOrder.customerName}</span>
+              <span className="text-gray-500">Email</span>
+              <span className="font-medium text-right">{viewOrder.customerEmail}</span>
+              <span className="text-gray-500">Status</span>
+              <span className="font-medium text-right">{viewOrder.status}</span>
+              <span className="text-gray-500">Payment</span>
+              <span className="font-medium text-right">{viewOrder.paymentStatus}</span>
+              <span className="text-gray-500">Placed</span>
+              <span className="font-medium text-right">{viewOrder.createdAt}</span>
+              {viewOrder.trackingNumber && (
+                <>
+                  <span className="text-gray-500">Tracking</span>
+                  <span className="font-medium text-right">{viewOrder.trackingNumber}</span>
+                </>
+              )}
+            </div>
+            <div className="border-t pt-3">
+              <p className="font-semibold text-gray-800 mb-2">Items</p>
+              <ul className="space-y-1">
+                {viewOrder.items.map((it) => (
+                  <li key={it.id} className="flex justify-between">
+                    <span>{it.productType} · {it.printingType} × {it.quantity}</span>
+                    <span className="font-medium">₹{it.price.toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="border-t pt-3 flex justify-between font-semibold text-gray-900">
+              <span>Total</span>
+              <span>₹{viewOrder.totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+      </Modal>
     </Layout>
   );
 };

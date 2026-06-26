@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
@@ -25,14 +26,14 @@ export default function Hero() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-[#171717] hover:bg-[#B87D4C] text-white px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all shadow-[0_8px_20px_-6px_rgba(184,125,76,0.5)]">
+              <Link href="/design-editor" className="bg-[#171717] hover:bg-[#B87D4C] text-white px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all shadow-[0_8px_20px_-6px_rgba(184,125,76,0.5)]">
                 Customize Product
                 <ArrowRight className="ml-2 w-5 h-5" strokeWidth={2.5} />
-              </button>
-              <button className="bg-white border border-gray-300 hover:border-gray-900 text-gray-900 px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all">
+              </Link>
+              <Link href="/product-collection" className="bg-white border border-gray-300 hover:border-gray-900 text-gray-900 px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all">
                 Explore Collection
                 <ArrowRight className="ml-2 w-5 h-5" strokeWidth={2.5} />
-              </button>
+              </Link>
             </div>
           </div>
 

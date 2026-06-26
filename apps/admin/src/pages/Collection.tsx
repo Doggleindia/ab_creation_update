@@ -75,7 +75,7 @@ const CollectionPage: React.FC = () => {
   };
 
   const handleView = (collection: Collection) => {
-    console.log('View collection:', collection);
+    navigate(`/collection/edit/${collection.id}`, { state: { collection } });
   };
 
   return (

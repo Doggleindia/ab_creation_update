@@ -63,7 +63,7 @@ const BulkProductVariants: React.FC = () => {
   };
 
   const handleView = (variant: BulkProductVariant) => {
-    console.log('View bulk variant:', variant);
+    navigate(`/bulk-product/${productId}/variants/edit/${variant._id}`, { state: { variant } });
   };
 
   if (!productId) {

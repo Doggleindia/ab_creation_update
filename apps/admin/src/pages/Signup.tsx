@@ -210,13 +210,23 @@ const Signup: React.FC = () => {
               />
               <label htmlFor="terms" className="text-gray-300 text-sm cursor-pointer">
                 I agree to the{' '}
-                <button type="button" className="text-[#B87D4C] hover:text-[#B87D4C] font-medium bg-transparent border-none p-0 cursor-pointer">
+                <a
+                  href="https://ab-creations-web.vercel.app/terms-and-conditions"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#B87D4C] hover:underline font-medium"
+                >
                   Terms of Service
-                </button>
+                </a>
                 {' '}and{' '}
-                <button type="button" className="text-[#B87D4C] hover:text-[#B87D4C] font-medium bg-transparent border-none p-0 cursor-pointer">
+                <a
+                  href="https://ab-creations-web.vercel.app/privacy-policy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#B87D4C] hover:underline font-medium"
+                >
                   Privacy Policy
-                </button>
+                </a>
               </label>
             </div>
 

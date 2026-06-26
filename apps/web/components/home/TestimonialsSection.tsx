@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const testimonials = [
@@ -110,6 +111,7 @@ export default function TestimonialsSection() {
         {/* BUTTON */}
         <div className="flex justify-center mt-20">
           <Button
+            asChild
             variant="outline"
             className="
               h-[58px]
@@ -128,7 +130,7 @@ export default function TestimonialsSection() {
               duration-300
             "
           >
-            Read More
+            <Link href="/look-book">Read More</Link>
           </Button>
         </div>
       </div>

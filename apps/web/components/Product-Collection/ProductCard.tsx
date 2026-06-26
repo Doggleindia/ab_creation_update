@@ -175,12 +175,18 @@ export default function ProductCard({
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
-          <button className="flex-1 bg-white border border-[#B87D4C] text-[#B87D4C] text-xs font-semibold py-2 px-3 rounded hover:bg-[#F5F1EA] transition">
+          <Link
+            href={`/product/${slug}`}
+            className="flex-1 text-center bg-white border border-[#B87D4C] text-[#B87D4C] text-xs font-semibold py-2 px-3 rounded hover:bg-[#F5F1EA] transition"
+          >
             Add to Cart
-          </button>
-          <button className="flex-1 bg-[#B87D4C] text-white text-xs font-semibold py-2 px-3 rounded hover:bg-[#171717] transition">
+          </Link>
+          <Link
+            href={`/product/${slug}`}
+            className="flex-1 text-center bg-[#B87D4C] text-white text-xs font-semibold py-2 px-3 rounded hover:bg-[#171717] transition"
+          >
             Customize
-          </button>
+          </Link>
         </div>
       </div>
     </div>

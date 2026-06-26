@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiSearch } from 'react-icons/fi';
+import { FiSearch } from 'react-icons/fi';
 import Layout from '../components/Layout';
 import CustomersTable from '../components/Tables/CustomersTable';
 import { renderIcon } from '../utils/iconRenderer';
@@ -61,10 +61,6 @@ const Customers: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
           <p className="text-gray-600 mt-1">Manage and view customer information</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white rounded-lg hover:bg-[#B87D4C] transition-colors">
-          {renderIcon(FiPlus, { size: 20 })}
-          <span>Add Customer</span>
-        </button>
       </div>
 
       {/* Search Bar */}

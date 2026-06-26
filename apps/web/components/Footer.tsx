@@ -64,18 +64,18 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-[#CBAA75] transition-colors">
-                  Shipping Policy
+                <Link href="/refund-cancellation-policy" className="hover:text-[#CBAA75] transition-colors">
+                  Shipping &amp; Returns
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-[#CBAA75] transition-colors">
-                  Sustainability
+                <Link href="/contact-us" className="hover:text-[#CBAA75] transition-colors">
+                  Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-[#CBAA75] transition-colors">
-                  Affiliates
+                <Link href="/become-a-seller" className="hover:text-[#CBAA75] transition-colors">
+                  Become a Seller
                 </Link>
               </li>
             </ul>
