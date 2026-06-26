@@ -34,6 +34,20 @@ class ApiService {
     return response.json();
   }
 
+  // ---- Orders (admin) ----
+  // GET /api/orders/admin/all — every order with populated user/product/variant.
+  async getAdminOrders(params?: { productType?: string; orderStatus?: string }):
+    Promise<{ success: boolean; count: number; data: any[] }> {
+    const qs = new URLSearchParams();
+    if (params?.productType) qs.set('productType', params.productType);
+    if (params?.orderStatus) qs.set('orderStatus', params.orderStatus);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+    const response = await fetch(`${API_BASE}/orders/admin/all${query}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
   // LookBook API methods
   async getAllLookBookMedia(): Promise<{ data: { lookbookItems: LookBookMedia[] } }> {
     const response = await fetch(`${API_BASE}/lookbook/all`, {

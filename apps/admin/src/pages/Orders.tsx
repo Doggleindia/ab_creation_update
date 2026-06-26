@@ -1,19 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import Layout from '../components/Layout';
 import OrdersTable from '../components/Tables/OrdersTable';
 import Modal from '../components/Modal';
 import { renderIcon } from '../utils/iconRenderer';
+import { apiService } from '../utils/api';
 import { dummyOrders } from '../utils/dummyData';
 import { Order, OrderStatus } from '../types/models';
+
+// Map a real backend order onto the admin table's display shape.
+const mapOrderStatus = (s?: string): OrderStatus => {
+  switch (s) {
+    case 'shipped': return 'Shipping';
+    case 'delivered': return 'Delivered';
+    case 'cancelled': return 'Cancelled';
+    case 'processing':
+    case 'pending':
+    default: return 'Processing';
+  }
+};
+
+const mapOrder = (o: any): Order => ({
+  id: o._id,
+  orderNumber: o.orderId,
+  customerName: o.userId?.name || o.guestName || 'Guest',
+  customerEmail: o.userId?.email || o.guestEmail || '—',
+  items: [
+    {
+      id: o._id,
+      productType: (o.productId?.title || o.productType || 'Product') as any,
+      printingType: (o.productType === 'bulk' ? 'Bulk' : 'Ready') as any,
+      quantity: o.quantity ?? 1,
+      price: o.totalAmount ?? 0,
+    },
+  ],
+  totalAmount: o.totalAmount ?? 0,
+  status: mapOrderStatus(o.orderStatus),
+  paymentStatus: o.paymentStatus === 'paid' ? 'Paid' : o.paymentStatus === 'failed' ? 'Failed' : 'Pending',
+  createdAt: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '',
+  estimatedDelivery: '',
+});
 
 type FilterStatus = OrderStatus | 'All';
 
 const Orders: React.FC = () => {
+  // Starts with demo data, then replaced by live orders when available.
   const [orders, setOrders] = useState<Order[]>(dummyOrders);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    apiService
+      .getAdminOrders()
+      .then((res) => {
+        const real = (res?.data || []).map(mapOrder);
+        // Only swap in live data if there's actually some — otherwise keep the demo rows.
+        if (active && real.length > 0) setOrders(real);
+      })
+      .catch(() => {
+        /* keep demo data on error */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const orderStatuses: FilterStatus[] = ['All', 'Paid', 'Processing', 'Shipping', 'Delivered', 'Cancelled'];
 
@@ -31,6 +83,17 @@ const Orders: React.FC = () => {
       setOrders(prev => prev.filter(o => o.id !== orderId));
     }
   };
+
+  // Search across order number / customer name / email (status tabs handled in the table)
+  const visibleOrders = orders.filter((o) => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      o.orderNumber.toLowerCase().includes(q) ||
+      o.customerName.toLowerCase().includes(q) ||
+      o.customerEmail.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <Layout>
@@ -108,7 +171,7 @@ const Orders: React.FC = () => {
 
       {/* Orders Table */}
       <OrdersTable
-        orders={orders}
+        orders={visibleOrders}
         filterStatus={filterStatus}
         onView={handleView}
         onEdit={handleEdit}

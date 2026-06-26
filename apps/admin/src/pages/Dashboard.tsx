@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { renderIcon } from '../utils/iconRenderer';
+import { apiService } from '../utils/api';
 import {
   FiDollarSign,
   FiShoppingCart,
@@ -71,13 +72,44 @@ const Dashboard: React.FC = () => {
 
   const maxRevenue = Math.max(...chartData.map(d => d.revenue));
 
-  const recentOrders = [
+  // Demo rows shown until live orders load (kept as a fallback, never removed).
+  const demoRecentOrders = [
     { id: '#12345', customer: 'John Doe', amount: '$1,299', status: 'Completed', date: '2025-01-19' },
     { id: '#12344', customer: 'Jane Smith', amount: '$899', status: 'Pending', date: '2025-01-18' },
     { id: '#12343', customer: 'Mike Johnson', amount: '$2,499', status: 'Completed', date: '2025-01-17' },
     { id: '#12342', customer: 'Sarah Williams', amount: '$599', status: 'Processing', date: '2025-01-16' },
     { id: '#12341', customer: 'Tom Brown', amount: '$1,699', status: 'Completed', date: '2025-01-15' }
   ];
+  const [recentOrders, setRecentOrders] = useState(demoRecentOrders);
+
+  useEffect(() => {
+    let active = true;
+    apiService
+      .getAdminOrders()
+      .then((res) => {
+        const mapped = (res?.data || []).slice(0, 5).map((o: any) => ({
+          id: o.orderId || o._id,
+          customer: o.userId?.name || o.guestName || 'Guest',
+          amount: `₹${(o.totalAmount ?? 0).toLocaleString('en-IN')}`,
+          status:
+            o.orderStatus === 'delivered'
+              ? 'Completed'
+              : o.orderStatus === 'pending'
+              ? 'Pending'
+              : o.orderStatus
+              ? o.orderStatus.charAt(0).toUpperCase() + o.orderStatus.slice(1)
+              : 'Processing',
+          date: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '',
+        }));
+        if (active && mapped.length > 0) setRecentOrders(mapped);
+      })
+      .catch(() => {
+        /* keep demo data on error */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleExport = () => {
     const headers = ['Order ID', 'Customer', 'Amount', 'Status', 'Date'];
