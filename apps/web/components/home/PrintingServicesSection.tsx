@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 const services = [
   {
@@ -46,10 +47,12 @@ export default function PrintingServicesSection() {
           >
             {/* IMAGE */}
             <div className="relative w-full h-[260px] bg-gray-100 overflow-hidden">
-              <img
+              <Image
                 src={service.image}
                 alt={service.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
 

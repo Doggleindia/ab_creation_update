@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
@@ -39,9 +40,13 @@ export default function Hero() {
 
           {/* RIGHT - MASONRY IMAGES GRID */}
           <div className="w-full">
-            <img
+            <Image
               src="/images/home/heroImage.png"
               alt="Hero Image"
+              width={1662}
+              height={1662}
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
               className="w-full h-auto"
             />
           </div>

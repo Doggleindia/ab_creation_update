@@ -93,6 +93,8 @@ export default function ShopTopCategories() {
             <img
               src="/images/home/unisex-men-collection.png"
               alt="Unisex/Men collection"
+              loading="lazy"
+              decoding="async"
               className="absolute right-0 bottom-0 h-[85%] md:h-[85%] object-cover object-bottom"
             />
           </div>
@@ -115,6 +117,8 @@ export default function ShopTopCategories() {
             <img
               src="/images/home/woman-collection.png"
               alt="Woman collection"
+              loading="lazy"
+              decoding="async"
               className="absolute right-0 bottom-0 h-[85%] md:h-[85%] object-cover object-bottom"
             />
           </div>

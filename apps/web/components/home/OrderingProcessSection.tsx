@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ArrowDown } from "lucide-react";
 
 export default function OrderingProcessSection() {
@@ -23,9 +24,12 @@ export default function OrderingProcessSection() {
           
           {/* LEFT - IMAGE */}
           <div className="relative rounded-[24px] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)]">
-            <img
+            <Image
               src="/images/home/ordering-process-image.png"
               alt="Person holding a custom t-shirt"
+              width={2400}
+              height={2400}
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="w-full h-auto object-cover"
             />
           </div>
