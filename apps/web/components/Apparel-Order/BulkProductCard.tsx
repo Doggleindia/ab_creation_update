@@ -28,7 +28,7 @@ export default function BulkProductCard({
       )}
 
       {/* Image */}
-      <Link href={`/apparel-order/${slug}`}>
+      <Link href={`/bulk-products/${slug}`}>
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
           <Image
             src={image}
@@ -41,7 +41,7 @@ export default function BulkProductCard({
 
       {/* Content */}
       <div className="p-4 space-y-2">
-        <Link href={`/apparel-order/${slug}`}>
+        <Link href={`/bulk-products/${slug}`}>
           <h3 className="text-sm font-semibold text-gray-900 hover:text-[#B87D4C] transition">
             {title}
           </h3>

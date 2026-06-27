@@ -24,8 +24,8 @@ export default function ChooseHowToShop() {
             <div className="flex flex-wrap gap-4">
               {/* Primary Button */}
             <Link
-  href="/design-your-own"
-  className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md 
+  href="/design-editor"
+  className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md
     bg-[linear-gradient(98.51deg,#C79280_1.39%,#B87D4C_100%)]
     hover:bg-[linear-gradient(98.51deg,#C79280_1.39%,#B87D4C_100%)]
     text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 
@@ -37,8 +37,8 @@ export default function ChooseHowToShop() {
 
               {/* Secondary Button */}
            <Link
-  href="/products"
-  className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md 
+  href="/product-collection"
+  className="inline-flex items-center justify-center px-5 py-3 text-xs font-semibold uppercase tracking-wide rounded-md
     bg-[#CBAA75] border 
     hover:bg-[#B87D4C] hover:text-white hover:shadow-xl 
     shadow-lg transform hover:-translate-y-0.5 

@@ -6,9 +6,7 @@ import {
   FiLogOut,
   FiMenu,
   FiX,
-  FiBell,
   FiSearch,
-  FiSettings,
   FiActivity,
   FiShoppingCart,
   FiUsers,
@@ -158,19 +156,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="bg-transparent outline-none text-sm w-32 placeholder-gray-500"
               />
             </div>
-
-            {/* Notifications */}
-            <div className="relative">
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors relative">
-                {renderIcon(FiBell, { size: 20 })}
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-            </div>
-
-            {/* Settings */}
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-              {renderIcon(FiSettings, { size: 20 })}
-            </button>
 
             {/* User Menu */}
             <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
