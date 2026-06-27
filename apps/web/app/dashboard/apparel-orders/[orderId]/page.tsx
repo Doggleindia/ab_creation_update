@@ -201,13 +201,13 @@ export default function ApparelOrderDetails({ params }: { params: Promise<{ orde
               {order.designFiles.map((file, idx) => (
                 <div key={idx} className="rounded-lg border overflow-hidden">
                   {isBase64Image(file) ? (
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={file}
                       alt={`Design ${idx + 1}`}
                       className="w-full h-32 object-cover"
                     />
                   ) : file.startsWith("http") ? (
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={file}
                       alt={`Design ${idx + 1}`}
                       className="w-full h-32 object-cover"

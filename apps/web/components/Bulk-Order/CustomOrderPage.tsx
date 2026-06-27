@@ -335,7 +335,7 @@ export default function CustomOrderPage() {
                       >
                         {uploadedDesigns[placement] ? (
                           <div className="relative h-full w-full overflow-hidden rounded-md">
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={uploadedDesigns[placement]}
                               alt={placement}
                               className="h-full w-full object-cover"

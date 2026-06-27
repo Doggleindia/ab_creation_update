@@ -25,9 +25,9 @@ export default function ShopTopCategories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const base = process.env.NEXT_PUBLIC_MAIN_BACKEND?.replace(/\/$/, "") || "";
-        const url = base ? `${base}/api/categories` : "/api/categories";
-        const res = await fetch(url);
+        // Hit the cached Next.js proxy route (served from the edge cache) rather
+        // than the backend directly, so the homepage stays fast.
+        const res = await fetch("/api/categories");
 
         if (!res.ok) {
           throw new Error(`Failed to load categories: ${res.status}`);
@@ -139,7 +139,7 @@ export default function ShopTopCategories() {
                 className="group relative bg-white border border-gray-200 rounded-[24px] h-[220px] md:h-[260px] flex flex-col items-center justify-center overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 {category.images && category.images.length > 0 ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={category.images[0]}
                     alt={category.name}
                     className="w-[75%] h-auto object-contain group-hover:scale-105 transition-transform duration-300 pb-8"

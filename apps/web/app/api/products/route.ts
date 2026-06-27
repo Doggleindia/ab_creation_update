@@ -15,6 +15,9 @@ export async function GET(request: NextRequest) {
       headers: {
         "Content-Type": "application/json",
       },
+      // Cache product listings at the edge for a short window to avoid hitting
+      // the backend on every navigation/filter.
+      next: { revalidate: 120 },
     });
 
     if (!response.ok) {

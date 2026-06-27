@@ -196,7 +196,7 @@ export default function OrdersPage() {
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 rounded bg-neutral-100 flex items-center justify-center shrink-0 overflow-hidden relative border border-[#E8E6E3]">
                     {o.productId?.image || o.productId?.images?.[0] ? (
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={o.productId?.image || o.productId?.images?.[0]} 
                         alt={o.productId?.title || o.productId?.name}
                         className="object-cover w-full h-full"

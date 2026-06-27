@@ -236,7 +236,7 @@ const TShirtPreviewCard = ({
             className="flex items-center justify-center w-full h-full"
           >
             {el.type === "image" && (
-              <img
+              <img loading="lazy" decoding="async"
                 src={el.content}
                 className="w-full h-full object-contain select-none pointer-events-none"
                 alt="preview element"
@@ -1582,7 +1582,7 @@ export default function TShirtDesigner({
                               onClick={() => setSelectedElementId(el.id)}
                               className="relative aspect-square border border-neutral-800 rounded-lg overflow-hidden bg-neutral-900 cursor-pointer hover:border-neutral-600"
                             >
-                              <img src={el.content} className="w-full h-full object-contain p-1" alt="layer thumbnail" />
+                              <img loading="lazy" decoding="async" src={el.content} className="w-full h-full object-contain p-1" alt="layer thumbnail" />
                             </div>
                           ))}
                         </div>
@@ -1775,7 +1775,7 @@ export default function TShirtDesigner({
 
                           {/* ELEMENT INTERNAL CONTENT */}
                           {el.type === "image" && (
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={el.content}
                               className="w-full h-full object-contain select-none pointer-events-none"
                               alt="custom design layer"

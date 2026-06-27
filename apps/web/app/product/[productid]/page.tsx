@@ -12,7 +12,7 @@ async function fetchProduct(slug: string) {
 
 
   try {
-    const res = await fetch(url, { cache: 'no-store' })
+    const res = await fetch(url, { next: { revalidate: 120 } })
     if (!res.ok) {
       let body = ''
       try {

@@ -159,7 +159,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
           <div className="bg-white p-4 rounded border border-[#E8E6E3] flex items-start gap-4">
             <div className="w-20 h-20 rounded bg-neutral-100 flex items-center justify-center shrink-0 overflow-hidden relative border border-[#E8E6E3]">
               {order.productId?.image || order.productId?.images?.[0] ? (
-                <img 
+                <img loading="lazy" decoding="async" 
                   src={order.productId?.image || order.productId?.images?.[0]} 
                   alt={order.productId?.title || order.productId?.name}
                   className="object-cover w-full h-full"

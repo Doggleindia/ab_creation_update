@@ -61,7 +61,7 @@ export default function LookbookSection() {
                     preload="metadata"
                   />
                 ) : (
-                  <img src={it.mediaUrl} alt={it.title || `Lookbook ${index + 1}`} className="w-full rounded-sm object-cover" />
+                  <img loading="lazy" decoding="async" src={it.mediaUrl} alt={it.title || `Lookbook ${index + 1}`} className="w-full rounded-sm object-cover" />
                 )}
               </div>
             ))}

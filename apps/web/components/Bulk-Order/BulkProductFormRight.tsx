@@ -624,7 +624,7 @@ export default function ProductFormRight({
                     className="relative w-[82px] h-[82px] rounded-[6px] border border-[#E8E6E3] overflow-hidden bg-white"
                   >
                     {/* IMAGE */}
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={img}
                       alt="design"
                       className="w-full h-full object-cover"
