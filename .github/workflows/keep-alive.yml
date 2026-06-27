@@ -20,10 +20,9 @@ jobs:
     steps:
       - name: Ping backend health endpoint
         run: |
+          # Override anytime via repo variable BACKEND_URL; defaults to the
+          # current Render service so this works out of the box.
           URL="${{ vars.BACKEND_URL }}"
-          if [ -z "$URL" ]; then
-            echo "BACKEND_URL repo variable is not set — skipping. See file header for setup."
-            exit 0
-          fi
+          if [ -z "$URL" ]; then URL="https://ab-creations.onrender.com"; fi
           echo "Pinging $URL/ ..."
           curl -fsS --max-time 90 "$URL/" && echo "  ok" || echo "  ping failed (backend may be waking)"
