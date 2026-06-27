@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function Footer() {
@@ -21,7 +22,13 @@ export default function Footer() {
 
           {/* LEFT SECTION - BRAND INFO */}
           <div>
-            <h3 className="text-2xl font-bold mb-4 text-[#CBAA75] tracking-[0.15em]">AB CREATION</h3>
+            <Image
+              src="/ab-creation-logo.png"
+              alt="AB Creation"
+              width={160}
+              height={160}
+              className="h-24 w-auto mb-4"
+            />
             <p className="text-gray-300 text-sm leading-relaxed">
               Precision crafted custom apparel for creative teams and modern brands.
             </p>

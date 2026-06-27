@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "concurrently -n \"backend,web,admin\" -c \"blue,green,magenta\" \"npm run dev:backend\" \"npm run dev:web\" \"npm run dev:admin\"",
     "dev:backend": "npm --prefix apps/backend run dev",
     "start:backend": "npm --prefix apps/backend run start",
     "dev:web": "npm --prefix apps/web run dev",
@@ -17,5 +18,8 @@
     "build:admin": "npm --prefix apps/admin run build",
     "build:all": "npm run build:web && npm run build:admin",
     "install:all": "npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
   }
 }

@@ -36,7 +36,19 @@ cp apps/admin/.env.example   apps/admin/.env     # VITE_MAIN_BACKEND
 
 ### Running from the repo root
 
-Convenience scripts in the root `package.json`:
+You can start all three applications simultaneously (concurrently) with one command:
+
+```bash
+npm run dev             # Start backend, web storefront, and admin panel at once
+```
+
+Alternatively, on Windows, you can double-click or run the batch script:
+
+```bash
+run-all.bat
+```
+
+Or run individual apps separately:
 
 ```bash
 npm run dev:backend     # start the API (nodemon)
