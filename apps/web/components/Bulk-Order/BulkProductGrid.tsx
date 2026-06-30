@@ -45,7 +45,11 @@ export default function BulkProductGrid({ products, loading }: { products?: Prod
         const priceValue =
           typeof p.basePrice === "number" ? p.basePrice : p.variants?.[0]?.price;
         const price =
-          typeof priceValue === "number" ? `₹${priceValue}/Starting` : "Contact for price";
+          typeof priceValue === "number"
+            ? `₹${priceValue.toFixed(2)}`
+            : "Contact for price";
+        const priceSuffix =
+          typeof priceValue === "number" ? "/Starting" : undefined;
 
         // Generate slug from title or use existing slug or fallback to _id
         const slug = p.slug || p.title?.toLowerCase().replace(/\s+/g, "-").replace(/[^\w\-]/g, "") || p._id;
@@ -60,6 +64,7 @@ export default function BulkProductGrid({ products, loading }: { products?: Prod
             title={p.title || "Untitled"}
             description={p.description || ""}
             price={price}
+            priceSuffix={priceSuffix}
             slug={slug}
             badge={badge}
           />

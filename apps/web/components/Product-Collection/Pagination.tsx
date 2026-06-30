@@ -28,7 +28,7 @@ export default function Pagination({
             onClick={() => onPageChange && onPageChange(p)}
             className={`h-10 w-10 flex items-center justify-center border rounded text-sm font-medium transition-colors ${p === page
                 ? "bg-[#B87D4C] text-white border-[#B87D4C]"
-                : "border-gray-300 text-gray-700 hover:border-gray-400"
+                : "bg-[#F5ECE4] border-transparent text-gray-700 hover:bg-[#ecdfd2]"
               }`}
           >
             {p}
@@ -40,7 +40,7 @@ export default function Pagination({
         {total > 5 && (
           <button
             onClick={() => onPageChange && onPageChange(total)}
-            className="h-10 w-10 flex items-center justify-center border border-gray-300 text-gray-700 rounded text-sm font-medium hover:border-gray-400 transition-colors"
+            className="h-10 w-10 flex items-center justify-center bg-[#F5ECE4] border border-transparent text-gray-700 rounded text-sm font-medium hover:bg-[#ecdfd2] transition-colors"
           >
             {total}
           </button>
@@ -48,7 +48,7 @@ export default function Pagination({
 
         <button
           onClick={() => onPageChange && onPageChange(Math.min(total, page + 1))}
-          className="px-3 h-10 flex items-center justify-center border border-gray-300 text-gray-700 rounded text-sm font-medium hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 h-10 flex items-center justify-center bg-[#F5ECE4] border border-transparent text-gray-700 rounded text-sm font-medium hover:bg-[#ecdfd2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={page >= total}
         >
           Next

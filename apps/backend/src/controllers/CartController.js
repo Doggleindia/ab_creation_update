@@ -6,7 +6,9 @@ import Inventory from "../models/Inventory.js";
 // Add item to cart
 export const addToCart = async(req, res) => {
     try {
-        const { productType, productId, variantId, quantity, size } = req.body;
+        const { productType, productId, variantId, quantity, size, customDesign, designState } = req.body;
+        const designFiles = Array.isArray(req.body.designFiles) ? req.body.designFiles : [];
+        const hasDesign = designFiles.length > 0 || !!customDesign;
 
         const userId = req.user._id;
 
@@ -61,13 +63,16 @@ export const addToCart = async(req, res) => {
             basePrice +
             (basePrice * priceAdjustment) / 100;
 
-        // Existing cart item check
-        let cartItem = await Cart.findOne({
-            userId,
-            productId,
-            variantId,
-            size,
-        });
+        // Existing cart item check — a customized item is always its own line
+        // (never merged into a non-customized one) so its artwork is preserved.
+        let cartItem = hasDesign
+            ? null
+            : await Cart.findOne({
+                userId,
+                productId,
+                variantId,
+                size,
+            });
 
         if (cartItem) {
             cartItem.quantity += quantity;
@@ -83,6 +88,10 @@ export const addToCart = async(req, res) => {
 
                 // Save adjusted price
                 priceAtTime: adjustedUnitPrice,
+
+                customDesign: customDesign || undefined,
+                designFiles,
+                designState: designState || undefined,
             });
         }
 
@@ -127,6 +136,12 @@ export const addToCart = async(req, res) => {
                     size: size,
 
                     color: variant.color,
+
+                    customDesign: cartItem.customDesign || undefined,
+
+                    designFiles: cartItem.designFiles || [],
+
+                    designState: cartItem.designState || undefined,
                 },
 
                 pricing: {
@@ -207,6 +222,12 @@ export const getCart = async(req, res) => {
 
                         color: item.variantId ?
                             item.variantId.color : "",
+
+                        customDesign: item.customDesign || undefined,
+
+                        designFiles: item.designFiles || [],
+
+                        designState: item.designState || undefined,
                     },
 
                     pricing: {

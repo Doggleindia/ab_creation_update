@@ -581,13 +581,15 @@ export default function CustomOrderPage() {
               </div>
             </section>
 
-            <Button 
-              className="w-fit bg-[#171717] hover:bg-[#B87D4C]"
-              onClick={handleSubmit}
-              disabled={submitting}
-            >
-              {submitting ? "Processing..." : "Save & Continue"}
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                className="w-fit bg-[#7A4A2B] hover:bg-[#B87D4C] text-white"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting ? "Processing..." : "Save & Continue"}
+              </Button>
+            </div>
           </motion.div>
         </div>
       </div>

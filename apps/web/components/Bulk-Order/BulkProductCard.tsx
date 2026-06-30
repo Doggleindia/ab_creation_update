@@ -6,6 +6,7 @@ interface BulkProductCardProps {
   title: string;
   description?: string;
   price: string;
+  priceSuffix?: string;
   badge?: string;
   slug: string;
 }
@@ -15,6 +16,7 @@ export default function BulkProductCard({
   title,
   description = "",
   price,
+  priceSuffix,
   badge,
   slug
 }: BulkProductCardProps) {
@@ -51,7 +53,12 @@ export default function BulkProductCard({
           <p className="text-xs text-gray-500 line-clamp-1">{description}</p>
         )}
 
-        <p className="text-base font-semibold text-gray-900">{price}</p>
+        <p className="text-base text-gray-900">
+          <span className="font-bold">{price}</span>
+          {priceSuffix && (
+            <span className="text-xs font-normal text-gray-500">{priceSuffix}</span>
+          )}
+        </p>
       </div>
     </div>
   );

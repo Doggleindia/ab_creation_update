@@ -145,6 +145,28 @@ export default function ProductFormRight({
         .map(([sizeName, qty]) => `${sizeName} (${qty})`);
       const sizeString = selectedSizesList.length > 0 ? selectedSizesList.join(", ") : "OS";
 
+      // Upload the customer's artwork to S3 so it is stored on the order
+      // (previously only a text note was saved and the design was lost).
+      let designFileUrls: string[] = [];
+      if (uploadedDesigns.length > 0) {
+        try {
+          const files = await Promise.all(
+            uploadedDesigns.map(async (src, i) => {
+              const blob = await (await fetch(src)).blob();
+              const ext = (blob.type && blob.type.split("/")[1]) || "png";
+              return new File([blob], `design-${i + 1}.${ext}`, {
+                type: blob.type || "image/png",
+              });
+            })
+          );
+          const uploadRes = await api.uploadDesigns(files, token);
+          designFileUrls = uploadRes?.data?.urls || [];
+        } catch (uploadErr) {
+          console.error("Design upload failed:", uploadErr);
+          throw new Error("Failed to upload your design files. Please try again.");
+        }
+      }
+
       const payload: any = {
         productId: product._id,
         productType: "bulk",
@@ -160,6 +182,8 @@ export default function ProductFormRight({
         },
         phoneNumber: phone,
         customDesign: uploadedDesigns.length > 0 ? `Uploaded (${uploadedDesigns.length} files)` : (designerState ? "Online Customized Design" : undefined),
+        designFiles: designFileUrls,
+        designState: designerState || undefined,
         anyText: customizationText || undefined,
       };
 
@@ -497,23 +521,34 @@ export default function ProductFormRight({
   const isExceeded =
     totalSelected > targetQty;
 
+  // ================= DISCOUNT / ORIGINAL PRICE =================
+  const discountPercentage = Number(product?.discountPercentage) || 0;
+
+  const originalPrice =
+    discountPercentage > 0
+      ? Number((calculatePrice / (1 - discountPercentage / 100)).toFixed(2))
+      : null;
+
 
     // ================= COLOR HEX MAP =================
   function getColorHex(colorName: string): string {
     const map: Record<string, string> = {
       black: "#171717",
-      blue: "#B87D4C",
-      red: "#EF4444",
+      blue: "#2563EB",
+      red: "#DC2626",
       white: "#ffffff",
-      navy: "#B87D4C",
+      navy: "#1E3A8A",
       gray: "#9CA3AF",
-      orange: "#B87D4C",
-      royalblue: "#B87D4C",
+      grey: "#9CA3AF",
+      orange: "#F97316",
+      royalblue: "#3B5BDB",
+      "royal blue": "#3B5BDB",
       darkgreen: "#166534",
-      purple: "#B87D4C",
-      pink: "#C79280",
+      "dark green": "#166534",
+      purple: "#7C3AED",
+      pink: "#F9A8D4",
       green: "#16A34A",
-      yellow: "#CBAA75",
+      yellow: "#FACC15",
     };
 
     return map[colorName?.toLowerCase()] || "#E8E6E3";
@@ -574,6 +609,18 @@ export default function ProductFormRight({
           <h2 className="text-[32px] font-[700] tracking-[-0.5px] text-[#171717]">
             ₹ {calculatePrice}
           </h2>
+
+          {originalPrice && (
+            <>
+              <span className="line-through text-[#9b9b9b] text-[15px]">
+                ₹ {originalPrice}
+              </span>
+
+              <span className="bg-[#B87D4C] text-white text-[10px] px-2 py-[2px] rounded-sm font-semibold">
+                SAVE {discountPercentage}%
+              </span>
+            </>
+          )}
         </div>
 
         <p className="text-[10px] text-[#8B8B8B] mt-[2px]">
@@ -599,7 +646,7 @@ export default function ProductFormRight({
             <button
               type="button"
               onClick={() => setIsDesignerOpen(true)}
-              className="w-full h-[52px] bg-[#B87D4C] hover:bg-[#B87D4C] rounded-[4px] text-white text-[14px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer border-0 outline-none"
+              className="w-full h-[52px] bg-[#F97316] hover:bg-[#ea6a0c] rounded-[4px] text-white text-[14px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer border-0 outline-none"
             >
               <Palette className="w-4 h-4" />
               Customize Design Online
@@ -995,7 +1042,7 @@ export default function ProductFormRight({
           className="w-full h-[58px] rounded-[4px] bg-[#171717] hover:bg-black text-white text-[14px] font-semibold tracking-wide"
         >
           <Lock className="w-4 h-4 mr-2" />
-          BUY NOW
+          ADD TO CART
         </Button>
       </div>
 

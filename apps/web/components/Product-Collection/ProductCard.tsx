@@ -102,7 +102,11 @@ export default function ProductCard({
 
       {/* Badge */}
       {badge && (
-        <span className="absolute top-3 left-3 bg-[#CBAA75] text-[#171717] text-xs font-semibold px-3 py-1 rounded z-10">
+        <span
+          className={`absolute top-3 left-3 text-white text-xs font-semibold px-3 py-1 rounded z-10 ${
+            badge.toLowerCase().includes("screen") ? "bg-[#B87D4C]" : "bg-[#3F3F46]"
+          }`}
+        >
           {badge}
         </span>
       )}

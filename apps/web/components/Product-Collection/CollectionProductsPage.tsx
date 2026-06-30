@@ -111,13 +111,14 @@ function CollectionProductsPageInner() {
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
-      {/* Filters */}
-      <div className="mb-8">
-        <Filters onFilterChange={handleFilterChange} activeFilters={filters} />
-      </div>
+      {/* Filters + count/sort on one row */}
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex-1">
+          <Filters onFilterChange={handleFilterChange} activeFilters={filters} />
+        </div>
 
-      {/* Filter Header */}
-      <FilterHeader meta={meta} onLimitChange={handleLimitChange} onSortChange={handleSortChange} />
+        <FilterHeader meta={meta} onLimitChange={handleLimitChange} onSortChange={handleSortChange} />
+      </div>
 
       {/* Product Grid */}
       <ProductGrid products={products} loading={loading} />

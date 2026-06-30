@@ -1,6 +1,8 @@
 import Footer from '@/components/Footer'
-import ExploreCategories from '@/components/Product-Collection/ExploreCategories'
 import ProductPage from '@/components/Product-Collection/ProductPage'
+import ClientTestimonials from '@/components/product-page/ClientTestimonials'
+import ExploreOtherProducts from '@/components/product-page/ExploreOtherProducts'
+import FeatureStrip from '@/components/common/FeatureStrip'
 
 async function fetchProduct(slug: string) {
   const base = process.env.NEXT_PUBLIC_MAIN_BACKEND
@@ -124,7 +126,9 @@ const Page = async ({
   return (
     <div>
       <ProductPage images={images} product={product} />
-      <ExploreCategories />
+      <ClientTestimonials />
+      <ExploreOtherProducts />
+      <FeatureStrip />
       <Footer />
     </div>
   )

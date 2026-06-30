@@ -15,16 +15,16 @@ export default function FilterHeader({
   const limit = meta?.limit || 12;
 
   return (
-    <div className="flex items-center justify-between py-4 mb-6">
-      {/* Left - Product Count */}
-      <div className="text-sm text-gray-600">
-        <span className="font-semibold text-gray-900">{total} products</span>
+    <div className="flex items-center gap-6 shrink-0">
+      {/* Product Count */}
+      <div className="text-sm whitespace-nowrap">
+        <span className="font-semibold text-[#B87D4C]">{total} products</span>
       </div>
 
-      {/* Right - Sort & Display Options */}
+      {/* Sort Options */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600">Sort by</label>
+          <label className="text-sm text-gray-600 whitespace-nowrap">Sort By:</label>
           <div className="relative">
             <select 
               className="appearance-none border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 bg-white pr-8 cursor-pointer hover:border-gray-400 transition"

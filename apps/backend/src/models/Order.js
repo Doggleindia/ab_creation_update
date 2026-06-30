@@ -75,6 +75,13 @@ const orderSchema = new mongoose.Schema(
     customDesign: {
       type: String,
     },
+    designFiles: {
+      type: [String],
+      default: [],
+    },
+    designState: {
+      type: mongoose.Schema.Types.Mixed,
+    },
     anyText: {
       type: String,
     },

@@ -3,10 +3,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Lock } from "lucide-react";
+import { Lock, Palette, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import * as api from "@/lib/api";
+import TShirtDesigner from "@/components/Bulk-Order/TShirtDesigner";
 import { notifyCartUpdate, getLocalCart, setLocalCart, type CartItem } from "@/lib/cart";
 
 export default function ProductFormRight({
@@ -30,6 +31,107 @@ export default function ProductFormRight({
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [cartError, setCartError] = useState<string | null>(null);
+
+  // ===== Online customization (design studio) =====
+  const [isDesignerOpen, setIsDesignerOpen] = useState(false);
+  const [designerState, setDesignerState] = useState<any>(null);
+  const [designUrls, setDesignUrls] = useState<string[]>([]);
+  const [uploadingDesign, setUploadingDesign] = useState(false);
+
+  // Save the designed previews: upload them to S3 and keep the resulting URLs
+  const handleSaveDesign = async (
+    previews: { front?: string; back?: string },
+    editorState: any
+  ): Promise<string[]> => {
+    setDesignerState(editorState);
+    const dataUrls = [previews.front, previews.back].filter(Boolean) as string[];
+    if (dataUrls.length === 0) return [];
+
+    setUploadingDesign(true);
+    setCartError(null);
+    try {
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") || undefined : undefined;
+      const files = await Promise.all(
+        dataUrls.map(async (src, i) => {
+          const blob = await (await fetch(src)).blob();
+          const ext = (blob.type && blob.type.split("/")[1]) || "png";
+          return new File([blob], `design-${i + 1}.${ext}`, {
+            type: blob.type || "image/png",
+          });
+        })
+      );
+      const res = await api.uploadDesigns(files, token);
+      const urls = res?.data?.urls || [];
+      setDesignUrls(urls);
+      return urls;
+    } catch (err) {
+      console.error("Design upload failed", err);
+      setCartError("Failed to save your design. Please log in and try again.");
+      return [];
+    } finally {
+      setUploadingDesign(false);
+    }
+  };
+
+  // If the user designed in the Design Studio (/design-editor) and was sent here
+  // to pick a product, pick up that stashed design and attach it automatically.
+  // Only clear the stash once the upload actually succeeds, so a failure
+  // (e.g. not logged in) can be retried on the next visit instead of losing it.
+  useEffect(() => {
+    const KEY = "kt-pending-design";
+    const clear = () => {
+      try {
+        sessionStorage.removeItem(KEY);
+      } catch {
+        /* ignore */
+      }
+    };
+
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      clear();
+      return;
+    }
+
+    // Logged-in studio path already uploaded the artwork — just attach the URLs.
+    if (Array.isArray(parsed?.urls) && parsed.urls.length > 0) {
+      setDesignUrls(parsed.urls);
+      if (parsed.state) setDesignerState(parsed.state);
+      clear();
+      return;
+    }
+
+    if (!parsed?.previews) {
+      clear();
+      return;
+    }
+
+    // Guest path: artwork still needs uploading, which requires login.
+    // Keep the stash so it attaches once they log in and return to a product.
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") || undefined : undefined;
+    if (!token) {
+      if (parsed.state) setDesignerState(parsed.state);
+      setCartError("Log in to attach the design you created in the studio.");
+      return;
+    }
+
+    handleSaveDesign(parsed.previews, parsed.state).then((urls) => {
+      if (urls.length > 0) clear();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sizes = product?.sizes || ["S", "M", "L", "XL", "XXL"];
 
@@ -135,6 +237,9 @@ export default function ProductFormRight({
           variantId: selectedVariant._id || selectedVariant.id || "",
           quantity,
           size: selectedSize,
+          customDesign: designUrls.length ? "Online Customized Design" : undefined,
+          designFiles: designUrls,
+          designState: designUrls.length ? designerState || undefined : undefined,
         };
 
         await api.addToCart(payload, token);
@@ -163,12 +268,15 @@ export default function ProductFormRight({
       // Guest user: add via Local Storage
       try {
         const localItems = getLocalCart();
-        const existingIndex = localItems.findIndex(
-          (item) =>
-            item.productId === product?._id &&
-            item.variantId === (selectedVariant._id || selectedVariant.id || "") &&
-            item.snapshot.size === selectedSize
-        );
+        // A customized item is always its own line so its artwork is preserved.
+        const existingIndex = designUrls.length
+          ? -1
+          : localItems.findIndex(
+              (item) =>
+                item.productId === product?._id &&
+                item.variantId === (selectedVariant._id || selectedVariant.id || "") &&
+                item.snapshot.size === selectedSize
+            );
 
         const unitPrice = discountedPrice;
         const subtotal = unitPrice * quantity;
@@ -201,6 +309,9 @@ export default function ProductFormRight({
               image: selectedVariant?.media?.images?.[0] || product?.media?.images?.[0] || "/images/home/Menclothing.png",
               size: selectedSize,
               color: selectedColor,
+              customDesign: designUrls.length ? "Online Customized Design" : undefined,
+              designFiles: designUrls,
+              designState: designUrls.length ? designerState || undefined : undefined,
             },
             pricing: {
               unitPrice,
@@ -375,8 +486,54 @@ export default function ProductFormRight({
         </div>
       </div>
 
+      {/* CUSTOMIZE DESIGN ONLINE */}
+      <div className="mt-7">
+        <button
+          type="button"
+          onClick={() => setIsDesignerOpen(true)}
+          disabled={uploadingDesign}
+          className="w-full h-[52px] bg-[#F97316] hover:bg-[#ea6a0c] rounded-md text-white text-[14px] font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+        >
+          <Palette className="w-4 h-4" />
+          {uploadingDesign
+            ? "Saving design..."
+            : designUrls.length
+            ? "Edit Your Design"
+            : "Customize Design Online"}
+        </button>
+
+        {/* DESIGN PREVIEWS */}
+        {designUrls.length > 0 && (
+          <div className="flex flex-wrap gap-3 mt-4">
+            {designUrls.map((img, index) => (
+              <div
+                key={index}
+                className="relative w-[72px] h-[72px] rounded-md border border-[#E8E6E3] overflow-hidden bg-white"
+              >
+                <img
+                  loading="lazy"
+                  decoding="async"
+                  src={img}
+                  alt={`design-${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDesignUrls((prev) => prev.filter((_, i) => i !== index))
+                  }
+                  className="absolute top-1 right-1 w-[18px] h-[18px] rounded-full bg-black/70 text-white flex items-center justify-center"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* BUTTON */}
-      <div className="mt-8">
+      <div className="mt-4">
         <Button
           onClick={handleAddToCart}
           disabled={isOutOfStock || isAdding}
@@ -389,6 +546,14 @@ export default function ProductFormRight({
           <p className="mt-3 text-sm text-red-600">{cartError}</p>
         )}
       </div>
+
+      {/* DESIGN STUDIO MODAL */}
+      <TShirtDesigner
+        isOpen={isDesignerOpen}
+        onClose={() => setIsDesignerOpen(false)}
+        onSave={handleSaveDesign}
+        initialState={designerState}
+      />
     </motion.div>
   );
 }

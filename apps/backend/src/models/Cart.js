@@ -40,6 +40,19 @@ const cartItemSchema = new mongoose.Schema({
         min: 0,
     },
 
+    customDesign: {
+        type: String,
+    },
+
+    designFiles: {
+        type: [String],
+        default: [],
+    },
+
+    designState: {
+        type: mongoose.Schema.Types.Mixed,
+    },
+
     addedAt: {
         type: Date,
         default: Date.now,

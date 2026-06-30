@@ -12,6 +12,9 @@ export type CartSnapshot = {
   image: string
   size: string
   color: string
+  customDesign?: string
+  designFiles?: string[]
+  designState?: any
 }
 
 export type CartItem = {

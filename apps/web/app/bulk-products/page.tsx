@@ -5,7 +5,7 @@ import Breadcrumbs from '@/components/Breadcrumbs'
 const page = () => {
   return (
     <div>
-      <Breadcrumbs />
+      <Breadcrumbs customSegments={[{ label: "Buy Order" }]} />
       <BulkOrderPage />
       <Footer/>
     </div>

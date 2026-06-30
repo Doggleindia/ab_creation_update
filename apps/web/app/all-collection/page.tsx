@@ -1,12 +1,12 @@
 import CollectionProductsPage from "@/components/Product-Collection/CollectionProductsPage";
 import Footer from "@/components/Footer";
-import ExploreCategories from "@/components/Product-Collection/ExploreCategories";
+import ShopTopCategories from "@/components/home/ShopTopCategories";
 
 export default function page() {
   return (
     <>
       <CollectionProductsPage />
-      <ExploreCategories />
+      <ShopTopCategories />
       <Footer />
     </>
   );

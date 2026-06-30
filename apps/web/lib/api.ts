@@ -268,6 +268,9 @@ export const addToCart = async (
     variantId: string;
     quantity: number;
     size: string;
+    customDesign?: string;
+    designFiles?: string[];
+    designState?: any;
   },
   token?: string
 ) => {
@@ -324,6 +327,8 @@ export const checkoutCart = async (
       size?: string;
       quantity: number;
       customDesign?: string;
+      designFiles?: string[];
+      designState?: any;
       anyText?: string;
     }[];
     shippingAddress: {
@@ -360,6 +365,8 @@ export const buyNowOrder = async (
     };
     phoneNumber: string;
     customDesign?: string;
+    designFiles?: string[];
+    designState?: any;
     anyText?: string;
     guestName?: string;
     guestEmail?: string;
@@ -369,6 +376,24 @@ export const buyNowOrder = async (
   const headers: Record<string, string> = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await api.post("/api/orders/buynow", orderData, { headers });
+  return res.data;
+};
+
+/**
+ * Upload one or more customer design files (File/Blob) to S3 via the backend.
+ * Returns the stored URLs so they can be attached to an order.
+ */
+export const uploadDesigns = async (
+  files: File[],
+  token?: string
+): Promise<{ success: boolean; data?: { urls: string[] }; message?: string }> => {
+  const formData = new FormData();
+  files.forEach((f) => formData.append("designs", f));
+
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await api.post("/api/orders/upload-designs", formData, { headers });
   return res.data;
 };
 

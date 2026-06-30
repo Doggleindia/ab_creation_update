@@ -11,6 +11,36 @@ import {
   creditToAdminWallet,
 } from "../services/walletService.js";
 import { toStr } from "../utils/sanitize.js";
+import { uploadFileToS3 } from "../config/s3Service.js";
+
+/**
+ * Upload one or more customer design files to S3 and return their URLs.
+ * Used by the customization flows so the actual artwork is stored on the order.
+ */
+export const uploadDesigns = async (req, res) => {
+  try {
+    const files = req.files || [];
+    if (!files.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No design files uploaded." });
+    }
+
+    const urls = [];
+    for (const file of files) {
+      const result = await uploadFileToS3(file);
+      if (result?.Location) urls.push(result.Location);
+    }
+
+    return res.status(200).json({ success: true, data: { urls } });
+  } catch (err) {
+    console.error("uploadDesigns error:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Failed to upload design files.",
+    });
+  }
+};
 
 /**
  * Place order directly (Buy Now)
@@ -27,6 +57,8 @@ export const buyNow = async (req, res) => {
       shippingAddress,
       phoneNumber,
       customDesign,
+      designFiles,
+      designState,
       anyText,
     } = req.body;
 
@@ -235,6 +267,8 @@ export const buyNow = async (req, res) => {
               shippingAddress: finalShippingAddress,
               phoneNumber: finalPhoneNumber,
               customDesign,
+              designFiles: Array.isArray(designFiles) ? designFiles : [],
+              designState: designState || undefined,
               anyText,
               orderStatus: "pending",
               paymentStatus: "paid",
@@ -356,6 +390,8 @@ const resolveCheckoutItem = async (item) => {
     resolvedSize,
     totalAmount,
     customDesign: item.customDesign,
+    designFiles: Array.isArray(item.designFiles) ? item.designFiles : [],
+    designState: item.designState || undefined,
     anyText: item.anyText,
   };
 };
@@ -445,6 +481,8 @@ export const checkoutCart = async (req, res) => {
           shippingAddress: finalShippingAddress,
           phoneNumber: finalPhoneNumber,
           customDesign: r.customDesign,
+          designFiles: Array.isArray(r.designFiles) ? r.designFiles : [],
+          designState: r.designState || undefined,
           anyText: r.anyText,
           orderStatus: "pending",
           paymentStatus: "paid",
