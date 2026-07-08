@@ -33,7 +33,9 @@ import {
   Check,
   Move,
   Eye,
-  FileDown
+  FileDown,
+  Lock,
+  Sliders
 } from "lucide-react";
 
 // ==========================================
@@ -51,19 +53,174 @@ export interface CanvasElement {
   rotation: number; // Rotation in degrees (0 - 360)
   zIndex: number; // Layer position
 
+  // Universal (advanced)
+  opacity?: number; // 0 - 100 (default 100)
+  flipX?: boolean;
+  flipY?: boolean;
+  hidden?: boolean;
+  locked?: boolean;
+  name?: string; // friendly layer name
+
   // Text specific
   fontFamily?: string;
   fontSize?: number; // Base point size
+  fontWeight?: number; // 100 - 900 (overrides bold when set)
   color?: string;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
   align?: "left" | "center" | "right";
+  letterSpacing?: number; // px
+  lineHeight?: number; // multiplier (e.g. 1.2)
+  curve?: number; // arc amount -100..100 (0 = straight)
+  strokeColor?: string; // text outline color
+  strokeWidth?: number; // text outline width (px)
+  shadow?: boolean; // soft drop shadow
+
+  // Image specific
+  filter?: string; // CSS/canvas filter string, e.g. "grayscale(1)"
 
   // Shape specific
-  shapeType?: "rect" | "circle" | "star" | "triangle" | "heart";
+  shapeType?: "rect" | "circle" | "star" | "triangle" | "heart" | "line" | "arrow" | "hexagon" | "diamond";
   fillColor?: string;
 }
+
+// ---- Shared render helpers (keep the 2 CSS render paths consistent) ----
+const elementTransform = (el: CanvasElement): string =>
+  `rotate(${el.rotation}deg) scale(${el.flipX ? -1 : 1}, ${el.flipY ? -1 : 1})`;
+
+const elementOpacity = (el: CanvasElement): number =>
+  el.opacity == null ? 1 : Math.max(0, Math.min(100, el.opacity)) / 100;
+
+const textLayerStyle = (el: CanvasElement): React.CSSProperties => {
+  const style: React.CSSProperties = {
+    fontFamily: el.fontFamily,
+    color: el.color,
+    fontWeight: el.fontWeight ? el.fontWeight : el.bold ? "bold" : "normal",
+    fontStyle: el.italic ? "italic" : "normal",
+    textDecoration: el.underline ? "underline" : "none",
+    textAlign: el.align || "center",
+  };
+  if (el.letterSpacing != null) style.letterSpacing = `${el.letterSpacing}px`;
+  if (el.strokeColor && el.strokeWidth) {
+    (style as React.CSSProperties & { WebkitTextStroke?: string }).WebkitTextStroke =
+      `${el.strokeWidth}px ${el.strokeColor}`;
+  }
+  if (el.shadow) style.textShadow = "1px 1px 3px rgba(0,0,0,0.45)";
+  return style;
+};
+
+// Inline SVG for shapes shared between preview + interactive canvas.
+const ShapeSvg = ({ el }: { el: CanvasElement }) => {
+  const fill = el.fillColor || "#B87D4C";
+  switch (el.shapeType) {
+    case "rect":
+      return <div className="w-full h-full" style={{ backgroundColor: fill }} />;
+    case "circle":
+      return <div className="w-full h-full rounded-full" style={{ backgroundColor: fill }} />;
+    case "triangle":
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+          <polygon points="50,5 95,95 5,95" fill={fill} />
+        </svg>
+      );
+    case "diamond":
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+          <polygon points="50,2 98,50 50,98 2,50" fill={fill} />
+        </svg>
+      );
+    case "hexagon":
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+          <polygon points="25,5 75,5 98,50 75,95 25,95 2,50" fill={fill} />
+        </svg>
+      );
+    case "line":
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+          <rect x="0" y="44" width="100" height="12" fill={fill} />
+        </svg>
+      );
+    case "arrow":
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+          <polygon points="0,38 60,38 60,18 98,50 60,82 60,62 0,62" fill={fill} />
+        </svg>
+      );
+    case "star":
+      return (
+        <svg viewBox="0 0 24 24" className="w-full h-full" preserveAspectRatio="none">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill={fill} />
+        </svg>
+      );
+    case "heart":
+      return (
+        <svg viewBox="0 0 24 24" className="w-full h-full" preserveAspectRatio="none">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill={fill} />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+// Quadratic arc path for curved text (shared by CSS + export).
+const arcPathD = (curve: number): string => {
+  const sag = (curve / 100) * 35;
+  const baseY = 55;
+  return `M 5,${baseY} Q 50,${baseY - sag} 95,${baseY}`;
+};
+
+// Renders a text layer: straight (multi-line + line-height) or curved (SVG arc).
+const TextLayer = ({ el }: { el: CanvasElement }) => {
+  if (el.curve) {
+    const fw = el.fontWeight ? el.fontWeight : el.bold ? 700 : 400;
+    return (
+      <svg
+        viewBox="0 0 100 100"
+        width="100%"
+        height="100%"
+        preserveAspectRatio="xMidYMid meet"
+        style={{ overflow: "visible" }}
+        className="pointer-events-none select-none"
+      >
+        <defs>
+          <path id={`tp_${el.id}`} d={arcPathD(el.curve)} fill="none" />
+        </defs>
+        <text
+          fill={el.color || "#FFFFFF"}
+          fontFamily={el.fontFamily}
+          fontWeight={fw}
+          fontStyle={el.italic ? "italic" : "normal"}
+          fontSize={22}
+          letterSpacing={el.letterSpacing || 0}
+          stroke={el.strokeColor && el.strokeWidth ? el.strokeColor : "none"}
+          strokeWidth={el.strokeWidth || 0}
+          style={{ textAnchor: "middle", paintOrder: "stroke" }}
+        >
+          <textPath href={`#tp_${el.id}`} startOffset="50%">
+            {el.content}
+          </textPath>
+        </text>
+      </svg>
+    );
+  }
+  return (
+    <div
+      style={{
+        ...textLayerStyle(el),
+        fontSize: "14px",
+        width: "100%",
+        whiteSpace: "pre-line",
+        lineHeight: el.lineHeight ?? 1.1,
+      }}
+      className="select-none pointer-events-none break-words"
+    >
+      {el.content}
+    </div>
+  );
+};
 
 export type DesignSide = "front" | "back";
 
@@ -94,7 +251,29 @@ const FONTS = [
   "Impact",
   "Comic Sans MS",
   "Georgia",
-  "Courier New"
+  "Courier New",
+  "Arial",
+  "Times New Roman",
+  "Verdana",
+  "Trebuchet MS",
+  "Oswald",
+  "Bebas Neue",
+  "Montserrat",
+  "Pacifico"
+];
+
+const FONT_WEIGHTS = [300, 400, 500, 600, 700, 800, 900];
+
+const STICKERS = ["⭐", "🔥", "❤️", "😎", "💀", "👑", "⚡", "🌈", "✌️", "🎯", "🚀", "🏆", "🎵", "☀️", "🌙", "💎"];
+
+const IMAGE_FILTERS: { label: string; value: string }[] = [
+  { label: "None", value: "" },
+  { label: "Grayscale", value: "grayscale(1)" },
+  { label: "Sepia", value: "sepia(0.7)" },
+  { label: "Bright", value: "brightness(1.25)" },
+  { label: "Dark", value: "brightness(0.8)" },
+  { label: "Contrast", value: "contrast(1.4)" },
+  { label: "Invert", value: "invert(1)" },
 ];
 
 // ==========================================
@@ -221,7 +400,8 @@ const TShirtPreviewCard = ({
 
       {/* PRINTABLE AREA (HIDDEN/BORDERLESS IN PREVIEW) */}
       <div className="absolute left-[32%] top-[25%] w-[36%] h-[46%] z-40 overflow-hidden pointer-events-none">
-        {elementsList.map((el) => (
+        {elementsList.map((el) =>
+          el.hidden ? null : (
           <div
             key={el.id}
             style={{
@@ -230,7 +410,8 @@ const TShirtPreviewCard = ({
               top: `${el.y}%`,
               width: `${el.width}%`,
               height: `${el.height}%`,
-              transform: `rotate(${el.rotation}deg)`,
+              transform: elementTransform(el),
+              opacity: elementOpacity(el),
               zIndex: el.zIndex
             }}
             className="flex items-center justify-center w-full h-full"
@@ -238,52 +419,22 @@ const TShirtPreviewCard = ({
             {el.type === "image" && (
               <img loading="lazy" decoding="async"
                 src={el.content}
+                style={el.filter ? { filter: el.filter } : undefined}
                 className="w-full h-full object-contain select-none pointer-events-none"
                 alt="preview element"
               />
             )}
 
-            {el.type === "text" && (
-              <div
-                style={{
-                  fontFamily: el.fontFamily,
-                  color: el.color,
-                  fontWeight: el.bold ? "bold" : "normal",
-                  fontStyle: el.italic ? "italic" : "normal",
-                  textDecoration: el.underline ? "underline" : "none",
-                  textAlign: el.align || "center",
-                  fontSize: "14px", // Matches interactive design container scaling
-                  width: "100%"
-                }}
-                className="select-none pointer-events-none break-words leading-tight"
-              >
-                {el.content}
-              </div>
-            )}
+            {el.type === "text" && <TextLayer el={el} />}
 
             {el.type === "shape" && (
               <div className="w-full h-full pointer-events-none select-none">
-                {el.shapeType === "rect" && <div className="w-full h-full" style={{ backgroundColor: el.fillColor }} />}
-                {el.shapeType === "circle" && <div className="w-full h-full rounded-full" style={{ backgroundColor: el.fillColor }} />}
-                {el.shapeType === "triangle" && (
-                  <svg viewBox="0 0 100 100" className="w-full h-full">
-                    <polygon points="50,5 95,95 5,95" fill={el.fillColor} />
-                  </svg>
-                )}
-                {el.shapeType === "star" && (
-                  <svg viewBox="0 0 24 24" className="w-full h-full">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill={el.fillColor} />
-                  </svg>
-                )}
-                {el.shapeType === "heart" && (
-                  <svg viewBox="0 0 24 24" className="w-full h-full">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill={el.fillColor} />
-                  </svg>
-                )}
+                <ShapeSvg el={el} />
               </div>
             )}
           </div>
-        ))}
+          )
+        )}
       </div>
     </div>
   );
@@ -322,6 +473,9 @@ export default function TShirtDesigner({
   // Canvas View State
   const [tshirtColor, setTshirtColor] = useState("#171717");
   const [zoom, setZoom] = useState(1);
+  const [snapGuides, setSnapGuides] = useState<{ x: boolean; y: boolean }>({ x: false, y: false });
+  const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
+  const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [previewSide, setPreviewSide] = useState<"front" | "back" | "both">("both");
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
@@ -499,6 +653,85 @@ export default function TShirtDesigner({
   };
 
   // ==========================================
+  // KEYBOARD SHORTCUTS
+  // ==========================================
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      const isTyping =
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        !!target?.isContentEditable;
+
+      const meta = e.ctrlKey || e.metaKey;
+
+      // Undo / Redo work even while typing in some editors, but here we keep
+      // them global except when focused in a text field.
+      if (meta && (e.key === "z" || e.key === "Z")) {
+        if (isTyping) return;
+        e.preventDefault();
+        if (e.shiftKey) handleRedo();
+        else handleUndo();
+        return;
+      }
+      if (meta && (e.key === "y" || e.key === "Y")) {
+        if (isTyping) return;
+        e.preventDefault();
+        handleRedo();
+        return;
+      }
+
+      if (isTyping || !selectedElementId) return;
+
+      // Duplicate
+      if (meta && (e.key === "d" || e.key === "D")) {
+        e.preventDefault();
+        duplicateElement(selectedElementId);
+        return;
+      }
+
+      // Delete
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        deleteElement(selectedElementId);
+        return;
+      }
+
+      // Deselect
+      if (e.key === "Escape") {
+        setSelectedElementId(null);
+        return;
+      }
+
+      // Arrow-key nudge (Shift = larger step)
+      const el = elements[currentSide].find((x) => x.id === selectedElementId);
+      if (!el) return;
+      const step = e.shiftKey ? 5 : 1;
+      let dx = 0;
+      let dy = 0;
+      if (e.key === "ArrowLeft") dx = -step;
+      else if (e.key === "ArrowRight") dx = step;
+      else if (e.key === "ArrowUp") dy = -step;
+      else if (e.key === "ArrowDown") dy = step;
+      else return;
+
+      e.preventDefault();
+      updateElementProperties(selectedElementId, {
+        x: Math.max(0, Math.min(100, el.x + dx)),
+        y: Math.max(0, Math.min(100, el.y + dy)),
+      });
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, selectedElementId, currentSide, elements, history, historyIndex]);
+
+  // ==========================================
   // TEXT CREATION
   // ==========================================
   const handleAddText = () => {
@@ -553,16 +786,82 @@ export default function TShirtDesigner({
   // ==========================================
   // SHAPE CREATION
   // ==========================================
-  const handleAddShape = (shapeType: "rect" | "circle" | "star" | "triangle" | "heart") => {
+  const handleAddShape = (shapeType: NonNullable<CanvasElement["shapeType"]>) => {
     addElement({
       type: "shape",
       content: shapeType,
-      width: 25,
-      height: 25,
+      width: shapeType === "line" ? 40 : 25,
+      height: shapeType === "line" ? 8 : 25,
       shapeType,
       fillColor: "#B87D4C"
     });
   };
+
+  // Insert an emoji/sticker as a text layer
+  const handleAddSticker = (emoji: string) => {
+    addElement({
+      type: "text",
+      content: emoji,
+      width: 18,
+      height: 18,
+      fontFamily: "Outfit",
+      fontSize: 40,
+      color: "#FFFFFF",
+      align: "center",
+    } as Omit<CanvasElement, "id" | "zIndex" | "x" | "y" | "rotation">);
+  };
+
+  // One-click starter templates (text/shape based, no external assets)
+  const applyTemplate = (templateId: string) => {
+    const base = { rotation: 0 };
+    let newEls: Omit<CanvasElement, "id" | "zIndex">[] = [];
+    if (templateId === "badge") {
+      newEls = [
+        { ...base, type: "shape", content: "circle", shapeType: "circle", fillColor: "#B87D4C", x: 25, y: 20, width: 50, height: 50 },
+        { ...base, type: "text", content: "EST. 2024", fontFamily: "Bebas Neue", fontSize: 30, color: "#FFFFFF", align: "center", x: 20, y: 40, width: 60, height: 20, letterSpacing: 2 },
+      ];
+    } else if (templateId === "headline") {
+      newEls = [
+        { ...base, type: "text", content: "YOUR", fontFamily: "Impact", fontSize: 48, color: "#FFFFFF", align: "center", x: 10, y: 22, width: 80, height: 22 },
+        { ...base, type: "text", content: "BRAND", fontFamily: "Impact", fontSize: 48, color: "#B87D4C", align: "center", x: 10, y: 48, width: 80, height: 22, strokeColor: "#FFFFFF", strokeWidth: 1 },
+      ];
+    } else if (templateId === "stacked") {
+      newEls = [
+        { ...base, type: "shape", content: "rect", shapeType: "rect", fillColor: "#B87D4C", x: 15, y: 44, width: 70, height: 6 },
+        { ...base, type: "text", content: "Original", fontFamily: "Playfair Display", fontSize: 30, italic: true, color: "#FFFFFF", align: "center", x: 10, y: 28, width: 80, height: 16 },
+        { ...base, type: "text", content: "CLASSICS", fontFamily: "Oswald", fontSize: 26, color: "#FFFFFF", align: "center", x: 10, y: 54, width: 80, height: 16, letterSpacing: 4 },
+      ];
+    }
+    if (!newEls.length) return;
+    const startZ = elements[currentSide].reduce((m, e) => Math.max(m, e.zIndex), 0);
+    const built: CanvasElement[] = newEls.map((e, i) => ({
+      ...e,
+      id: `el_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`,
+      zIndex: startZ + i + 1,
+    }));
+    updateElementsAndHistory([...elements[currentSide], ...built]);
+  };
+
+  // Reorder layers via drag in the Layer Manager (top of list = front-most).
+  const reorderLayers = (draggedId: string, targetId: string) => {
+    if (!draggedId || draggedId === targetId) return;
+    const ordered = [...elements[currentSide]].sort((a, b) => b.zIndex - a.zIndex);
+    const from = ordered.findIndex((e) => e.id === draggedId);
+    const to = ordered.findIndex((e) => e.id === targetId);
+    if (from === -1 || to === -1) return;
+    const [moved] = ordered.splice(from, 1);
+    ordered.splice(to, 0, moved);
+    const n = ordered.length;
+    const updated = elements[currentSide].map((el) => {
+      const idx = ordered.findIndex((s) => s.id === el.id);
+      return { ...el, zIndex: n - idx };
+    });
+    updateElementsAndHistory(updated);
+  };
+
+  const layerLabel = (el: CanvasElement): string =>
+    el.name ||
+    (el.type === "text" ? el.content : el.type === "image" ? "Image Logo" : `Shape: ${el.content}`);
 
   // ==========================================
   // CANVAS GESTURE GIANTS (DRAG, RESIZE, ROTATE)
@@ -619,8 +918,18 @@ export default function TShirtDesigner({
 
     if (inter.type === "drag") {
       // Calculate boundaries safely (0-100)
-      const newX = Math.max(0, Math.min(100 - target.width, inter.initialX + deltaX));
-      const newY = Math.max(0, Math.min(100 - target.height, inter.initialY + deltaY));
+      let newX = Math.max(0, Math.min(100 - target.width, inter.initialX + deltaX));
+      let newY = Math.max(0, Math.min(100 - target.height, inter.initialY + deltaY));
+
+      // Snap element center to the canvas center (50%) within a small threshold
+      const THRESHOLD = 2.5;
+      const centerX = newX + target.width / 2;
+      const centerY = newY + target.height / 2;
+      const snapX = Math.abs(centerX - 50) < THRESHOLD;
+      const snapY = Math.abs(centerY - 50) < THRESHOLD;
+      if (snapX) newX = 50 - target.width / 2;
+      if (snapY) newY = 50 - target.height / 2;
+      setSnapGuides({ x: snapX, y: snapY });
 
       setElements((prev) => ({
         ...prev,
@@ -685,6 +994,7 @@ export default function TShirtDesigner({
       pushToHistory(updatedElements, currentSide);
       interactionRef.current = null;
     }
+    setSnapGuides({ x: false, y: false });
     document.removeEventListener("mousemove", handleInteractionMove);
     document.removeEventListener("mouseup", handleInteractionEnd);
     document.removeEventListener("touchmove", handleInteractionMove);
@@ -800,6 +1110,7 @@ export default function TShirtDesigner({
         const sorted = [...elements[side]].sort((a, b) => a.zIndex - b.zIndex);
 
         for (const el of sorted) {
+          if (el.hidden) continue;
           ctx.save();
 
           // Element absolute properties
@@ -808,9 +1119,15 @@ export default function TShirtDesigner({
           const elW = (el.width / 100) * pw;
           const elH = (el.height / 100) * ph;
 
-          // Pivot and rotate canvas
+          // Opacity
+          ctx.globalAlpha = el.opacity == null ? 1 : Math.max(0, Math.min(100, el.opacity)) / 100;
+
+          // Pivot, rotate and flip canvas
           ctx.translate(elX + elW / 2, elY + elH / 2);
           ctx.rotate((el.rotation * Math.PI) / 180);
+          if (el.flipX || el.flipY) {
+            ctx.scale(el.flipX ? -1 : 1, el.flipY ? -1 : 1);
+          }
 
           if (el.type === "image") {
             // Draw custom image layers
@@ -818,43 +1135,87 @@ export default function TShirtDesigner({
               const layerImg = new Image();
               layerImg.crossOrigin = "anonymous";
               layerImg.onload = () => {
+                if (el.filter) {
+                  try { ctx.filter = el.filter; } catch { /* unsupported */ }
+                }
                 ctx.drawImage(layerImg, -elW / 2, -elH / 2, elW, elH);
+                ctx.filter = "none";
                 imgResolve();
               };
               layerImg.onerror = () => imgResolve(); // fallback
               layerImg.src = el.content;
             });
           } else if (el.type === "text") {
-            // Text typography options
-            const fStyle = `${el.italic ? "italic " : ""}${el.bold ? "bold " : ""}`;
-            const fSize = (el.fontSize || 24) * 2; // high resolution scale
-            const fFamily = el.fontFamily || "Outfit";
-            ctx.font = `${fStyle}${fSize}px ${fFamily}`;
-            ctx.fillStyle = el.color || "#FFFFFF";
-            ctx.textAlign = el.align || "center";
-            ctx.textBaseline = "middle";
+            if (el.curve) {
+              // Curved text: rasterize an SVG arc and draw it into the element box
+              await new Promise<void>((res) => {
+                const fw = el.fontWeight ? el.fontWeight : el.bold ? 700 : 400;
+                const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const strokeAttr = el.strokeColor && el.strokeWidth ? ` stroke="${el.strokeColor}" stroke-width="${el.strokeWidth}" paint-order="stroke"` : "";
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${Math.max(1, Math.round(elW))}" height="${Math.max(1, Math.round(elH))}"><defs><path id="tp" d="${arcPathD(el.curve)}" fill="none"/></defs><text fill="${el.color || "#FFFFFF"}" font-family="${el.fontFamily || "Outfit"}" font-weight="${fw}" font-style="${el.italic ? "italic" : "normal"}" font-size="22" letter-spacing="${el.letterSpacing || 0}" text-anchor="middle"${strokeAttr}><textPath href="#tp" startOffset="50%">${esc(el.content)}</textPath></text></svg>`;
+                const im = new Image();
+                im.onload = () => { ctx.drawImage(im, -elW / 2, -elH / 2, elW, elH); res(); };
+                im.onerror = () => res();
+                im.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg)));
+              });
+            } else {
+              // Straight (multi-line) text
+              const fWeight = el.fontWeight ? `${el.fontWeight} ` : el.bold ? "bold " : "";
+              const fStyle = `${el.italic ? "italic " : ""}${fWeight}`;
+              const fSize = (el.fontSize || 24) * 2; // high resolution scale
+              const fFamily = el.fontFamily || "Outfit";
+              ctx.font = `${fStyle}${fSize}px ${fFamily}`;
+              ctx.fillStyle = el.color || "#FFFFFF";
+              ctx.textAlign = el.align || "center";
+              ctx.textBaseline = "middle";
+              try { (ctx as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = `${el.letterSpacing || 0}px`; } catch { /* unsupported */ }
 
-            const textX = el.align === "left" ? -elW / 2 : el.align === "right" ? elW / 2 : 0;
-            ctx.fillText(el.content, textX, 0);
+              const textX = el.align === "left" ? -elW / 2 : el.align === "right" ? elW / 2 : 0;
+              const lines = el.content.split("\n");
+              const lh = (el.lineHeight ?? 1.1) * fSize;
+              const startY = -((lines.length - 1) * lh) / 2;
 
-            if (el.underline) {
-              const metrics = ctx.measureText(el.content);
-              const textWidth = metrics.width;
-              ctx.lineWidth = fSize / 12;
-              ctx.strokeStyle = el.color || "#FFFFFF";
-              ctx.beginPath();
-              const lineY = fSize / 2;
-              if (el.align === "center") {
-                ctx.moveTo(-textWidth / 2, lineY);
-                ctx.lineTo(textWidth / 2, lineY);
-              } else if (el.align === "left") {
-                ctx.moveTo(-elW / 2, lineY);
-                ctx.lineTo(-elW / 2 + textWidth, lineY);
-              } else {
-                ctx.moveTo(elW / 2 - textWidth, lineY);
-                ctx.lineTo(elW / 2, lineY);
-              }
-              ctx.stroke();
+              lines.forEach((line, i) => {
+                const ly = startY + i * lh;
+
+                if (el.shadow) {
+                  ctx.shadowColor = "rgba(0,0,0,0.45)";
+                  ctx.shadowBlur = fSize / 8;
+                  ctx.shadowOffsetX = fSize / 24;
+                  ctx.shadowOffsetY = fSize / 24;
+                }
+                ctx.fillText(line, textX, ly);
+                ctx.shadowColor = "transparent";
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                if (el.strokeColor && el.strokeWidth) {
+                  ctx.lineWidth = el.strokeWidth * 2;
+                  ctx.strokeStyle = el.strokeColor;
+                  ctx.lineJoin = "round";
+                  ctx.strokeText(line, textX, ly);
+                }
+
+                if (el.underline) {
+                  const textWidth = ctx.measureText(line).width;
+                  ctx.lineWidth = fSize / 12;
+                  ctx.strokeStyle = el.color || "#FFFFFF";
+                  ctx.beginPath();
+                  const lineY = ly + fSize / 2;
+                  if ((el.align || "center") === "center") {
+                    ctx.moveTo(-textWidth / 2, lineY);
+                    ctx.lineTo(textWidth / 2, lineY);
+                  } else if (el.align === "left") {
+                    ctx.moveTo(-elW / 2, lineY);
+                    ctx.lineTo(-elW / 2 + textWidth, lineY);
+                  } else {
+                    ctx.moveTo(elW / 2 - textWidth, lineY);
+                    ctx.lineTo(elW / 2, lineY);
+                  }
+                  ctx.stroke();
+                }
+              });
             }
           } else if (el.type === "shape") {
             ctx.fillStyle = el.fillColor || "#B87D4C";
@@ -902,6 +1263,43 @@ export default function TShirtDesigner({
                 rot += step;
               }
               ctx.lineTo(0, -outerRadius);
+              ctx.closePath();
+              ctx.fill();
+            } else if (el.shapeType === "diamond") {
+              ctx.beginPath();
+              ctx.moveTo(0, -elH / 2);
+              ctx.lineTo(elW / 2, 0);
+              ctx.lineTo(0, elH / 2);
+              ctx.lineTo(-elW / 2, 0);
+              ctx.closePath();
+              ctx.fill();
+            } else if (el.shapeType === "hexagon") {
+              const hx: [number, number][] = [
+                [-0.25 * elW, -0.45 * elH],
+                [0.25 * elW, -0.45 * elH],
+                [0.48 * elW, 0],
+                [0.25 * elW, 0.45 * elH],
+                [-0.25 * elW, 0.45 * elH],
+                [-0.48 * elW, 0],
+              ];
+              ctx.beginPath();
+              hx.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
+              ctx.closePath();
+              ctx.fill();
+            } else if (el.shapeType === "line") {
+              ctx.fillRect(-elW / 2, -elH * 0.06, elW, elH * 0.12);
+            } else if (el.shapeType === "arrow") {
+              const ar: [number, number][] = [
+                [-0.5 * elW, -0.12 * elH],
+                [0.1 * elW, -0.12 * elH],
+                [0.1 * elW, -0.32 * elH],
+                [0.48 * elW, 0],
+                [0.1 * elW, 0.32 * elH],
+                [0.1 * elW, 0.12 * elH],
+                [-0.5 * elW, 0.12 * elH],
+              ];
+              ctx.beginPath();
+              ar.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
               ctx.closePath();
               ctx.fill();
             }
@@ -1646,6 +2044,58 @@ export default function TShirtDesigner({
                           <Heart className="h-5 w-5 text-neutral-400 group-hover:text-white" />
                           <span className="text-[10px] text-neutral-400">Heart</span>
                         </button>
+                        {([
+                          ["diamond", "◆", "Diamond"],
+                          ["hexagon", "⬢", "Hexagon"],
+                          ["line", "▬", "Line"],
+                          ["arrow", "➜", "Arrow"],
+                        ] as [NonNullable<CanvasElement["shapeType"]>, string, string][]).map(([type, glyph, label]) => (
+                          <button
+                            key={type}
+                            onClick={() => handleAddShape(type)}
+                            className="flex flex-col items-center justify-center border border-neutral-800 hover:border-[#B87D4C] bg-neutral-900/30 rounded-xl p-3.5 gap-2 transition-all group"
+                          >
+                            <span className="text-lg leading-none text-neutral-400 group-hover:text-white">{glyph}</span>
+                            <span className="text-[10px] text-neutral-400">{label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* STICKERS */}
+                      <div className="mt-2">
+                        <h4 className="text-sm font-bold text-neutral-200 mb-2">Stickers</h4>
+                        <div className="grid grid-cols-8 gap-1.5">
+                          {STICKERS.map((emoji) => (
+                            <button
+                              key={emoji}
+                              onClick={() => handleAddSticker(emoji)}
+                              className="aspect-square flex items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900/30 hover:border-[#B87D4C] text-lg transition-all"
+                              title="Add sticker"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* TEMPLATES */}
+                      <div className="mt-2">
+                        <h4 className="text-sm font-bold text-neutral-200 mb-2">Quick Templates</h4>
+                        <div className="flex flex-col gap-2">
+                          {([
+                            ["headline", "YOUR BRAND headline"],
+                            ["badge", "Circular badge"],
+                            ["stacked", "Stacked classics"],
+                          ] as [string, string][]).map(([id, label]) => (
+                            <button
+                              key={id}
+                              onClick={() => applyTemplate(id)}
+                              className="w-full py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 hover:border-[#B87D4C] hover:text-[#B87D4C] transition-all text-xs"
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1661,21 +2111,63 @@ export default function TShirtDesigner({
                           {[...elements[currentSide]].sort((a, b) => b.zIndex - a.zIndex).map((el) => (
                             <div
                               key={el.id}
+                              draggable
+                              onDragStart={() => setDraggedLayerId(el.id)}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={() => { if (draggedLayerId) reorderLayers(draggedLayerId, el.id); setDraggedLayerId(null); }}
+                              onDragEnd={() => setDraggedLayerId(null)}
                               onClick={() => setSelectedElementId(el.id)}
-                              className={`flex items-center justify-between rounded-lg p-2 border transition-all cursor-pointer ${selectedElementId === el.id
+                              className={`flex items-center justify-between rounded-lg p-2 border transition-all cursor-pointer ${draggedLayerId === el.id ? "opacity-50" : ""} ${selectedElementId === el.id
                                 ? "border-[#B87D4C] bg-[#B87D4C]/5 text-[#B87D4C]"
                                 : "border-neutral-800 bg-neutral-900/40 text-neutral-300 hover:bg-neutral-900"
                                 }`}
                             >
-                              <div className="flex items-center gap-2 truncate">
+                              <div className="flex items-center gap-2 truncate flex-1">
+                                <Move className="h-3 w-3 flex-shrink-0 text-neutral-600 cursor-grab" />
                                 {el.type === "text" && <Type className="h-3.5 w-3.5 flex-shrink-0" />}
                                 {el.type === "image" && <Upload className="h-3.5 w-3.5 flex-shrink-0" />}
                                 {el.type === "shape" && <Square className="h-3.5 w-3.5 flex-shrink-0" />}
-                                <span className="text-xs truncate font-medium">
-                                  {el.type === "text" ? el.content : el.type === "image" ? "Image Logo" : `Shape: ${el.content}`}
-                                </span>
+                                {editingLayerId === el.id ? (
+                                  <input
+                                    autoFocus
+                                    value={el.name ?? layerLabel(el)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => updateElementProperties(el.id, { name: e.target.value })}
+                                    onBlur={() => setEditingLayerId(null)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") setEditingLayerId(null); }}
+                                    className="text-xs font-medium bg-neutral-950 border border-neutral-700 rounded px-1 py-0.5 w-full outline-none text-white"
+                                  />
+                                ) : (
+                                  <span
+                                    className="text-xs truncate font-medium"
+                                    onDoubleClick={(e) => { e.stopPropagation(); setEditingLayerId(el.id); }}
+                                    title="Double-click to rename"
+                                  >
+                                    {layerLabel(el)}
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateElementProperties(el.id, { hidden: !el.hidden });
+                                  }}
+                                  className={`p-1 rounded ${el.hidden ? "text-neutral-600" : "text-neutral-400 hover:text-white"}`}
+                                  title={el.hidden ? "Show" : "Hide"}
+                                >
+                                  <Eye className="h-3 w-3" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateElementProperties(el.id, { locked: !el.locked });
+                                  }}
+                                  className={`p-1 rounded ${el.locked ? "text-[#B87D4C]" : "text-neutral-400 hover:text-white"}`}
+                                  title={el.locked ? "Unlock" : "Lock"}
+                                >
+                                  <Lock className="h-3 w-3" />
+                                </button>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1751,9 +2243,18 @@ export default function TShirtDesigner({
                       Printable Area
                     </div>
 
+                    {/* CENTER SNAP GUIDES */}
+                    {snapGuides.x && (
+                      <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[1px] bg-[#22d3ee] z-[60] pointer-events-none" />
+                    )}
+                    {snapGuides.y && (
+                      <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[1px] bg-[#22d3ee] z-[60] pointer-events-none" />
+                    )}
+
                     {/* RENDER CANVAS ELEMENTS */}
                     {elements[currentSide].map((el) => {
                       const isSelected = el.id === selectedElementId;
+                      if (el.hidden) return null;
                       return (
                         <div
                           key={el.id}
@@ -1764,61 +2265,31 @@ export default function TShirtDesigner({
                             top: `${el.y}%`,
                             width: `${el.width}%`,
                             height: `${el.height}%`,
-                            transform: `rotate(${el.rotation}deg)`,
+                            transform: elementTransform(el),
+                            opacity: elementOpacity(el),
                             zIndex: el.zIndex
                           }}
-                          className={`group flex items-center justify-center ${isSelected ? "ring-2 ring-[#B87D4C] cursor-move" : "hover:ring-1 hover:ring-neutral-500 cursor-pointer"
+                          className={`group flex items-center justify-center ${el.locked ? "cursor-default" : isSelected ? "ring-2 ring-[#B87D4C] cursor-move" : "hover:ring-1 hover:ring-neutral-500 cursor-pointer"
                             }`}
-                          onMouseDown={(e) => handleInteractionStart(e, el, "drag")}
-                          onTouchStart={(e) => handleInteractionStart(e, el, "drag")}
+                          onMouseDown={(e) => { if (!el.locked) handleInteractionStart(e, el, "drag"); }}
+                          onTouchStart={(e) => { if (!el.locked) handleInteractionStart(e, el, "drag"); }}
                         >
 
                           {/* ELEMENT INTERNAL CONTENT */}
                           {el.type === "image" && (
                             <img loading="lazy" decoding="async"
                               src={el.content}
+                              style={el.filter ? { filter: el.filter } : undefined}
                               className="w-full h-full object-contain select-none pointer-events-none"
                               alt="custom design layer"
                             />
                           )}
 
-                          {el.type === "text" && (
-                            <div
-                              style={{
-                                fontFamily: el.fontFamily,
-                                color: el.color,
-                                fontWeight: el.bold ? "bold" : "normal",
-                                fontStyle: el.italic ? "italic" : "normal",
-                                textDecoration: el.underline ? "underline" : "none",
-                                textAlign: el.align || "center",
-                                fontSize: "14px", // Dynamic auto-scales inside wrapper
-                                width: "100%"
-                              }}
-                              className="select-none pointer-events-none break-words leading-tight"
-                            >
-                              {el.content}
-                            </div>
-                          )}
+                          {el.type === "text" && <TextLayer el={el} />}
 
                           {el.type === "shape" && (
                             <div className="w-full h-full pointer-events-none select-none">
-                              {el.shapeType === "rect" && <div className="w-full h-full" style={{ backgroundColor: el.fillColor }} />}
-                              {el.shapeType === "circle" && <div className="w-full h-full rounded-full" style={{ backgroundColor: el.fillColor }} />}
-                              {el.shapeType === "triangle" && (
-                                <svg viewBox="0 0 100 100" className="w-full h-full">
-                                  <polygon points="50,5 95,95 5,95" fill={el.fillColor} />
-                                </svg>
-                              )}
-                              {el.shapeType === "star" && (
-                                <svg viewBox="0 0 24 24" className="w-full h-full">
-                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill={el.fillColor} />
-                                </svg>
-                              )}
-                              {el.shapeType === "heart" && (
-                                <svg viewBox="0 0 24 24" className="w-full h-full">
-                                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill={el.fillColor} />
-                                </svg>
-                              )}
+                              <ShapeSvg el={el} />
                             </div>
                           )}
 
@@ -1954,6 +2425,20 @@ export default function TShirtDesigner({
                         <span>• Select a sidebar tool on the left to add a custom image, shapes or editable text layer.</span>
                         <span>• Click on any layer directly inside the dashed printable box to scale, rotate, drag, layer order, duplicate or edit properties.</span>
                       </div>
+
+                      {/* Keyboard shortcuts */}
+                      <div className="rounded-xl border border-neutral-800 bg-neutral-900/30 p-4 gap-2 flex flex-col text-[11px] leading-normal text-neutral-400">
+                        <span className="font-bold text-neutral-300">⌨️ Keyboard Shortcuts</span>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                          <span><kbd className="font-mono text-neutral-300">Del</kbd> · delete layer</span>
+                          <span><kbd className="font-mono text-neutral-300">Ctrl+D</kbd> · duplicate</span>
+                          <span><kbd className="font-mono text-neutral-300">Ctrl+Z</kbd> · undo</span>
+                          <span><kbd className="font-mono text-neutral-300">Ctrl+Y</kbd> · redo</span>
+                          <span><kbd className="font-mono text-neutral-300">← ↑ → ↓</kbd> · nudge</span>
+                          <span><kbd className="font-mono text-neutral-300">Shift</kbd>+arrows · move 5×</span>
+                          <span><kbd className="font-mono text-neutral-300">Esc</kbd> · deselect</span>
+                        </div>
+                      </div>
                     </div>
                   ) : (
 
@@ -1978,12 +2463,13 @@ export default function TShirtDesigner({
                           {/* Editable text string */}
                           <div className="flex flex-col gap-2">
                             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Edit Text Value</label>
-                            <input
-                              type="text"
+                            <textarea
+                              rows={2}
                               value={activeElement.content}
                               onChange={(e) => updateElementProperties(activeElement.id, { content: e.target.value })}
-                              className="w-full bg-neutral-900 border border-neutral-800 focus:border-[#B87D4C] rounded-lg px-3 py-2 text-xs font-medium text-white outline-none select-text"
+                              className="w-full bg-neutral-900 border border-neutral-800 focus:border-[#B87D4C] rounded-lg px-3 py-2 text-xs font-medium text-white outline-none select-text resize-none"
                             />
+                            <span className="text-[9px] text-neutral-600">Press Enter for a new line (multi-line text).</span>
                           </div>
 
                           {/* Font Family Selector */}
@@ -2118,6 +2604,98 @@ export default function TShirtDesigner({
                             </div>
                           </div>
 
+                          {/* Font weight */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Font Weight</label>
+                            <select
+                              value={activeElement.fontWeight || (activeElement.bold ? 700 : 400)}
+                              onChange={(e) => updateElementProperties(activeElement.id, { fontWeight: Number(e.target.value) })}
+                              className="bg-neutral-900 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 outline-none"
+                            >
+                              {FONT_WEIGHTS.map((w) => (
+                                <option key={w} value={w}>{w}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Letter spacing */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                              Letter Spacing · {activeElement.letterSpacing || 0}px
+                            </label>
+                            <input
+                              type="range"
+                              min="-4"
+                              max="20"
+                              value={activeElement.letterSpacing || 0}
+                              onChange={(e) => updateElementProperties(activeElement.id, { letterSpacing: Number(e.target.value) })}
+                              className="w-full h-1 bg-neutral-800 accent-[#B87D4C] rounded-lg cursor-pointer"
+                            />
+                          </div>
+
+                          {/* Line height */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                              Line Height · {(activeElement.lineHeight ?? 1.1).toFixed(2)}
+                            </label>
+                            <input
+                              type="range"
+                              min="0.8"
+                              max="2.5"
+                              step="0.05"
+                              value={activeElement.lineHeight ?? 1.1}
+                              onChange={(e) => updateElementProperties(activeElement.id, { lineHeight: Number(e.target.value) })}
+                              className="w-full h-1 bg-neutral-800 accent-[#B87D4C] rounded-lg cursor-pointer"
+                            />
+                          </div>
+
+                          {/* Curve */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                              Curve · {activeElement.curve || 0}
+                            </label>
+                            <input
+                              type="range"
+                              min="-100"
+                              max="100"
+                              value={activeElement.curve || 0}
+                              onChange={(e) => updateElementProperties(activeElement.id, { curve: Number(e.target.value) })}
+                              className="w-full h-1 bg-neutral-800 accent-[#B87D4C] rounded-lg cursor-pointer"
+                            />
+                            <span className="text-[9px] text-neutral-600">Bends text along an arc. Curve disables multi-line.</span>
+                          </div>
+
+                          {/* Outline / stroke */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                              Outline · {activeElement.strokeWidth || 0}px
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                value={activeElement.strokeColor || "#000000"}
+                                onChange={(e) => updateElementProperties(activeElement.id, { strokeColor: e.target.value })}
+                                className="w-7 h-7 rounded-md border-0 bg-transparent cursor-pointer flex-shrink-0"
+                              />
+                              <input
+                                type="range"
+                                min="0"
+                                max="6"
+                                value={activeElement.strokeWidth || 0}
+                                onChange={(e) => updateElementProperties(activeElement.id, { strokeWidth: Number(e.target.value) })}
+                                className="w-full h-1 bg-neutral-800 accent-[#B87D4C] rounded-lg cursor-pointer"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Drop shadow */}
+                          <button
+                            onClick={() => updateElementProperties(activeElement.id, { shadow: !activeElement.shadow })}
+                            className={`py-2 rounded-lg border text-xs font-semibold transition-all ${activeElement.shadow ? "border-[#B87D4C] text-[#B87D4C] bg-[#B87D4C]/10" : "border-neutral-800 text-neutral-400 hover:text-white"}`}
+                          >
+                            {activeElement.shadow ? "Drop Shadow: On" : "Drop Shadow: Off"}
+                          </button>
+
                         </div>
                       )}
 
@@ -2157,6 +2735,22 @@ export default function TShirtDesigner({
                             <span>• Grab the circular top rotation handle and swing to spin your asset to any degree angle.</span>
                           </div>
 
+                          {/* Image filters */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Filter</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {IMAGE_FILTERS.map((f) => (
+                                <button
+                                  key={f.label}
+                                  onClick={() => updateElementProperties(activeElement.id, { filter: f.value })}
+                                  className={`py-1.5 rounded-lg border text-[10px] font-semibold transition-all ${(activeElement.filter || "") === f.value ? "border-[#B87D4C] text-[#B87D4C] bg-[#B87D4C]/10" : "border-neutral-800 text-neutral-400 hover:text-white"}`}
+                                >
+                                  {f.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
                         </div>
                       )}
 
@@ -2178,6 +2772,37 @@ export default function TShirtDesigner({
                             {activeElement.rotation}°
                           </span>
                         </div>
+                      </div>
+
+                      {/* Opacity */}
+                      <div className="flex flex-col gap-3 mt-3">
+                        <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1">
+                          <Sliders className="h-3 w-3" /> Opacity · {activeElement.opacity == null ? 100 : activeElement.opacity}%
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={activeElement.opacity == null ? 100 : activeElement.opacity}
+                          onChange={(e) => updateElementProperties(activeElement.id, { opacity: Number(e.target.value) })}
+                          className="w-full h-1 bg-neutral-800 accent-[#B87D4C] rounded-lg cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Flip */}
+                      <div className="flex items-center gap-2 mt-3">
+                        <button
+                          onClick={() => updateElementProperties(activeElement.id, { flipX: !activeElement.flipX })}
+                          className={`flex-1 py-2 rounded-lg border text-xs font-semibold transition-all ${activeElement.flipX ? "border-[#B87D4C] text-[#B87D4C] bg-[#B87D4C]/10" : "border-neutral-800 text-neutral-400 hover:text-white"}`}
+                        >
+                          Flip H
+                        </button>
+                        <button
+                          onClick={() => updateElementProperties(activeElement.id, { flipY: !activeElement.flipY })}
+                          className={`flex-1 py-2 rounded-lg border text-xs font-semibold transition-all ${activeElement.flipY ? "border-[#B87D4C] text-[#B87D4C] bg-[#B87D4C]/10" : "border-neutral-800 text-neutral-400 hover:text-white"}`}
+                        >
+                          Flip V
+                        </button>
                       </div>
 
                     </div>
