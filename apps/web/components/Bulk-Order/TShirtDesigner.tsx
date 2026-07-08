@@ -1152,7 +1152,7 @@ export default function TShirtDesigner({
                 const fw = el.fontWeight ? el.fontWeight : el.bold ? 700 : 400;
                 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 const strokeAttr = el.strokeColor && el.strokeWidth ? ` stroke="${el.strokeColor}" stroke-width="${el.strokeWidth}" paint-order="stroke"` : "";
-                const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${Math.max(1, Math.round(elW))}" height="${Math.max(1, Math.round(elH))}"><defs><path id="tp" d="${arcPathD(el.curve)}" fill="none"/></defs><text fill="${el.color || "#FFFFFF"}" font-family="${el.fontFamily || "Outfit"}" font-weight="${fw}" font-style="${el.italic ? "italic" : "normal"}" font-size="22" letter-spacing="${el.letterSpacing || 0}" text-anchor="middle"${strokeAttr}><textPath href="#tp" startOffset="50%">${esc(el.content)}</textPath></text></svg>`;
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${Math.max(1, Math.round(elW))}" height="${Math.max(1, Math.round(elH))}"><defs><path id="tp" d="${arcPathD(el.curve || 0)}" fill="none"/></defs><text fill="${el.color || "#FFFFFF"}" font-family="${el.fontFamily || "Outfit"}" font-weight="${fw}" font-style="${el.italic ? "italic" : "normal"}" font-size="22" letter-spacing="${el.letterSpacing || 0}" text-anchor="middle"${strokeAttr}><textPath href="#tp" startOffset="50%">${esc(el.content)}</textPath></text></svg>`;
                 const im = new Image();
                 im.onload = () => { ctx.drawImage(im, -elW / 2, -elH / 2, elW, elH); res(); };
                 im.onerror = () => res();
