@@ -5,6 +5,7 @@ import UserWallet from "../../models/UserWallet.js";
 import AppError from "../../utils/AppError.js";
 import sendOtp from "../../utils/sendOtp.js";
 import { hashOtp } from "../../utils/otp.js";
+import { toStr } from "../../utils/sanitize.js";
 
 const generateToken = (id) =>
   jwt.sign({ id, role: "user" }, process.env.JWT_SECRET, {
@@ -49,7 +50,10 @@ export const signupUser = async (req, res, next) => {
  */
 export const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    // Coerce email to a primitive string so a crafted object (e.g.
+    // {"$ne":null}) can't turn the lookup into a NoSQL operator query.
+    const email = toStr(req.body.email);
 
     // Check if email & password provided
     if (!email || !password) {
@@ -70,6 +74,14 @@ export const loginUser = async (req, res, next) => {
       });
     }
 
+    // Suspended accounts can authenticate but are not allowed in.
+    if (user.status === "suspended") {
+      return res.status(403).json({
+        status: "fail",
+        message: "This account has been suspended. Please contact support.",
+      });
+    }
+
     // Generate JWT token
     const token = generateToken(user._id);
 
@@ -81,6 +93,8 @@ export const loginUser = async (req, res, next) => {
           id: user._id,
           name: user.name,
           email: user.email,
+          accountType: user.accountType,
+          mustChangePassword: user.mustChangePassword,
         },
       },
     });
@@ -258,6 +272,8 @@ export const getUserProfile = async (req, res, next) => {
       name: user.name,
       email: user.email,
       phone: user.phone || null,
+      accountType: user.accountType,
+      mustChangePassword: user.mustChangePassword,
       address: {
         street: user.address?.street || null,
         city: user.address?.city || null,
@@ -322,6 +338,8 @@ export const updateUserProfile = async (req, res, next) => {
       name: user.name,
       email: user.email,
       phone: user.phone || null,
+      accountType: user.accountType,
+      mustChangePassword: user.mustChangePassword,
       address: {
         street: user.address?.street || null,
         city: user.address?.city || null,
@@ -337,6 +355,62 @@ export const updateUserProfile = async (req, res, next) => {
       status: "success",
       message: "Profile updated successfully",
       data: { user: userData },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ======================
+ * CHANGE PASSWORD
+ * ======================
+ * Used both for the forced first-login change (temp password -> new password)
+ * and for a normal voluntary change from the profile screen. Clears the
+ * mustChangePassword flag so an approved bulk/seller user only sets it once.
+ */
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Current and new password are required",
+      });
+    }
+
+    if (typeof newPassword !== "string" || newPassword.length < 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "New password must be at least 6 characters",
+      });
+    }
+
+    // req.user was loaded without the password (select:false); re-fetch with it.
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+
+    const isCorrect = await user.correctPassword(
+      currentPassword,
+      user.password,
+    );
+    if (!isCorrect) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Current password is incorrect",
+      });
+    }
+
+    user.password = newPassword; // pre-save hook re-hashes
+    user.mustChangePassword = false;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Password changed successfully",
     });
   } catch (err) {
     next(err);

@@ -8,6 +8,7 @@ import {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  changePassword,
 } from '../../controllers/auth/userController.js';
 
 import { userAuth } from '../../middleware/userAuth.js';
@@ -30,5 +31,6 @@ router.post("/reset-password", asyncHandler(resetPassword));
 router.post("/logout", userAuth, asyncHandler(logoutUser));
 router.get("/profile", userAuth, asyncHandler(getUserProfile));
 router.put("/profile", userAuth, asyncHandler(updateUserProfile));
+router.post("/change-password", userAuth, asyncHandler(changePassword));
 
 export default router;

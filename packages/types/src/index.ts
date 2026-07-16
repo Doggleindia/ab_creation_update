@@ -33,6 +33,18 @@ export type WalletTransactionType = "recharge" | "payment" | "refund";
 
 export type WalletTransactionStatus = "pending" | "completed" | "failed";
 
+// Kind of user account. "normal" self-registers; "bulk" and "seller" are
+// provisioned by an admin approving a BusinessApplication.
+export type AccountType = "normal" | "bulk" | "seller";
+
+export type AccountStatus = "active" | "suspended";
+
+// Business onboarding: the two application queues (seller / bulk buyer) and
+// their review lifecycle.
+export type ApplicationType = "bulk" | "seller";
+
+export type ApplicationStatus = "pending" | "approved" | "rejected";
+
 // ---- Common ----
 
 export interface Address {
@@ -229,7 +241,76 @@ export interface UserProfile {
   name: string;
   email: string;
   phone?: string | null;
+  accountType?: AccountType;
+  mustChangePassword?: boolean;
   address?: Partial<Address>;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// ---- Business onboarding (seller / bulk applications) ----
+
+export interface BusinessApplication {
+  _id: string;
+  type: ApplicationType;
+
+  // Shared contact details
+  businessName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  address?: Partial<Address>;
+  message?: string;
+
+  // Bulk-specific
+  expectedVolume?: string;
+  orderFrequency?: string;
+  gstNumber?: string;
+
+  // Seller-specific
+  brandName?: string;
+  website?: string;
+  productsToSell?: string;
+
+  // Categories of interest (bulk) / products offered (seller)
+  categories?: string[];
+
+  status: ApplicationStatus;
+  rejectionReason?: string;
+  reviewedBy?: string | { _id: string; name: string; email: string };
+  reviewedAt?: string;
+  linkedUserId?:
+    | string
+    | { _id: string; name: string; email: string; accountType: AccountType };
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Payloads the public application forms submit. `type` is set by the endpoint,
+// so it is intentionally omitted here.
+export interface BulkApplicationInput {
+  businessName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  address?: Partial<Address>;
+  message?: string;
+  expectedVolume?: string;
+  orderFrequency?: string;
+  gstNumber?: string;
+  categories?: string[];
+}
+
+export interface SellerApplicationInput {
+  businessName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  address?: Partial<Address>;
+  message?: string;
+  brandName?: string;
+  website?: string;
+  productsToSell?: string;
+  categories?: string[];
 }

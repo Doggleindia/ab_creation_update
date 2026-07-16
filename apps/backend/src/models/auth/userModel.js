@@ -33,6 +33,29 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    // Distinguishes the kind of account. "normal" self-registers via /signup;
+    // "bulk" and "seller" are provisioned by an admin approving a
+    // BusinessApplication, which is why they can never be set from /signup.
+    accountType: {
+      type: String,
+      enum: ["normal", "bulk", "seller"],
+      default: "normal",
+    },
+
+    // Set to true when an account is created with a system-generated temporary
+    // password (approved bulk/seller applications). The user is forced to set a
+    // new password on first login before reaching the dashboard.
+    mustChangePassword: {
+      type: Boolean,
+      default: false,
+    },
+
+    status: {
+      type: String,
+      enum: ["active", "suspended"],
+      default: "active",
+    },
+
     address: {
       street: {
         type: String,
