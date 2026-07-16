@@ -8,6 +8,8 @@ module.exports = {    darkMode: ["class"],
   	extend: {
  fontFamily: {
         'inter': ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        'poppins': ['var(--font-poppins)', 'Poppins', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
 	   keyframes: {
         marquee: {
@@ -30,13 +32,18 @@ module.exports = {    darkMode: ["class"],
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
-  			// AB Creation brand palette (single source of truth for the rebrand)
+  			// AB Creation brand palette — sourced from the Figma design tokens.
   			brand: {
+  				ink: '#1a1c1c',      // logo wordmark / darkest text
   				black: '#171717',
+  				text: '#374151',     // nav + body text
+  				muted: '#6b7280',    // secondary/placeholder text
+  				orange: '#ff5c00',   // primary CTA (Design Now / Customize)
+  				rust: '#a04100',     // secondary button (footer Join)
+  				footer: '#30302f',   // footer background
   				cream: '#F5F1EA',
   				gold: '#CBAA75',
   				copper: '#B87D4C',
-  				rose: '#C79280',
   				stone: '#E8E6E3'
   			},
   			background: 'hsl(var(--background))',
