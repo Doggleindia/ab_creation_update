@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const SHOP_LINKS = [
@@ -21,8 +22,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="flex flex-col gap-6">
-            <span className="text-[24px] font-bold text-[#f3f0ee]">
-              AB Creation
+            <span className="flex items-center gap-3">
+              <Image
+                src="/ab-creation-logo.png"
+                alt="AB Creation logo"
+                width={48}
+                height={48}
+                className="h-12 w-12 object-contain"
+              />
+              <span className="text-[24px] font-bold text-[#f3f0ee]">
+                AB Creation
+              </span>
             </span>
             <p className="max-w-[240px] text-[16px] leading-[25.6px] text-[#f3f0ee]/80">
               Precision crafted custom apparel for creative teams and modern

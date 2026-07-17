@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Search, User, Menu, X } from "lucide-react";
 
@@ -20,11 +21,18 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-4 sm:px-8">
         {/* Left: logo + desktop links */}
         <div className="flex items-center gap-8">
-          <Link
-            href="/"
-            className="text-[24px] font-bold tracking-[-1.2px] text-brand-ink"
-          >
-            AB CREATION
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/ab-creation-logo.png"
+              alt="AB Creation logo"
+              width={44}
+              height={44}
+              priority
+              className="h-11 w-11 object-contain"
+            />
+            <span className="text-[24px] font-bold tracking-[-1.2px] text-brand-ink">
+              AB CREATION
+            </span>
           </Link>
 
           <ul className="hidden items-center gap-5 lg:flex">

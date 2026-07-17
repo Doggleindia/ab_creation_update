@@ -32,19 +32,22 @@ module.exports = {    darkMode: ["class"],
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
-  			// AB Creation brand palette — sourced from the Figma design tokens.
+  			// AB Creation brand palette — Figma design tokens + official brand
+  			// guide ("colour pallet.png" at repo root: 70% cream / 20% black /
+  			// 10% gold usage ratio).
   			brand: {
   				ink: '#1a1c1c',      // logo wordmark / darkest text
-  				black: '#171717',
+  				black: '#171717',    // Rich Black — logo, typography, strong elements
   				text: '#374151',     // nav + body text
   				muted: '#6b7280',    // secondary/placeholder text
   				orange: '#ff5c00',   // primary CTA (Design Now / Customize)
   				rust: '#a04100',     // secondary button (footer Join)
   				footer: '#30302f',   // footer background
-  				cream: '#F5F1EA',
-  				gold: '#CBAA75',
-  				copper: '#B87D4C',
-  				stone: '#E8E6E3'
+  				cream: '#F5F1EA',    // Luxury Cream — primary background
+  				gold: '#CBAA75',     // Signature Gold — main accent
+  				copper: '#B87D4C',   // Copper Gold — secondary accent (logo color)
+  				rose: '#C79280',     // Rose Gold — soft accent
+  				stone: '#E8E6E3'     // Soft Stone — neutral backgrounds
   			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
