@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { Phone, MapPin, Clock } from "lucide-react";
+import { ChevronRight, Phone, MapPin, Clock } from "lucide-react";
 import FeatureStrip from "@/components/common/FeatureStrip";
 import ContactForm from "@/components/contact/ContactForm";
 
@@ -11,62 +12,81 @@ export const metadata: Metadata = {
 };
 
 const INFO = [
-  { icon: Phone, title: "Phone", lines: ["+91 912 112 12 12"] },
   {
     icon: MapPin,
     title: "Address",
-    lines: ["Patricia C. Amedee", "41 Waldeck, Nashville"],
+    lines: ["236 5th SE Avenue, New York", "NY10000, United States"],
   },
-  { icon: Clock, title: "Working Time", lines: ["Mon–Sat", "9:00 AM – 5:30 PM"] },
+  {
+    icon: Phone,
+    title: "Phone",
+    lines: ["Mobile: +(84) 546-6789", "Hotline: +(84) 456-6789"],
+  },
+  {
+    icon: Clock,
+    title: "Working Time",
+    lines: ["Monday-Friday: 9:00 - 22:00", "Saturday-Sunday: 9:00 - 21:00"],
+  },
 ];
 
 export default function ContactPage() {
   return (
     <main>
-      {/* Header */}
-      <section className="w-full bg-[#171717] px-4 py-16 text-center text-white sm:px-8">
-        <h1 className="font-poppins text-3xl font-bold sm:text-[40px]">Contact</h1>
-        <nav className="mt-3 flex items-center justify-center gap-2 text-[14px] text-white/70">
-          <Link href="/" className="hover:text-brand-orange">Home</Link>
-          <span>/</span>
-          <span className="text-brand-gold">Contact</span>
-        </nav>
+      {/* Hero banner */}
+      <section className="relative h-[220px] w-full overflow-hidden sm:h-[280px] lg:h-[328px]">
+        <Image
+          src="/contact-hero.png"
+          alt="Contact AB Creation"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <h1 className="font-poppins text-[36px] font-medium text-black sm:text-[48px]">
+            Contact
+          </h1>
+          <nav className="mt-2 flex items-center gap-3 text-[16px] text-black">
+            <Link href="/" className="font-semibold hover:text-brand-orange">
+              Home
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <span>Contact</span>
+          </nav>
+        </div>
       </section>
-
-      <FeatureStrip />
 
       {/* Get in touch */}
       <section className="w-full bg-white px-4 py-16 sm:px-8 lg:px-16">
         <div className="mx-auto max-w-[1152px]">
-          <div className="mb-10 text-center">
-            <h2 className="font-poppins text-2xl font-bold text-[#111827] sm:text-[32px]">
+          <div className="mb-14 text-center">
+            <h2 className="font-poppins text-[28px] font-semibold uppercase text-black sm:text-[32px]">
               Get In Touch With Us
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-[15px] text-[#6b7280]">
-              For more information about our products &amp; services, please feel
-              free to drop us a message. We&apos;re here to help.
+            <p className="mx-auto mt-3 max-w-xl text-[16px] leading-relaxed text-[#9f9f9f]">
+              For More Information About Our Product &amp; Services. Please Feel
+              Free To Drop Us An Email. Our Staff Always Be There To Help You
+              Out. Do Not Hesitate!
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px_1fr]">
-            {/* Info cards */}
-            <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-[380px_1fr]">
+            {/* Info list */}
+            <div className="flex flex-col gap-12 pt-4">
               {INFO.map((c) => {
                 const Icon = c.icon;
                 return (
-                  <div
-                    key={c.title}
-                    className="flex items-start gap-4 rounded-2xl border border-[#e8e6e3] bg-[#f9fafb] p-5"
-                  >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10">
-                      <Icon className="h-5 w-5 text-brand-orange" />
-                    </div>
+                  <div key={c.title} className="flex items-start gap-6">
+                    <Icon className="mt-1 h-7 w-7 shrink-0 fill-black text-black" />
                     <div>
-                      <p className="text-[15px] font-bold text-[#111827]">
+                      <p className="font-poppins text-[24px] font-medium text-black">
                         {c.title}
                       </p>
                       {c.lines.map((l) => (
-                        <p key={l} className="text-[14px] text-[#6b7280]">
+                        <p
+                          key={l}
+                          className="max-w-[254px] font-poppins text-[16px] text-black"
+                        >
                           {l}
                         </p>
                       ))}
@@ -81,6 +101,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <FeatureStrip />
     </main>
   );
 }
