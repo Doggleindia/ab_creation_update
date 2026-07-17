@@ -11,6 +11,7 @@ import {
   cartSubtotal,
   clearCart,
 } from "@/lib/cart";
+import { apiFetch, getToken } from "@/lib/auth";
 
 const SHIPPING = [
   { id: "standard", label: "Standard", time: "5-7 days", price: 0, days: 7 },
@@ -69,11 +70,16 @@ export default function CheckoutPage() {
   const [shipping, setShipping] = useState("standard");
   const [payment, setPayment] = useState<"razorpay" | "cod">("razorpay");
   const [placing, setPlacing] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setMounted(true);
     setItems(getCart());
-  }, []);
+    // Purchases require login (wallet payment) — send guests to log in first.
+    if (!getToken()) {
+      router.replace("/login?next=/checkout");
+    }
+  }, [router]);
 
   const subtotal = cartSubtotal(items);
   const method = SHIPPING.find((s) => s.id === shipping) ?? SHIPPING[0];
@@ -88,48 +94,115 @@ export default function CheckoutPage() {
     year: "numeric",
   });
 
-  function placeOrder(e: React.FormEvent<HTMLFormElement>) {
+  // Upload a custom item's artwork (data URL) and return the hosted URLs.
+  async function uploadArtwork(artwork: string): Promise<string[]> {
+    const blob = await (await fetch(artwork)).blob();
+    const fd = new FormData();
+    fd.append("designs", blob, "custom-design.png");
+    const j = await apiFetch<{ data: { urls: string[] } }>(
+      "/api/orders/upload-designs",
+      { method: "POST", body: fd },
+    );
+    return j.data?.urls ?? [];
+  }
+
+  async function placeOrder(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setPlacing(true);
-    // NOTE: real order submission (wallet/Razorpay via /api/orders) is a
-    // follow-up. For now we confirm the UI flow and clear the cart.
-    const fd = new FormData(e.currentTarget);
-    const now = new Date();
-    const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-    const orderId = `ABC-${ymd}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
-    const addressParts = [
-      [fd.get("fullName"), fd.get("addr1"), fd.get("addr2")]
-        .filter(Boolean)
-        .join(", "),
-      `${fd.get("city")}, ${fd.get("state")} ${fd.get("pin")}`,
-    ];
-    try {
-      sessionStorage.setItem(
-        "ab:lastOrder",
-        JSON.stringify({
-          orderId,
-          email: fd.get("email"),
-          address: addressParts,
-          items: items.map(({ title, variant, image, price, quantity }) => ({
-            title,
-            variant,
-            image,
-            price,
-            quantity,
-          })),
-          subtotal,
-          shipping: method,
-          payment,
-          codFee,
-          total,
-          etaLabel,
-        }),
+    setError("");
+
+    const missingProduct = items.filter((i) => !i.productId);
+    if (missingProduct.length > 0) {
+      setError(
+        `${missingProduct.map((i) => `"${i.title}"`).join(", ")} isn't linked to a catalog product. ` +
+          "Please re-add it from the product page (or open the design studio from a product).",
       );
-    } catch {
-      // sessionStorage unavailable — confirmation page falls back to defaults
+      return;
     }
-    clearCart();
-    router.push(`/order-confirmed?orderId=${orderId}`);
+
+    setPlacing(true);
+    const fd = new FormData(e.currentTarget);
+
+    try {
+      const orderItems = await Promise.all(
+        items.map(async (i) => ({
+          productId: i.productId,
+          productType: i.productType ?? "ready",
+          variantId: i.variantId || undefined,
+          color: i.color || undefined,
+          size: i.size || undefined,
+          quantity: i.quantity,
+          customDesign: i.customDesign || undefined,
+          designFiles: i.artwork ? await uploadArtwork(i.artwork) : undefined,
+        })),
+      );
+
+      const street = [fd.get("addr1"), fd.get("addr2")]
+        .filter(Boolean)
+        .join(", ");
+      const res = await apiFetch<{
+        data: { orders: unknown[]; grandTotal: number; orderId?: string };
+      }>("/api/orders/checkout", {
+        method: "POST",
+        body: JSON.stringify({
+          items: orderItems,
+          shippingAddress: {
+            street,
+            city: fd.get("city"),
+            state: fd.get("state"),
+            pincode: fd.get("pin"),
+            country: "India",
+          },
+          phoneNumber: `+91${String(fd.get("phone")).replace(/\D/g, "")}`,
+        }),
+      });
+
+      const orderId = res.data?.orderId ?? "";
+      const addressParts = [
+        [fd.get("fullName"), street].filter(Boolean).join(", "),
+        `${fd.get("city")}, ${fd.get("state")} ${fd.get("pin")}`,
+      ];
+      try {
+        sessionStorage.setItem(
+          "ab:lastOrder",
+          JSON.stringify({
+            orderId,
+            email: fd.get("email"),
+            address: addressParts,
+            items: items.map(({ title, variant, image, price, quantity }) => ({
+              title,
+              variant,
+              image,
+              price,
+              quantity,
+            })),
+            subtotal,
+            shipping: method,
+            payment,
+            codFee,
+            total: res.data?.grandTotal ?? total,
+            etaLabel,
+          }),
+        );
+      } catch {
+        // snapshot is a nicety; the order itself is placed
+      }
+      clearCart();
+      router.push(`/order-confirmed?orderId=${encodeURIComponent(orderId)}`);
+    } catch (err) {
+      const status = (err as Error & { status?: number }).status;
+      if (status === 401) {
+        router.push("/login?next=/checkout");
+        return;
+      }
+      setError(
+        status === 402
+          ? "Insufficient wallet balance. Please recharge your AB Creation wallet and try again."
+          : err instanceof Error
+            ? err.message
+            : "Could not place the order. Please try again.",
+      );
+      setPlacing(false);
+    }
   }
 
   if (!mounted) return <div className="min-h-[60vh] bg-white" />;
@@ -344,6 +417,11 @@ export default function CheckoutPage() {
 
             {/* CTA */}
             <div>
+              {error && (
+                <p className="mb-4 rounded-[8px] bg-[#fef2f2] px-4 py-3 text-[14px] text-[#ba1a1a]">
+                  {error}
+                </p>
+              )}
               <button
                 type="submit"
                 disabled={items.length === 0 || placing}

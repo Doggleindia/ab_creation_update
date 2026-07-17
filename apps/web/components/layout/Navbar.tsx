@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, Search, User, Menu, X } from "lucide-react";
+import { ChevronDown, Search, User, Menu, X, LogOut } from "lucide-react";
+import { type AuthUser, getUser, logout, subscribeAuth } from "@/lib/auth";
 
 const NAV_LINKS = [
   { label: "Customize Design", href: "/design-studio" },
@@ -13,8 +14,54 @@ const NAV_LINKS = [
   { label: "Contact Us", href: "/contact-us" },
 ];
 
+function AccountMenu({ user }: { user: AuthUser }) {
+  const [open, setOpen] = useState(false);
+  const initial = (user.name || user.email || "?").charAt(0).toUpperCase();
+
+  return (
+    <div className="relative">
+      <button
+        aria-label="Account menu"
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-ink text-[14px] font-bold text-white"
+      >
+        {initial}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-11 z-50 w-56 rounded-[12px] border border-[#c4c7c7] bg-white p-2 shadow-[0px_4px_12px_rgba(0,0,0,0.1)]">
+            <div className="border-b border-[#f3f3f4] px-3 py-2">
+              <p className="truncate text-[14px] font-semibold text-black">
+                {user.name}
+              </p>
+              <p className="truncate text-[12px] text-[#444748]">{user.email}</p>
+            </div>
+            <button
+              onClick={() => {
+                setOpen(false);
+                void logout();
+              }}
+              className="mt-1 flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-left text-[14px] text-[#ba1a1a] hover:bg-[#fef2f2]"
+            >
+              <LogOut className="h-4 w-4" /> Log out
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    const sync = () => setUser(getUser());
+    sync();
+    return subscribeAuth(sync);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#f3f4f6] bg-white">
@@ -58,13 +105,17 @@ export default function Navbar() {
           >
             <Search className="h-5 w-5" />
           </button>
-          <Link
-            href="/login"
-            aria-label="Account"
-            className="p-2 text-brand-ink transition-colors hover:text-brand-orange"
-          >
-            <User className="h-5 w-5" />
-          </Link>
+          {user ? (
+            <AccountMenu user={user} />
+          ) : (
+            <Link
+              href="/login"
+              aria-label="Account"
+              className="p-2 text-brand-ink transition-colors hover:text-brand-orange"
+            >
+              <User className="h-5 w-5" />
+            </Link>
+          )}
           <Link
             href="/design-studio"
             className="hidden rounded-full bg-brand-orange px-6 py-2 text-[16px] font-semibold text-white transition-opacity hover:opacity-90 sm:block"

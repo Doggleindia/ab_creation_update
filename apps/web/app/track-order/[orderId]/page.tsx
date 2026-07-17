@@ -11,6 +11,7 @@ import {
   Download,
   Mail,
 } from "lucide-react";
+import { apiFetch, getToken } from "@/lib/auth";
 
 type LastOrder = {
   orderId: string;
@@ -32,10 +33,32 @@ type LastOrder = {
 
 type StepState = "done" | "current" | "pending";
 
+// Backend order shape (GET /api/orders/:orderId), only the fields we render
+type ApiOrder = {
+  orderId: string;
+  orderStatus: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  paymentStatus: "pending" | "paid" | "failed";
+  totalAmount: number;
+  quantity: number;
+  size?: string;
+  color?: string;
+  createdAt?: string;
+  phoneNumber?: string;
+  shippingAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+  };
+  productId?: { name?: string; title?: string } | null;
+  variantId?: { media?: { images?: string[] } } | null;
+};
+
 export default function TrackOrderPage() {
   const params = useParams<{ orderId: string }>();
   const orderId = decodeURIComponent(params.orderId ?? "");
   const [order, setOrder] = useState<LastOrder | null>(null);
+  const [apiOrder, setApiOrder] = useState<ApiOrder | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -49,14 +72,68 @@ export default function TrackOrderPage() {
     } catch {
       // fall through to mock data
     }
+
+    // Fetch the live order when logged in; keep the snapshot as fallback.
+    if (getToken() && orderId) {
+      apiFetch<{ data: ApiOrder }>(
+        `/api/orders/${encodeURIComponent(orderId)}`,
+      )
+        .then((j) => setApiOrder(j.data ?? null))
+        .catch(() => {
+          // not this user's order / offline — snapshot or mock stays
+        });
+    }
   }, [orderId]);
 
   const item = order?.items?.[0];
-  const placedOn = new Date().toLocaleDateString("en-IN", {
+  const placedOn = (
+    apiOrder?.createdAt ? new Date(apiOrder.createdAt) : new Date()
+  ).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+
+  // Map the backend's order status onto the 6-step journey.
+  const status = apiOrder?.orderStatus ?? "confirmed";
+  const delivered = status === "delivered";
+  const currentIdx =
+    status === "pending" || status === "cancelled"
+      ? 0
+      : status === "shipped"
+        ? 4
+        : status === "delivered"
+          ? 5
+          : 2; // confirmed → In Production
+  const badgeLabel =
+    status === "pending"
+      ? "Order Placed"
+      : status === "shipped"
+        ? "Dispatched"
+        : status === "delivered"
+          ? "Delivered"
+          : status === "cancelled"
+            ? "Cancelled"
+            : "In Production";
+
+  const stepState = (i: number): StepState =>
+    delivered || i < currentIdx ? "done" : i === currentIdx ? "current" : "pending";
+
+  const STEP_DEFS = [
+    { label: "Order Confirmed", detail: `Placed on ${placedOn}` },
+    { label: "Design Verified", detail: "Design checked by our team" },
+    {
+      label: "In Production",
+      detail: "Your order is being printed",
+      quote: '"Your apparel is being printed using DTF method"',
+    },
+    { label: "Quality Check", detail: "Pending completion of production" },
+    { label: "Dispatched", detail: "Awaiting shipping partner" },
+    {
+      label: "Delivered",
+      detail: `Estimated delivery by ${order?.etaLabel ?? "15 July"}`,
+    },
+  ];
 
   const steps: {
     label: string;
@@ -64,32 +141,64 @@ export default function TrackOrderPage() {
     state: StepState;
     chip?: string;
     quote?: string;
-  }[] = [
-    { label: "Order Confirmed", detail: "10 July, 09:24 AM", state: "done" },
-    { label: "Design Verified", detail: "10 July, 02:15 PM", state: "done" },
-    {
-      label: "In Production",
-      detail: "Started 11 July, 10:00 AM",
-      state: "current",
-      chip: "Active",
-      quote: '"Your apparel is being printed using DTF method"',
-    },
-    {
-      label: "Quality Check",
-      detail: "Pending completion of production",
-      state: "pending",
-    },
-    {
-      label: "Dispatched",
-      detail: "Awaiting shipping partner",
-      state: "pending",
-    },
-    {
-      label: "Delivered",
-      detail: `Estimated delivery by ${order?.etaLabel ?? "15 July"}`,
-      state: "pending",
-    },
-  ];
+  }[] = STEP_DEFS.map((s, i) => ({
+    label: s.label,
+    detail: s.detail,
+    state: stepState(i),
+    chip: stepState(i) === "current" ? "Active" : undefined,
+    quote: stepState(i) === "current" && i === 2 ? s.quote : undefined,
+  }));
+
+  // Sidebar display values — live order wins, then checkout snapshot, then mock
+  const displayTitle =
+    apiOrder?.productId?.title ||
+    apiOrder?.productId?.name ||
+    item?.title ||
+    "Round Neck T-Shirt — Custom Design";
+  const displayVariant = apiOrder
+    ? [
+        apiOrder.color,
+        apiOrder.size ? `Size ${apiOrder.size}` : null,
+        `Qty: ${apiOrder.quantity}`,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : item
+      ? `${item.variant} · Qty: ${item.quantity}`
+      : "White · Size L · DTF Print · Qty: 1";
+  const displaySubtotal = apiOrder?.totalAmount ?? order?.subtotal ?? 449;
+  const displayShipping = apiOrder
+    ? "Included"
+    : order
+      ? order.shipping.price === 0
+        ? "Free"
+        : `₹${order.shipping.price}`
+      : "₹48";
+  const displayTotal = apiOrder?.totalAmount ?? order?.total ?? 497;
+  const displayPaid = apiOrder
+    ? apiOrder.paymentStatus === "paid"
+      ? "Paid via Wallet"
+      : "Payment pending"
+    : order?.payment === "cod"
+      ? "Cash on Delivery"
+      : "Paid via UPI";
+  const displayImage =
+    apiOrder?.variantId?.media?.images?.[0] || item?.image || null;
+  const displayAddress = apiOrder?.shippingAddress
+    ? [
+        apiOrder.shippingAddress.street,
+        `${apiOrder.shippingAddress.city}, ${apiOrder.shippingAddress.state}`,
+        apiOrder.shippingAddress.pincode,
+        apiOrder.phoneNumber,
+      ].filter((l): l is string => Boolean(l))
+    : order?.address?.length
+      ? order.address
+      : [
+          "Rahul Sharma",
+          "Flat 402, Green Meadows, 12th Main Road",
+          "Indiranagar, Bengaluru",
+          "Karnataka, 560038",
+        ];
 
   if (!mounted) return <div className="min-h-[60vh] bg-white" />;
 
@@ -121,7 +230,7 @@ export default function TrackOrderPage() {
           </div>
           <span className="flex items-center gap-2 rounded-full bg-[#fdcd74] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.6px] text-[#785601]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#785601]" />
-            In Production
+            {badgeLabel}
           </span>
         </div>
 
@@ -216,11 +325,11 @@ export default function TrackOrderPage() {
           <div className="flex flex-col gap-4">
             <aside className="overflow-hidden rounded-[12px] border border-[#c4c7c7] bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
               <div className="flex h-[200px] items-center justify-center bg-[#e8e8e8] p-4">
-                {item?.image ? (
+                {displayImage ? (
                   <div className="relative h-[168px] w-[168px]">
                     <Image
-                      src={item.image}
-                      alt={item.title}
+                      src={displayImage}
+                      alt={displayTitle}
                       fill
                       className="object-contain"
                       sizes="168px"
@@ -233,42 +342,30 @@ export default function TrackOrderPage() {
               <div className="flex flex-col gap-6 p-6">
                 <div className="border-b border-[#c4c7c7] pb-6">
                   <h3 className="text-[24px] font-bold leading-[31.2px] tracking-[-0.48px] text-black">
-                    {item?.title ?? "Round Neck T-Shirt — Custom Design"}
+                    {displayTitle}
                   </h3>
                   <p className="mt-1 text-[14px] text-[#444748]">
-                    {item
-                      ? `${item.variant} · Qty: ${item.quantity}`
-                      : "White · Size L · DTF Print · Qty: 1"}
+                    {displayVariant}
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-3">
                   <div className="flex justify-between text-[16px] text-[#444748]">
                     <span>Subtotal</span>
-                    <span>
-                      ₹{(order?.subtotal ?? 449).toLocaleString("en-IN")}
-                    </span>
+                    <span>₹{displaySubtotal.toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex justify-between text-[16px] text-[#444748]">
                     <span>Shipping</span>
-                    <span>
-                      {order
-                        ? order.shipping.price === 0
-                          ? "Free"
-                          : `₹${order.shipping.price}`
-                        : "₹48"}
-                    </span>
+                    <span>{displayShipping}</span>
                   </div>
                   <div className="flex justify-between border-t border-[#c4c7c7] pt-3 text-[16px] font-bold text-black">
                     <span>Order Total</span>
-                    <span>₹{(order?.total ?? 497).toLocaleString("en-IN")}</span>
+                    <span>₹{displayTotal.toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3 text-[#16a34a]" />
                     <span className="text-[12px] font-semibold text-[#16a34a]">
-                      {order?.payment === "cod"
-                        ? "Cash on Delivery"
-                        : "Paid via UPI"}
+                      {displayPaid}
                     </span>
                   </div>
                 </div>
@@ -278,15 +375,7 @@ export default function TrackOrderPage() {
                     Shipping Address
                   </h4>
                   <div className="text-[14px] leading-[22.75px] text-[#1a1c1c]">
-                    {(order?.address?.length
-                      ? order.address
-                      : [
-                          "Rahul Sharma",
-                          "Flat 402, Green Meadows, 12th Main Road",
-                          "Indiranagar, Bengaluru",
-                          "Karnataka, 560038",
-                        ]
-                    ).map((line, i) => (
+                    {displayAddress.map((line, i) => (
                       <p key={i} className={i === 0 ? "font-bold" : ""}>
                         {line}
                       </p>

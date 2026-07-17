@@ -24,7 +24,6 @@ const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
 const GARMENT_COST = 299;
 const PRINTING_COST = 149;
 const CUSTOMIZATION_FEE = 49;
-const UNIT_PRICE = GARMENT_COST + PRINTING_COST + CUSTOMIZATION_FEE; // 497
 const BULK_QTY = 6;
 const BULK_PRICE = 449;
 
@@ -37,6 +36,13 @@ type DesignState = {
   zone: string;
   placement: { xPct: number; yPct: number; scale: number; rotation: number };
   opacity: number;
+  product?: {
+    productId: string;
+    slug: string;
+    title: string;
+    price: number;
+    variantId?: string;
+  } | null;
 };
 
 const FALLBACK: DesignState = {
@@ -106,18 +112,31 @@ export default function PreviewOrderPage() {
     }
   }, []);
 
-  const unit = qty >= BULK_QTY ? BULK_PRICE : UNIT_PRICE;
+  const garmentCost = design.product?.price ?? GARMENT_COST;
+  const fullUnit = garmentCost + PRINTING_COST + CUSTOMIZATION_FEE;
+  const unit = qty >= BULK_QTY ? Math.min(BULK_PRICE, fullUnit) : fullUnit;
+  const productTitle = design.product?.title ?? "Round Neck T-Shirt";
 
   function addAndCheckout() {
+    // Keep the serialized design (minus the heavy artwork data URL) so
+    // checkout can submit it as the order's customDesign payload.
+    const { image: artwork, ...designMeta } = design;
     addToCart({
       id: `custom-${Date.now()}`,
-      slug: "custom-design",
-      title: "Round Neck T-Shirt — Custom Design",
+      slug: design.product?.slug ?? "custom-design",
+      title: `${productTitle} — Custom Design`,
       variant: `${design.colorName} · Size ${size} · DTF Print`,
       image: "/images/home/hero-tee.png",
       price: unit,
       quantity: qty,
       custom: true,
+      productId: design.product?.productId,
+      productType: design.product ? "ready" : undefined,
+      variantId: design.product?.variantId,
+      color: design.colorName,
+      size,
+      customDesign: JSON.stringify(designMeta),
+      artwork: artwork ?? undefined,
     });
     router.push("/cart");
   }
@@ -263,7 +282,7 @@ export default function PreviewOrderPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h1 className="text-[24px] font-bold tracking-[-0.48px] text-black">
-                    Round Neck T-Shirt
+                    {productTitle}
                   </h1>
                   <p className="mt-1 text-[14px] text-[#444748]">
                     Premium Heavyweight Cotton
@@ -360,7 +379,7 @@ export default function PreviewOrderPage() {
               <div className="flex flex-col gap-3 text-[15px]">
                 <div className="flex justify-between text-[#444748]">
                   <span>Garment cost</span>
-                  <span>₹{GARMENT_COST.toFixed(2)}</span>
+                  <span>₹{garmentCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-[#444748]">
                   <span>Printing cost</span>

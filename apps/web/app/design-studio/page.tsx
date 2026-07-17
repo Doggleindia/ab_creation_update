@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Upload,
   Type,
@@ -68,8 +68,55 @@ const sectionLabel =
   "text-[12px] font-semibold tracking-[0.6px] text-[#444748]";
 const fieldLabel = "text-[10px] font-bold uppercase text-[#444748]";
 
-export default function DesignStudioPage() {
+const BACKEND = (process.env.NEXT_PUBLIC_MAIN_BACKEND ?? "").replace(/\/$/, "");
+
+type ProductContext = {
+  productId: string;
+  slug: string;
+  title: string;
+  price: number;
+  variantsByColor: Record<string, string>; // lowercased color name -> variantId
+};
+
+function DesignStudio() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const productSlug = searchParams.get("product");
+  const [product, setProduct] = useState<ProductContext | null>(null);
+
+  useEffect(() => {
+    if (!productSlug || !BACKEND) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `${BACKEND}/api/products/slug/${encodeURIComponent(productSlug)}`,
+        );
+        if (!res.ok) return;
+        const j = await res.json();
+        const p = j?.data;
+        if (!p?._id || cancelled) return;
+        const variantsByColor: Record<string, string> = {};
+        for (const v of p.variants ?? []) {
+          if (v.color && v._id) variantsByColor[v.color.toLowerCase()] = v._id;
+        }
+        setProduct({
+          productId: p._id,
+          slug: p.slug,
+          title: p.title,
+          price: Math.round(
+            p.basePrice * (1 - (p.discountPercentage || 0) / 100),
+          ),
+          variantsByColor,
+        });
+      } catch {
+        // studio still works without product context
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [productSlug]);
   const [color, setColor] = useState(SHIRT_COLORS[0]);
   const [printMethod, setPrintMethod] = useState(PRINT_METHODS[0]);
   const [zone, setZone] = useState<Zone>("front");
@@ -114,6 +161,15 @@ export default function DesignStudioPage() {
       zone,
       placement,
       opacity,
+      product: product
+        ? {
+            productId: product.productId,
+            slug: product.slug,
+            title: product.title,
+            price: product.price,
+            variantId: product.variantsByColor[color.name.toLowerCase()],
+          }
+        : null,
     };
   }
 
@@ -158,7 +214,7 @@ export default function DesignStudioPage() {
           <span className="hidden h-6 w-px bg-[#c4c7c7] sm:block" />
           <div className="min-w-0">
             <p className="truncate text-[14px] font-bold text-black">
-              Round Neck T-Shirt
+              {product?.title ?? "Round Neck T-Shirt"}
             </p>
             <p className="truncate text-[10px] font-semibold uppercase tracking-[1px] text-[#444748]">
               {color.name} · {printMethod.split(" ")[0]} Printing
@@ -578,5 +634,13 @@ export default function DesignStudioPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DesignStudioPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh] bg-[#e8e8e8]" />}>
+      <DesignStudio />
+    </Suspense>
   );
 }

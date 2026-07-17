@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Palette, ShoppingCart, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Check, Palette, ShoppingCart, Star } from "lucide-react";
+import { addToCart } from "@/lib/cart";
 
-export type ProductColor = { name: string; hex: string };
+export type ProductColor = { name: string; hex: string; variantId?: string };
 
 export type ProductDetail = {
+  productId: string;
   slug: string;
   title: string;
   subtitle: string;
@@ -18,12 +21,35 @@ export type ProductDetail = {
   sizes: string[];
   colors: ProductColor[];
   inStock: number;
+  images?: string[];
 };
 
 export default function ProductBuyBox({ product }: { product: ProductDetail }) {
+  const router = useRouter();
   const [size, setSize] = useState(product.sizes[0] ?? "");
   const [color, setColor] = useState(product.colors[0]?.name ?? "");
   const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
+
+  function onAddToCart() {
+    const selectedColor = product.colors.find((c) => c.name === color);
+    addToCart({
+      id: `${product.slug}-${color}-${size}`,
+      slug: product.slug,
+      title: product.title,
+      variant: `${color} · Size ${size} · ${product.badge}`,
+      image: product.images?.[0] ?? "/images/home/hero-tee.png",
+      price: product.price,
+      quantity: qty,
+      productId: product.productId,
+      productType: "ready",
+      variantId: selectedColor?.variantId,
+      color,
+      size,
+    });
+    setAdded(true);
+    setTimeout(() => router.push("/cart"), 450);
+  }
 
   const discount =
     product.mrp && product.mrp > product.price
@@ -150,9 +176,20 @@ export default function ProductBuyBox({ product }: { product: ProductDetail }) {
           <Palette className="h-5 w-5" />
           Customize Design Online
         </Link>
-        <button className="flex items-center justify-center gap-2 rounded-lg bg-[#1b1c1b] py-3.5 text-[16px] font-semibold text-white transition-opacity hover:opacity-90">
-          <ShoppingCart className="h-5 w-5" />
-          Add to Cart
+        <button
+          onClick={onAddToCart}
+          disabled={added}
+          className="flex items-center justify-center gap-2 rounded-lg bg-[#1b1c1b] py-3.5 text-[16px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-80"
+        >
+          {added ? (
+            <>
+              <Check className="h-5 w-5" /> Added to Cart
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="h-5 w-5" /> Add to Cart
+            </>
+          )}
         </button>
       </div>
     </div>

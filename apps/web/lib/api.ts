@@ -194,6 +194,9 @@ export async function getProductBySlug(
   const colors: ProductColor[] = (p.colors ?? []).map((name) => ({
     name,
     hex: colorToHex(name),
+    variantId: (p.variants ?? []).find(
+      (v) => v.color?.toLowerCase() === name.toLowerCase(),
+    )?._id,
   }));
 
   const specifications = SPEC_LABELS.filter(
@@ -202,6 +205,7 @@ export async function getProductBySlug(
 
   return {
     detail: {
+      productId: p._id,
       slug: p.slug,
       title: p.title,
       subtitle: cat?.name || p.description?.slice(0, 80) || "Custom Apparel",

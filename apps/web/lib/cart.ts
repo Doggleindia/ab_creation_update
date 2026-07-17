@@ -6,12 +6,20 @@ export type CartItem = {
   id: string; // unique line id
   slug: string;
   title: string;
-  variant: string; // e.g. "White · Size L · DTF Print"
+  variant: string; // display string, e.g. "White · Size L · DTF Print"
   image: string;
-  price: number; // per unit, INR
+  price: number; // per unit, INR (display; server recomputes at checkout)
   quantity: number;
   seller?: string;
   custom?: boolean;
+  // Order-placement identity (POST /api/orders/checkout needs these)
+  productId?: string;
+  productType?: "ready" | "bulk";
+  variantId?: string;
+  color?: string;
+  size?: string;
+  customDesign?: string; // serialized design-studio state for custom items
+  artwork?: string; // data URL of the uploaded design (uploaded at checkout)
 };
 
 const KEY = "ab-cart";
