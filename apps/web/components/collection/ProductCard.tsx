@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import WishlistButton from "@/components/common/WishlistButton";
 
 export type Product = {
   slug: string;
@@ -41,12 +41,15 @@ export default function ProductCard({ product }: { product: Product }) {
         >
           {product.badge}
         </span>
-        <button
-          aria-label="Add to wishlist"
+        <WishlistButton
+          item={{
+            slug: product.slug,
+            title: product.title,
+            price: product.price,
+            image: product.image,
+          }}
           className="absolute right-3 top-3 flex items-center justify-center rounded-full bg-white/80 p-2 backdrop-blur-[2px] transition-colors hover:bg-white"
-        >
-          <Heart className="h-4 w-4 text-[#1b1c1b]" />
-        </button>
+        />
       </div>
 
       {/* Body */}

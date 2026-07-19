@@ -83,7 +83,7 @@ export default function CheckoutPage() {
 
   const subtotal = cartSubtotal(items);
   const method = SHIPPING.find((s) => s.id === shipping) ?? SHIPPING[0];
-  const codFee = payment === "cod" ? COD_FEE : 0;
+  const codFee = 0; // COD not offered yet — orders are wallet-paid
   const total = subtotal + method.price + codFee;
 
   const eta = new Date();
@@ -196,7 +196,7 @@ export default function CheckoutPage() {
       }
       setError(
         status === 402
-          ? "Insufficient wallet balance. Please recharge your AB Creation wallet and try again."
+          ? "Insufficient wallet balance. Recharge your wallet from My Account → Wallet, then try again."
           : err instanceof Error
             ? err.message
             : "Could not place the order. Please try again.",
@@ -365,7 +365,7 @@ export default function CheckoutPage() {
                     <span className="flex items-center gap-2">
                       <RadioDot selected={payment === "razorpay"} size={16} />
                       <span className="text-[16px] font-semibold text-[#1a1c1c]">
-                        Razorpay Secure Checkout
+                        Wallet Payment (via Razorpay)
                       </span>
                     </span>
                     <span className="flex gap-2">
@@ -380,23 +380,17 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                   <p className="mt-4 text-[14px] leading-[19.6px] text-[#444748]">
-                    Securely pay via UPI, Credit/Debit cards, or Net Banking.
-                    You will be redirected to Razorpay.
+                    Paid instantly from your AB Creation wallet. Top up the wallet
+                    via Razorpay (UPI, cards, net banking) from My Account →
+                    Wallet.
                   </p>
                 </label>
 
                 <label
-                  className={`flex cursor-pointer items-center justify-between rounded-[12px] border border-[#c4c7c7] p-[25px] ${
-                    payment === "cod" ? "bg-[#f3f3f4]" : "bg-white"
-                  }`}
+                  title="Cash on Delivery is coming soon"
+                  className="flex cursor-not-allowed items-center justify-between rounded-[12px] border border-[#e5e7eb] bg-white p-[25px] opacity-50"
                 >
-                  <input
-                    type="radio"
-                    name="payment"
-                    checked={payment === "cod"}
-                    onChange={() => setPayment("cod")}
-                    className="sr-only"
-                  />
+                  <input type="radio" name="payment" disabled className="sr-only" />
                   <span className="flex items-center gap-3">
                     <RadioDot selected={payment === "cod"} size={20} />
                     <span>
@@ -408,8 +402,8 @@ export default function CheckoutPage() {
                       </span>
                     </span>
                   </span>
-                  <span className="text-[14px] font-bold text-[#444748]">
-                    + ₹{COD_FEE} fee
+                  <span className="text-[12px] font-bold uppercase tracking-[0.5px] text-[#9ca3af]">
+                    Coming soon
                   </span>
                 </label>
               </div>
@@ -431,11 +425,11 @@ export default function CheckoutPage() {
               </button>
               <p className="mt-6 text-center text-[14px] text-[#444748]">
                 By placing an order, you agree to our{" "}
-                <Link href="/contact-us" className="underline hover:text-black">
+                <Link href="/terms-and-conditions" className="underline hover:text-black">
                   Terms
                 </Link>{" "}
                 and{" "}
-                <Link href="/contact-us" className="underline hover:text-black">
+                <Link href="/privacy-policy" className="underline hover:text-black">
                   Privacy Policy
                 </Link>
                 .

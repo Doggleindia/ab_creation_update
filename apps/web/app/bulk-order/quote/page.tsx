@@ -920,7 +920,7 @@ export default function BulkQuotePage() {
                   />
                   <span>
                     I agree to the{" "}
-                    <Link href="/contact-us" className="font-semibold underline">
+                    <Link href="/terms-and-conditions" className="font-semibold underline">
                       Terms of Service
                     </Link>{" "}
                     and confirm that all design rights provided belong to me or

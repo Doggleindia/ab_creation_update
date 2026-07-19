@@ -47,7 +47,8 @@ export default function DashboardPage() {
       .then((j) => setWallet(j.data?.balance ?? null))
       .catch(() => {});
     try {
-      const raw = sessionStorage.getItem("ab:design");
+      const raw =
+        localStorage.getItem("ab:design") ?? sessionStorage.getItem("ab:design");
       if (raw) setDesign(JSON.parse(raw));
     } catch {
       // no saved design
@@ -107,9 +108,12 @@ export default function DashboardPage() {
           <p className="pt-2 text-[40px] font-bold leading-none text-black">
             {wallet !== null ? `₹${wallet.toLocaleString("en-IN")}` : "—"}
           </p>
-          <p className="mt-4 text-[13px] text-[#9ca3af]">
-            Used to pay for orders
-          </p>
+          <Link
+            href="/dashboard/wallet"
+            className="mt-4 flex items-center gap-1 text-[14px] font-semibold text-black hover:text-brand-orange"
+          >
+            Recharge <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
 

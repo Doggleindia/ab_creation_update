@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Search, User, Menu, X, LogOut } from "lucide-react";
 import { type AuthUser, getUser, logout, subscribeAuth } from "@/lib/auth";
 
@@ -61,8 +62,19 @@ function AccountMenu({ user }: { user: AuthUser }) {
 }
 
 export default function Navbar() {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [user, setUser] = useState<AuthUser | null>(null);
+
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (!query.trim()) return;
+    setSearchOpen(false);
+    router.push(`/collection?search=${encodeURIComponent(query.trim())}`);
+    setQuery("");
+  }
 
   useEffect(() => {
     const sync = () => setUser(getUser());
@@ -106,12 +118,33 @@ export default function Navbar() {
 
         {/* Right: actions */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            aria-label="Search"
-            className="p-2 text-brand-ink transition-colors hover:text-brand-orange"
-          >
-            <Search className="h-5 w-5" />
-          </button>
+          {searchOpen ? (
+            <form onSubmit={submitSearch} className="flex items-center gap-1">
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onBlur={() => !query && setSearchOpen(false)}
+                placeholder="Search products…"
+                className="h-9 w-[180px] rounded-full border border-[#c4c7c7] px-4 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-brand-orange focus:outline-none"
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                className="p-2 text-brand-ink transition-colors hover:text-brand-orange"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            </form>
+          ) : (
+            <button
+              aria-label="Open search"
+              onClick={() => setSearchOpen(true)}
+              className="p-2 text-brand-ink transition-colors hover:text-brand-orange"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          )}
           {user ? (
             <AccountMenu user={user} />
           ) : (

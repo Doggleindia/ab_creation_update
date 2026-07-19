@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import WishlistButton from "@/components/common/WishlistButton";
+import type { WishlistItem } from "@/lib/wishlist";
 
-export default function ProductGallery({ images }: { images: string[] }) {
+export default function ProductGallery({
+  images,
+  wishlistItem,
+}: {
+  images: string[];
+  wishlistItem?: WishlistItem;
+}) {
   const [active, setActive] = useState(0);
   const gallery = images.length ? images : ["/images/product/pdp-1.png"];
 
@@ -21,12 +28,13 @@ export default function ProductGallery({ images }: { images: string[] }) {
           className="object-contain"
           sizes="(max-width: 1024px) 100vw, 540px"
         />
-        <button
-          aria-label="Add to wishlist"
-          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#c4c7c7] bg-white shadow-sm transition-colors hover:bg-[#f5f1ea]"
-        >
-          <Heart className="h-5 w-5 text-[#1b1c1b]" />
-        </button>
+        {wishlistItem && (
+          <WishlistButton
+            item={wishlistItem}
+            iconClassName="h-5 w-5"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#c4c7c7] bg-white shadow-sm transition-colors hover:bg-[#f5f1ea]"
+          />
+        )}
       </div>
 
       {/* Thumbnails */}

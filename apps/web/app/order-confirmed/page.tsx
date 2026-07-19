@@ -26,7 +26,7 @@ type LastOrder = {
 };
 
 const STEPS = ["Confirmed", "In Production", "Dispatched", "Delivered"];
-const CURRENT_STEP = 1; // In Production
+const CURRENT_STEP = 0; // Confirmed — production starts after admin review
 
 function Confirmation() {
   const params = useSearchParams();
@@ -185,7 +185,7 @@ function Confirmation() {
             </h2>
             <div className="relative flex items-start justify-between px-4">
               <div className="absolute left-[15%] right-[15%] top-[14px] h-[2px] bg-[#e8e8e8]" />
-              <div className="absolute left-[15%] right-[60%] top-[14px] h-[2px] bg-[#22c55e]" />
+              <div className="absolute left-[15%] right-[85%] top-[14px] h-[2px] bg-[#22c55e]" />
               {STEPS.map((label, i) => (
                 <div
                   key={label}
@@ -219,8 +219,8 @@ function Confirmation() {
             <div className="flex items-center justify-center gap-3 rounded-[8px] border border-[#c4c7c7]/30 bg-[#f3f3f4] p-[17px]">
               <Printer className="h-4 w-4 shrink-0 text-[#444748]" />
               <p className="text-[14px] text-[#444748]">
-                Current Status: <span className="text-black">In Production</span>{" "}
-                — Your custom design is being printed
+                Current Status: <span className="text-black">Confirmed</span>{" "}
+                — We're preparing your order for production
               </p>
             </div>
           </section>

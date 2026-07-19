@@ -9,7 +9,6 @@ import {
   Download,
   Eye,
   HelpCircle,
-  History,
   Info,
   Mail,
   MessageCircle,
@@ -105,7 +104,8 @@ export default function PreviewOrderPage() {
 
   useEffect(() => {
     try {
-      const raw = sessionStorage.getItem("ab:design");
+      const raw =
+        localStorage.getItem("ab:design") ?? sessionStorage.getItem("ab:design");
       if (raw) setDesign({ ...FALLBACK, ...JSON.parse(raw) });
     } catch {
       // fall through to defaults
@@ -172,12 +172,13 @@ export default function PreviewOrderPage() {
           Preview &amp; Order
         </span>
         <div className="flex items-center gap-4">
-          <button aria-label="History" className="hidden text-black hover:text-brand-orange sm:block">
-            <History className="h-5 w-5" />
-          </button>
-          <button aria-label="Help" className="hidden text-black hover:text-brand-orange sm:block">
+          <Link
+            href="/contact-us"
+            aria-label="Help"
+            className="hidden text-black hover:text-brand-orange sm:block"
+          >
             <HelpCircle className="h-5 w-5" />
-          </button>
+          </Link>
           <button
             onClick={addAndCheckout}
             className="rounded-full bg-brand-orange px-5 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
@@ -327,9 +328,14 @@ export default function PreviewOrderPage() {
                 <p className="text-[12px] font-bold uppercase tracking-[0.6px] text-[#444748]">
                   Select Size
                 </p>
-                <button className="text-[13px] font-bold text-black underline hover:text-brand-orange">
-                  Size Chart
-                </button>
+                {design.product?.slug ? (
+                  <Link
+                    href={`/product/${design.product.slug}#size-chart`}
+                    className="text-[13px] font-bold text-black underline hover:text-brand-orange"
+                  >
+                    Size Chart
+                  </Link>
+                ) : null}
               </div>
               <div className="mt-3 flex flex-wrap gap-3">
                 {SIZES.map((s) => (
@@ -402,9 +408,9 @@ export default function PreviewOrderPage() {
                 <Info className="h-4 w-4 shrink-0 text-[#16a34a]" />
                 <p className="text-[13px] text-[#166534]">
                   Order {BULK_QTY}+ for ₹{BULK_PRICE}/piece{" "}
-                  <button className="font-semibold underline">
+                  <Link href="/bulk-order" className="font-semibold underline">
                     Bulk Pricing
-                  </button>
+                  </Link>
                 </p>
               </div>
             </div>
@@ -431,18 +437,22 @@ export default function PreviewOrderPage() {
                 >
                   <Copy className="h-4 w-4" />
                 </button>
-                <button
+                <a
                   aria-label="Share on WhatsApp"
+                  href={`https://wa.me/?text=${encodeURIComponent(`Check out my custom ${productTitle} design on AB Creation!`)}`}
+                  target="_blank"
+                  rel="noreferrer"
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-[#c4c7c7] text-black hover:bg-[#f3f3f4]"
                 >
                   <MessageCircle className="h-4 w-4" />
-                </button>
-                <button
+                </a>
+                <a
                   aria-label="Share via email"
+                  href={`mailto:?subject=${encodeURIComponent("My custom AB Creation design")}&body=${encodeURIComponent(`I designed a custom ${productTitle} on AB Creation.`)}`}
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-[#c4c7c7] text-black hover:bg-[#f3f3f4]"
                 >
                   <Mail className="h-4 w-4" />
-                </button>
+                </a>
               </div>
             </div>
 

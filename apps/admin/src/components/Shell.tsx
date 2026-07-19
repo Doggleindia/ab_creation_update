@@ -152,13 +152,21 @@ export default function Shell({
           </div>
           <div className="flex items-center gap-4">
             {actions}
-            <div className="relative hidden lg:block">
+            <form
+              className="relative hidden lg:block"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = new FormData(e.currentTarget).get("q");
+                if (q) navigate(`/orders?q=${encodeURIComponent(String(q))}`);
+              }}
+            >
               <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9ca3af]" />
               <input
-                placeholder="Search orders, sellers..."
+                name="q"
+                placeholder="Search orders..."
                 className="h-10 w-[260px] rounded-lg border border-[#e5e7eb] bg-[#f8f9fb] pl-9 pr-3 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
               />
-            </div>
+            </form>
           </div>
         </header>
         <main className="p-8">{children}</main>

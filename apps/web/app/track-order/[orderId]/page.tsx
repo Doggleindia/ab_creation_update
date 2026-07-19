@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   Check,
@@ -11,6 +10,7 @@ import {
   Download,
   Mail,
 } from "lucide-react";
+import Link from "next/link";
 import { apiFetch, getToken } from "@/lib/auth";
 
 type LastOrder = {
@@ -200,6 +200,33 @@ export default function TrackOrderPage() {
           "Karnataka, 560038",
         ];
 
+  async function downloadInvoice() {
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF();
+    const line = (y: number) => doc.line(20, y, 190, y);
+    doc.setFontSize(18);
+    doc.text("AB Creation — Invoice", 20, 22);
+    doc.setFontSize(11);
+    doc.text(`Order: #${orderId}`, 20, 34);
+    doc.text(`Date: ${placedOn}`, 20, 41);
+    doc.text(`Status: ${badgeLabel}`, 20, 48);
+    line(54);
+    doc.text(`Item: ${displayTitle}`, 20, 63);
+    doc.text(`Details: ${displayVariant}`, 20, 70);
+    doc.text(`Subtotal: Rs. ${displaySubtotal.toLocaleString("en-IN")}`, 20, 80);
+    doc.text(`Shipping: ${displayShipping}`, 20, 87);
+    doc.setFontSize(13);
+    doc.text(`Order Total: Rs. ${displayTotal.toLocaleString("en-IN")}`, 20, 97);
+    doc.setFontSize(11);
+    doc.text(`Payment: ${displayPaid}`, 20, 105);
+    line(112);
+    doc.text("Ship to:", 20, 121);
+    displayAddress.forEach((l, i) => doc.text(String(l), 20, 128 + i * 7));
+    doc.setFontSize(9);
+    doc.text("Generated from abcreation — keep for your records.", 20, 170);
+    doc.save(`invoice-${orderId}.pdf`);
+  }
+
   if (!mounted) return <div className="min-h-[60vh] bg-white" />;
 
   return (
@@ -315,9 +342,12 @@ export default function TrackOrderPage() {
                   You can still modify the shipping address before dispatch.
                 </p>
               </div>
-              <button className="rounded-[8px] bg-white px-6 py-2 text-[16px] font-bold text-black transition-colors hover:bg-[#f3f3f4]">
+              <Link
+                href="/contact-us"
+                className="rounded-[8px] bg-white px-6 py-2 text-[16px] font-bold text-black transition-colors hover:bg-[#f3f3f4]"
+              >
                 Edit Address
-              </button>
+              </Link>
             </section>
           </div>
 
@@ -384,7 +414,10 @@ export default function TrackOrderPage() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <button className="flex w-full items-center justify-center gap-2 rounded-[8px] border border-[#747878] py-[13px] text-[16px] font-semibold text-black transition-colors hover:bg-[#f3f3f4]">
+                  <button
+                    onClick={() => void downloadInvoice()}
+                    className="flex w-full items-center justify-center gap-2 rounded-[8px] border border-[#747878] py-[13px] text-[16px] font-semibold text-black transition-colors hover:bg-[#f3f3f4]"
+                  >
                     <Download className="h-4 w-4" /> Download Invoice
                   </button>
                   <Link

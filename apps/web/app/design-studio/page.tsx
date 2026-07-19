@@ -128,6 +128,27 @@ function DesignStudio() {
   const areaRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
+  // Restore a previously saved draft so Save Draft actually persists
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("ab:design");
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (d.image) setImage(d.image);
+      if (d.colorName) {
+        const c = SHIRT_COLORS.find((x) => x.name === d.colorName);
+        if (c) setColor(c);
+      }
+      if (d.printMethod) setPrintMethod(d.printMethod);
+      if (d.zone) setZone(d.zone);
+      if (d.placement) setPlacement(d.placement);
+      if (typeof d.opacity === "number") setOpacity(d.opacity);
+    } catch {
+      // corrupted draft — start fresh
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const side: "front" | "back" = zone === "back" ? "back" : "front";
   const zoneCfg = ZONES.find((z) => z.id === zone) ?? ZONES[0];
 
@@ -175,7 +196,7 @@ function DesignStudio() {
 
   function saveDraft() {
     try {
-      sessionStorage.setItem("ab:design", JSON.stringify(designState()));
+      localStorage.setItem("ab:design", JSON.stringify(designState()));
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 1500);
     } catch {
@@ -185,7 +206,7 @@ function DesignStudio() {
 
   function goToPreview() {
     try {
-      sessionStorage.setItem("ab:design", JSON.stringify(designState()));
+      localStorage.setItem("ab:design", JSON.stringify(designState()));
     } catch {
       // storage full — preview falls back to defaults
     }
@@ -419,10 +440,11 @@ function DesignStudio() {
             {["Design", "Product", "Inspect"].map((tab, i) => (
               <button
                 key={tab}
+                title={i === 0 ? undefined : "Coming soon"}
                 className={`py-4 text-[12px] font-semibold tracking-[0.6px] ${
                   i === 0
                     ? "-mb-px border-b-2 border-black text-black"
-                    : "text-[#444748]"
+                    : "cursor-not-allowed text-[#c4c7c7]"
                 }`}
               >
                 {tab}
@@ -452,13 +474,15 @@ function DesignStudio() {
               <div className="flex gap-2">
                 <button
                   aria-label="Flip horizontal"
-                  className="flex h-10 flex-1 items-center justify-center rounded-[8px] border border-[#c4c7c7] text-black hover:bg-[#f3f3f4]"
+                  title="Coming soon"
+                  className="flex h-10 flex-1 cursor-not-allowed items-center justify-center rounded-[8px] border border-[#e5e7eb] text-[#c4c7c7]"
                 >
                   <FlipHorizontal2 className="h-4 w-4" />
                 </button>
                 <button
                   aria-label="Flip vertical"
-                  className="flex h-10 flex-1 items-center justify-center rounded-[8px] border border-[#c4c7c7] text-black hover:bg-[#f3f3f4]"
+                  title="Coming soon"
+                  className="flex h-10 flex-1 cursor-not-allowed items-center justify-center rounded-[8px] border border-[#e5e7eb] text-[#c4c7c7]"
                 >
                   <FlipVertical2 className="h-4 w-4" />
                 </button>
@@ -621,16 +645,16 @@ function DesignStudio() {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <button aria-label="Zoom out" className="hover:text-black">
+            <button aria-label="Zoom out" title="Coming soon" className="cursor-not-allowed text-[#c4c7c7]">
               <Minus className="h-3.5 w-3.5" />
             </button>
             <span className="font-semibold text-[#1a1c1c]">100%</span>
-            <button aria-label="Zoom in" className="hover:text-black">
+            <button aria-label="Zoom in" title="Coming soon" className="cursor-not-allowed text-[#c4c7c7]">
               <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
           <span className="h-3.5 w-px bg-[#c4c7c7]" />
-          <button className="font-semibold hover:text-black">Fit</button>
+          <button title="Coming soon" className="cursor-not-allowed font-semibold text-[#c4c7c7]">Fit</button>
         </div>
       </div>
     </div>

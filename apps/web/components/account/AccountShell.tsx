@@ -8,6 +8,7 @@ import {
   Package,
   Palette,
   Heart,
+  Wallet,
   MapPin,
   Settings,
 } from "lucide-react";
@@ -16,8 +17,9 @@ import { type AuthUser, getToken, getUser, subscribeAuth } from "@/lib/auth";
 const NAV = [
   { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
   { icon: Package, label: "My Orders", href: "/dashboard/orders" },
+  { icon: Wallet, label: "Wallet", href: "/dashboard/wallet" },
   { icon: Palette, label: "Saved Designs", href: "/design-studio" },
-  { icon: Heart, label: "Wishlist", href: null },
+  { icon: Heart, label: "Wishlist", href: "/dashboard/wishlist" },
   { icon: MapPin, label: "Addresses", href: null },
   { icon: Settings, label: "Account Settings", href: null },
 ];

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiX, FiDownload, FiUser, FiBox, FiCreditCard, FiActivity } from "react-icons/fi";
 import Shell, { Card, StatusChip } from "../components/Shell";
 import { api, inr, type AdminOrder } from "../lib/api";
@@ -41,7 +42,12 @@ export default function Orders() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null) setSearch(q);
+  }, [searchParams]);
   const [selected, setSelected] = useState<AdminOrder | null>(null);
   const [nextStatus, setNextStatus] = useState<string>("confirmed");
   const [updating, setUpdating] = useState(false);
@@ -92,6 +98,31 @@ export default function Orders() {
     }
   }
 
+  function exportCsv() {
+    const header = ["Order ID","Customer","Email","Product","Type","Qty","Amount","Status","Date"];
+    const lines = rows.map((o) =>
+      [
+        o.orderId,
+        o.userId?.name ?? "",
+        o.userId?.email ?? "",
+        (o.productId?.title ?? "Custom order").replace(/,/g, " "),
+        o.customDesign ? "Custom" : o.productType,
+        o.quantity,
+        o.totalAmount,
+        o.orderStatus,
+        o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 10) : "",
+      ].join(","),
+    );
+    const blob = new Blob([[header.join(","), ...lines].join(String.fromCharCode(10))], {
+      type: "text/csv",
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   const lifecycleIdx = selected
     ? LIFECYCLE.findIndex((l) => l.key === selected.orderStatus)
     : -1;
@@ -119,6 +150,12 @@ export default function Orders() {
           placeholder="Search by order ID, customer..."
           className="ml-auto h-10 w-[260px] rounded-lg border border-[#e5e7eb] bg-white px-4 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
         />
+        <button
+          onClick={exportCsv}
+          className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-4 text-[13px] font-bold text-black hover:border-black"
+        >
+          ⬇ Export CSV
+        </button>
       </div>
 
       {/* Table */}

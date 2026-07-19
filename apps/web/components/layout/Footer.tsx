@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import NewsletterForm from "@/components/layout/NewsletterForm";
 
 const SHOP_LINKS = [
   { label: "T-Shirts", href: "/collection?category=t-shirts" },
@@ -76,21 +77,7 @@ export default function Footer() {
             <p className="text-[14px] leading-5 text-[#f3f0ee]/80">
               Join for design tips and bulk discounts.
             </p>
-            <form className="flex items-center gap-1.5">
-              <input
-                type="email"
-                required
-                placeholder="Email"
-                aria-label="Email address"
-                className="w-[179px] rounded-md border border-[#e2bfb0] bg-[#eae8e6]/10 px-4 py-2 text-[15px] text-white placeholder:text-brand-muted focus:outline-none focus:ring-1 focus:ring-brand-orange"
-              />
-              <button
-                type="submit"
-                className="rounded-md bg-brand-rust px-4 py-2 text-[16px] text-white transition-opacity hover:opacity-90"
-              >
-                Join
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
 

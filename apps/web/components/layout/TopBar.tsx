@@ -3,11 +3,10 @@ export default function TopBar() {
     <div className="w-full bg-black text-white">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-2 text-[12px] leading-4 sm:px-8">
         <p className="truncate">
-          If you order today estimate delivery time is 12 September.
+          Made-to-order apparel — standard production 7-10 business days.
         </p>
         <div className="hidden shrink-0 items-center gap-4 sm:flex">
-          <span>🕒 9:00 AM - 5:30 PM</span>
-          <span>📞 Call us: (912) 112 12 12</span>
+          <span>🕒 Mon–Sat, 9:00 AM – 5:30 PM</span>
         </div>
       </div>
     </div>

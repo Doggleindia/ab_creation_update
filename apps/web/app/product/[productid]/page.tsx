@@ -78,7 +78,15 @@ export default async function ProductDetailPage({
     <main>
       <section className="w-full bg-white px-4 py-8 sm:px-8 lg:px-[86.5px]">
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,540px)_1fr]">
-          <ProductGallery images={detail.images} />
+          <ProductGallery
+            images={detail.images}
+            wishlistItem={{
+              slug: detail.slug,
+              title: detail.title,
+              price: detail.price,
+              image: detail.images[0],
+            }}
+          />
           <ProductBuyBox product={detail} specs={specs} />
         </div>
       </section>

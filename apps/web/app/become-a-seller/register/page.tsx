@@ -595,11 +595,11 @@ export default function SellerRegistrationPage() {
                     />
                     <span>
                       I agree to AB Creation&apos;s{" "}
-                      <Link href="/contact-us" className="underline">
+                      <Link href="/terms-and-conditions" className="underline">
                         Seller Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="/contact-us" className="underline">
+                      <Link href="/terms-and-conditions" className="underline">
                         Commission Policy
                       </Link>
                       .

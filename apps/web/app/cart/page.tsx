@@ -31,6 +31,7 @@ export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
   const [promo, setPromo] = useState("");
+  const [promoMsg, setPromoMsg] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -108,7 +109,7 @@ export default function CartPage() {
                     </p>
                     {item.custom && (
                       <Link
-                        href={`/product/${item.slug}`}
+                        href="/design-studio"
                         className="mt-2 w-fit text-[13px] font-semibold text-black underline hover:text-brand-orange"
                       >
                         Edit Design
@@ -196,11 +197,23 @@ export default function CartPage() {
                   placeholder="Promo code"
                   className="h-11 min-w-0 flex-1 rounded-[8px] border border-[#c4c7c7] bg-[#f9f9f9] px-4 text-[16px] text-black placeholder:text-[#6b7280] focus:border-brand-orange focus:outline-none"
                 />
-                <button className="h-11 rounded-[8px] border border-[#c4c7c7] bg-[#f9f9f9] px-6 text-[16px] font-semibold text-black transition-colors hover:bg-[#f0f0f0]">
+                <button
+                  onClick={() =>
+                    setPromoMsg(
+                      promo.trim()
+                        ? "This code isn't valid or has expired."
+                        : "Enter a promo code first.",
+                    )
+                  }
+                  className="h-11 rounded-[8px] border border-[#c4c7c7] bg-[#f9f9f9] px-6 text-[16px] font-semibold text-black transition-colors hover:bg-[#f0f0f0]"
+                >
                   Apply
                 </button>
               </div>
 
+              {promoMsg && (
+                <p className="mt-2 text-[13px] text-[#ba1a1a]">{promoMsg}</p>
+              )}
               <div className="mt-2 flex items-center justify-between pb-4 pt-2">
                 <span className="text-[24px] font-bold tracking-[-0.48px] text-black">
                   Total
