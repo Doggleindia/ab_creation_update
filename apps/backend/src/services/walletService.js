@@ -183,7 +183,7 @@ export const deductFromUserWallet = async (userId, amount, requestId, session) =
  * Credit to admin wallet
  */
 export const creditToAdminWallet = async (amount, requestId, session) => {
-  const adminWallet = await AdminWallet.getGlobalWallet();
+  const adminWallet = await AdminWallet.getGlobalWallet(session);
   adminWallet.balance += amount;
   await adminWallet.save({ session });
 

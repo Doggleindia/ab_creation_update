@@ -561,9 +561,14 @@ export const getOrderById = async (req, res) => {
     const { orderId } = req.params;
     const userId = req.user._id;
 
-    // Fetch order matching either _id or orderId, owned by the logged-in user
+    // Fetch order matching either _id or orderId, owned by the logged-in user.
+    // Only match _id when the param is a valid ObjectId — a human orderId like
+    // "ORD-..." would otherwise throw a CastError and turn into a 500.
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
     const order = await Order.findOne({
-      $or: [{ _id: orderId }, { orderId: orderId }],
+      $or: idClauses,
       userId,
     })
       .populate("productId")
