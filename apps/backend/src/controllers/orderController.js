@@ -657,3 +657,42 @@ export const getAdminAllOrders = async (req, res) => {
     });
   }
 };
+
+/**
+ * ADMIN — update an order's status (production pipeline).
+ * PATCH /api/orders/admin/:orderId/status  { orderStatus }
+ */
+export const updateAdminOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const orderStatus = toStr(req.body.orderStatus);
+
+    const allowed = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+    if (!allowed.includes(orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `orderStatus must be one of: ${allowed.join(", ")}`,
+      });
+    }
+
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
+    const order = await Order.findOneAndUpdate(
+      { $or: idClauses },
+      { orderStatus },
+      { new: true },
+    )
+      .populate("userId", "name email")
+      .populate("productId")
+      .populate("variantId");
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+
+    res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

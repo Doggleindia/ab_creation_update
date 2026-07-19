@@ -7,6 +7,7 @@ import {
   getAdminAllOrders,
   getOrderById,
   uploadDesigns,
+  updateAdminOrderStatus,
 } from "../controllers/orderController.js";
 import { userAuth } from "../middleware/userAuth.js";
 import { adminAuth } from "../middleware/adminAuth.js";
@@ -24,5 +25,6 @@ router.get("/:orderId", userAuth, getOrderById);
 // Admin Routes
 router.get("/admin/all", adminAuth, getAdminAllOrders);
 router.get("/admin/user/:userId", adminAuth, getAdminUserOrderHistory);
+router.patch("/admin/:orderId/status", adminAuth, updateAdminOrderStatus);
 
 export default router;

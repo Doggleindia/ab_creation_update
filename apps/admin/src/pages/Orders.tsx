@@ -1,0 +1,428 @@
+import { useEffect, useMemo, useState } from "react";
+import { FiX, FiDownload, FiUser, FiBox, FiCreditCard, FiActivity } from "react-icons/fi";
+import Shell, { Card, StatusChip } from "../components/Shell";
+import { api, inr, type AdminOrder } from "../lib/api";
+
+const STATUSES = [
+  "pending",
+  "confirmed",
+  "shipped",
+  "delivered",
+  "cancelled",
+] as const;
+
+const LIFECYCLE: { key: (typeof STATUSES)[number]; label: string }[] = [
+  { key: "pending", label: "Order Placed" },
+  { key: "confirmed", label: "In Production" },
+  { key: "shipped", label: "Dispatched" },
+  { key: "delivered", label: "Delivered" },
+];
+
+const FILTERS: { key: string; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "pending", label: "New" },
+  { key: "confirmed", label: "In Production" },
+  { key: "shipped", label: "Dispatched" },
+  { key: "delivered", label: "Delivered" },
+  { key: "cancelled", label: "Cancelled" },
+];
+
+function fullDate(d?: string) {
+  return d
+    ? new Date(d).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "—";
+}
+
+export default function Orders() {
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<AdminOrder | null>(null);
+  const [nextStatus, setNextStatus] = useState<string>("confirmed");
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState("");
+
+  function load() {
+    api<{ data: AdminOrder[] }>("/api/orders/admin/all")
+      .then((j) => setOrders(j.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }
+  useEffect(load, []);
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: orders.length };
+    for (const s of STATUSES) c[s] = orders.filter((o) => o.orderStatus === s).length;
+    return c;
+  }, [orders]);
+
+  const rows = orders.filter((o) => {
+    if (filter !== "all" && o.orderStatus !== filter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return (
+        o.orderId.toLowerCase().includes(q) ||
+        (o.userId?.name ?? "").toLowerCase().includes(q) ||
+        (o.productId?.title ?? "").toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
+
+  async function updateStatus() {
+    if (!selected) return;
+    setUpdating(true);
+    setError("");
+    try {
+      const j = await api<{ data: AdminOrder }>(
+        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/status`,
+        { method: "PATCH", body: JSON.stringify({ orderStatus: nextStatus }) },
+      );
+      setSelected(j.data);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  const lifecycleIdx = selected
+    ? LIFECYCLE.findIndex((l) => l.key === selected.orderStatus)
+    : -1;
+
+  return (
+    <Shell title="All Orders" subtitle={`${orders.length} total`}>
+      {/* Filter chips + search */}
+      <div className="flex flex-wrap items-center gap-3">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`rounded-full px-4 py-2 text-[13px] font-semibold ${
+              filter === f.key
+                ? "bg-black text-white"
+                : "border border-[#e5e7eb] bg-white text-[#374151] hover:border-black"
+            }`}
+          >
+            {f.label} ({counts[f.key] ?? 0})
+          </button>
+        ))}
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by order ID, customer..."
+          className="ml-auto h-10 w-[260px] rounded-lg border border-[#e5e7eb] bg-white px-4 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
+        />
+      </div>
+
+      {/* Table */}
+      <Card className="mt-5 overflow-x-auto">
+        <table className="w-full min-w-[860px] text-left">
+          <thead>
+            <tr className="bg-[#f8f9fb] text-[10.5px] font-bold uppercase tracking-[0.6px] text-[#6b7280]">
+              <th className="px-6 py-3.5">Order ID</th>
+              <th className="px-3 py-3.5">Customer</th>
+              <th className="px-3 py-3.5">Product</th>
+              <th className="px-3 py-3.5">Type</th>
+              <th className="px-3 py-3.5">Amount</th>
+              <th className="px-3 py-3.5">Status</th>
+              <th className="px-3 py-3.5">Date</th>
+              <th className="px-6 py-3.5">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!loaded && (
+              <tr>
+                <td colSpan={8} className="px-6 py-10 text-center text-[13px] text-[#9ca3af]">
+                  Loading orders…
+                </td>
+              </tr>
+            )}
+            {loaded && rows.length === 0 && (
+              <tr>
+                <td colSpan={8} className="px-6 py-10 text-center text-[13px] text-[#9ca3af]">
+                  No orders match.
+                </td>
+              </tr>
+            )}
+            {rows.map((o) => (
+              <tr key={o._id} className="border-t border-[#f3f4f6] text-[13.5px]">
+                <td className="px-6 py-4 font-bold text-black">
+                  #{o.orderId.slice(-8)}
+                </td>
+                <td className="px-3 py-4 text-[#374151]">{o.userId?.name ?? "—"}</td>
+                <td className="px-3 py-4">
+                  <span className="flex items-center gap-3">
+                    <span className="h-9 w-9 shrink-0 overflow-hidden rounded border border-[#e5e7eb] bg-[#f3f4f6]">
+                      {o.variantId?.media?.images?.[0] && (
+                        <img
+                          src={o.variantId.media.images[0]}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                    </span>
+                    <span className="max-w-[200px] truncate text-[#374151]">
+                      {o.productId?.title ?? "Custom order"}
+                      {o.customDesign ? " — Custom" : ""}
+                    </span>
+                  </span>
+                </td>
+                <td className="px-3 py-4">
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                      o.customDesign
+                        ? "bg-[#eef2ff] text-[#4f46e5]"
+                        : o.productType === "bulk"
+                          ? "bg-[#dcfce7] text-[#16a34a]"
+                          : "bg-[#f5f3ff] text-[#7c3aed]"
+                    }`}
+                  >
+                    {o.customDesign ? "Custom" : o.productType === "bulk" ? "Bulk" : "Catalog"}
+                  </span>
+                </td>
+                <td className="px-3 py-4 text-[#374151]">
+                  {inr(o.totalAmount)}
+                  {o.quantity > 1 && (
+                    <span className="block text-[11px] text-[#9ca3af]">
+                      (x{o.quantity})
+                    </span>
+                  )}
+                </td>
+                <td className="px-3 py-4">
+                  <StatusChip status={o.orderStatus} />
+                </td>
+                <td className="px-3 py-4 text-[#6b7280]">{fullDate(o.createdAt)}</td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => {
+                      setSelected(o);
+                      setError("");
+                      const idx = STATUSES.indexOf(o.orderStatus);
+                      setNextStatus(STATUSES[Math.min(idx + 1, 3)]);
+                    }}
+                    className="text-[13px] font-bold text-black hover:underline"
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="border-t border-[#f3f4f6] px-6 py-4 text-[12.5px] text-[#6b7280]">
+          Showing {rows.length} of {orders.length}
+        </p>
+      </Card>
+
+      {/* Detail drawer */}
+      {selected && (
+        <div className="fixed inset-0 z-40">
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setSelected(null)}
+          />
+          <div className="absolute inset-y-0 right-0 w-full max-w-[500px] overflow-y-auto bg-white shadow-2xl">
+            <div className="sticky top-0 flex items-start justify-between border-b border-[#e5e7eb] bg-white px-6 py-5">
+              <div>
+                <p className="flex items-center gap-3 text-[18px] font-bold text-black">
+                  Order #{selected.orderId.slice(-8)}{" "}
+                  <StatusChip status={selected.orderStatus} />
+                </p>
+                <p className="pt-1 text-[12.5px] text-[#6b7280]">
+                  Placed {fullDate(selected.createdAt)} · Payment{" "}
+                  {selected.paymentStatus}
+                </p>
+              </div>
+              <button
+                aria-label="Close"
+                onClick={() => setSelected(null)}
+                className="text-[#6b7280] hover:text-black"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-7 px-6 py-6">
+              {/* Customer */}
+              <section>
+                <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                  <FiUser /> Customer Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4 pt-3 text-[13.5px]">
+                  <div>
+                    <p className="text-[11.5px] text-[#9ca3af]">Name</p>
+                    <p className="font-bold text-black">
+                      {selected.userId?.name ?? "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[11.5px] text-[#9ca3af]">Email</p>
+                    <p className="text-[#374151]">{selected.userId?.email ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11.5px] text-[#9ca3af]">Phone</p>
+                    <p className="text-[#374151]">{selected.phoneNumber ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11.5px] text-[#9ca3af]">Address</p>
+                    <p className="text-[#374151]">
+                      {[
+                        selected.shippingAddress?.street,
+                        selected.shippingAddress?.city,
+                        selected.shippingAddress?.state,
+                        selected.shippingAddress?.pincode,
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "—"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Product */}
+              <section className="border-t border-[#f3f4f6] pt-6">
+                <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                  <FiBox /> Product Information
+                </h3>
+                <div className="flex gap-4 pt-4">
+                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-[#e5e7eb] bg-[#f3f4f6]">
+                    {selected.variantId?.media?.images?.[0] && (
+                      <img
+                        src={selected.variantId.media.images[0]}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="text-[13.5px]">
+                    <p className="text-[16px] font-bold leading-snug text-black">
+                      {selected.productId?.title ?? "Custom order"}
+                      {selected.customDesign ? " — Custom Design" : ""}
+                    </p>
+                    <p className="pt-1.5 text-[#374151]">
+                      Color: <b>{selected.color ?? "—"}</b> · Size:{" "}
+                      <b>{selected.size ?? "—"}</b> · Qty:{" "}
+                      <b>{selected.quantity}</b>
+                    </p>
+                    {(selected.designFiles?.length ?? 0) > 0 && (
+                      <a
+                        href={selected.designFiles![0]}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-bold text-black underline"
+                      >
+                        <FiDownload /> Download Design File
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Pricing */}
+              <section className="border-t border-[#f3f4f6] pt-6">
+                <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                  <FiCreditCard /> Pricing
+                </h3>
+                <div className="mt-3 rounded-lg bg-[#f8f9fb] p-4">
+                  <div className="flex justify-between border-t-0 text-[15px] font-bold text-black">
+                    <span>Total Amount</span>
+                    <span>{inr(selected.totalAmount)}</span>
+                  </div>
+                  <p className="pt-1 text-[12px] text-[#6b7280]">
+                    Paid via wallet · {selected.paymentStatus}
+                  </p>
+                </div>
+              </section>
+
+              {/* Lifecycle + status update */}
+              <section className="border-t border-[#f3f4f6] pt-6">
+                <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                  <FiActivity /> Order Lifecycle
+                </h3>
+                <ol className="flex flex-col gap-0 pt-4">
+                  {LIFECYCLE.map((l, i) => {
+                    const done =
+                      selected.orderStatus === "cancelled"
+                        ? false
+                        : i <= lifecycleIdx;
+                    return (
+                      <li key={l.key} className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <span
+                            className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${
+                              done
+                                ? "bg-black text-white"
+                                : "border border-[#d1d5db] text-[#d1d5db]"
+                            }`}
+                          >
+                            ✓
+                          </span>
+                          {i < LIFECYCLE.length - 1 && (
+                            <span
+                              className={`h-6 w-px ${done ? "bg-black" : "bg-[#e5e7eb]"}`}
+                            />
+                          )}
+                        </div>
+                        <span
+                          className={`pt-0.5 text-[13.5px] ${
+                            done ? "font-bold text-black" : "text-[#9ca3af]"
+                          }`}
+                        >
+                          {l.label}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+                {selected.orderStatus === "cancelled" && (
+                  <p className="pt-2 text-[13px] font-bold text-[#ba1a1a]">
+                    This order was cancelled.
+                  </p>
+                )}
+
+                <div className="mt-5 rounded-xl border border-[#e5e7eb] p-4">
+                  <div className="flex gap-3">
+                    <select
+                      value={nextStatus}
+                      onChange={(e) => setNextStatus(e.target.value)}
+                      className="h-10 flex-1 rounded-lg border border-[#e5e7eb] px-3 text-[13.5px] text-black focus:border-black focus:outline-none"
+                    >
+                      {STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s === "pending"
+                            ? "Order Placed"
+                            : s === "confirmed"
+                              ? "In Production"
+                              : s === "shipped"
+                                ? "Dispatched"
+                                : s.charAt(0).toUpperCase() + s.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => void updateStatus()}
+                      disabled={updating || nextStatus === selected.orderStatus}
+                      className="h-10 rounded-lg bg-black px-5 text-[13.5px] font-bold text-white transition-opacity hover:opacity-85 disabled:opacity-40"
+                    >
+                      {updating ? "Updating…" : "Update"}
+                    </button>
+                  </div>
+                  {error && (
+                    <p className="pt-3 text-[12.5px] text-[#ba1a1a]">{error}</p>
+                  )}
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
+    </Shell>
+  );
+}

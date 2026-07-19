@@ -1,27 +1,26 @@
-import './App.css';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Orders from "./pages/Orders";
+import Applications from "./pages/Applications";
+import Catalog from "./pages/Catalog";
+import Financials from "./pages/Financials";
+import Production from "./pages/Production";
 
-function App() {
+export default function App() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.75rem',
-        textAlign: 'center',
-        fontFamily: 'system-ui, sans-serif',
-      }}
-    >
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#171717' }}>
-        AB Creation Admin
-      </h1>
-      <p style={{ fontSize: '0.875rem', color: '#737373' }}>
-        Fresh start — admin panel rebuild in progress.
-      </p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/sellers" element={<Applications type="seller" />} />
+        <Route path="/bulk-orders" element={<Applications type="bulk" />} />
+        <Route path="/catalog" element={<Catalog />} />
+        <Route path="/financials" element={<Financials />} />
+        <Route path="/production" element={<Production />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
