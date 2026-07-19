@@ -8,21 +8,34 @@ const PRODUCTS = [
   { label: "Sweatshirt", img: "/images/home/cat-sweatshirt.png" },
 ];
 
-export default function ProductsCatalogSection() {
+export default function ProductsCatalogSection({
+  eyebrow = "Diverse Selection",
+  title = "Products You Can Sell",
+  sub = "Choose from over 30+ premium blank apparel options to build your brand identity.",
+  background = "bg-[#faf3ea]",
+}: {
+  eyebrow?: string | null;
+  title?: string;
+  sub?: string | null;
+  background?: string;
+}) {
   return (
-    <section className="w-full bg-[#faf3ea] py-16">
+    <section className={`w-full ${background} py-16`}>
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         <div className="mb-10 text-center">
-          <p className="text-[12px] font-semibold uppercase tracking-[1.2px] text-brand-orange">
-            Diverse Selection
-          </p>
+          {eyebrow && (
+            <p className="text-[12px] font-semibold uppercase tracking-[1.2px] text-brand-orange">
+              {eyebrow}
+            </p>
+          )}
           <h2 className="mt-2 font-poppins text-[28px] font-semibold text-[#242424] sm:text-[32px]">
-            Products You Can Sell
+            {title}
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-[15px] text-[#6b7280]">
-            Choose from over 30+ premium blank apparel options to build your
-            brand identity.
-          </p>
+          {sub && (
+            <p className="mx-auto mt-3 max-w-xl text-[15px] text-[#6b7280]">
+              {sub}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
