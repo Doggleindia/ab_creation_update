@@ -37,6 +37,13 @@ function AccountMenu({ user }: { user: AuthUser }) {
               </p>
               <p className="truncate text-[12px] text-[#444748]">{user.email}</p>
             </div>
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="mt-1 flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-[14px] text-black hover:bg-[#f3f3f4]"
+            >
+              <User className="h-4 w-4" /> My Account
+            </Link>
             <button
               onClick={() => {
                 setOpen(false);
