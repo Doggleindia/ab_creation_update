@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductGallery from "@/components/product/ProductGallery";
-import ProductBuyBox from "@/components/product/ProductBuyBox";
+import ProductBuyBox, { type SpecRow } from "@/components/product/ProductBuyBox";
+import SizeChartSection from "@/components/product/SizeChartSection";
 import ProductDetailInfo, {
   type RatingBar,
   type Review,
@@ -64,14 +65,25 @@ export default async function ProductDetailPage({
 
   const { detail, info } = product;
 
+  // Compact spec rows for the buy box's Fabric & Specifications block
+  const specs: SpecRow[] = [
+    info.material ? { label: "Material", value: info.material } : null,
+    ...info.specifications.map((s) => ({ label: s.label, value: s.value })),
+    info.careInstructions?.[0]
+      ? { label: "Care", value: info.careInstructions[0] }
+      : null,
+  ].filter((s): s is SpecRow => Boolean(s));
+
   return (
     <main>
       <section className="w-full bg-white px-4 py-8 sm:px-8 lg:px-[86.5px]">
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,540px)_1fr]">
           <ProductGallery images={detail.images} />
-          <ProductBuyBox product={detail} />
+          <ProductBuyBox product={detail} specs={specs} />
         </div>
       </section>
+
+      <SizeChartSection />
 
       <ProductDetailInfo
         info={{

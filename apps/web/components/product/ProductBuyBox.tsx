@@ -3,7 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Palette, ShoppingCart, Star } from "lucide-react";
+import {
+  Check,
+  ChevronUp,
+  Info,
+  Palette,
+  RotateCcw,
+  ShoppingCart,
+  Star,
+  Truck,
+  Zap,
+} from "lucide-react";
 import { addToCart } from "@/lib/cart";
 
 export type ProductColor = { name: string; hex: string; variantId?: string };
@@ -24,7 +34,16 @@ export type ProductDetail = {
   images?: string[];
 };
 
-export default function ProductBuyBox({ product }: { product: ProductDetail }) {
+export type SpecRow = { label: string; value: string };
+
+export default function ProductBuyBox({
+  product,
+  specs = [],
+}: {
+  product: ProductDetail;
+  specs?: SpecRow[];
+}) {
+  const [specsOpen, setSpecsOpen] = useState(true);
   const router = useRouter();
   const [size, setSize] = useState(product.sizes[0] ?? "");
   const [color, setColor] = useState(product.colors[0]?.name ?? "");
@@ -105,7 +124,15 @@ export default function ProductBuyBox({ product }: { product: ProductDetail }) {
 
       {/* Size */}
       <div className="flex flex-col gap-2">
-        <span className="text-[14px] font-semibold text-[#1b1c1b]">Size</span>
+        <span className="flex items-center justify-between text-[14px] font-semibold text-[#1b1c1b]">
+          Size
+          <a
+            href="#size-chart"
+            className="text-[13px] font-bold text-black underline hover:text-brand-orange"
+          >
+            Size Chart
+          </a>
+        </span>
         <div className="flex flex-wrap gap-2">
           {product.sizes.map((s) => (
             <button
@@ -191,6 +218,59 @@ export default function ProductBuyBox({ product }: { product: ProductDetail }) {
             </>
           )}
         </button>
+      </div>
+
+      {/* Fabric & specifications */}
+      {specs.length > 0 && (
+        <div className="border-t border-[#e5e7eb] pt-4">
+          <button
+            onClick={() => setSpecsOpen((v) => !v)}
+            className="flex w-full items-center justify-between text-[12px] font-bold uppercase tracking-[0.6px] text-[#374151]"
+          >
+            Fabric &amp; Specifications
+            <ChevronUp
+              className={`h-4 w-4 transition-transform ${specsOpen ? "" : "rotate-180"}`}
+            />
+          </button>
+          {specsOpen && (
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-2 pt-4 sm:grid-cols-2">
+              {specs.map((s) => (
+                <div key={s.label} className="flex gap-1.5 text-[14px]">
+                  <dt className="font-bold text-[#1b1c1b]">{s.label}:</dt>
+                  <dd className="text-[#374151]">{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+      )}
+
+      {/* Print method note */}
+      <div className="flex items-start gap-3 rounded-[8px] bg-[#f3f4f6] p-4">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#374151]" />
+        <p className="text-[13px] leading-5 text-[#374151]">
+          Printed with DTF (Direct to Film) for superior durability and color
+          vibrance.
+        </p>
+      </div>
+
+      {/* Perks */}
+      <div className="flex items-start justify-between gap-4 rounded-[8px] border border-[#e5e7eb] p-4">
+        {[
+          { icon: Truck, label: "Free Shipping 5+" },
+          { icon: Zap, label: "Rush Available" },
+          { icon: RotateCcw, label: "Easy Returns" },
+        ].map(({ icon: Icon, label }) => (
+          <span
+            key={label}
+            className="flex flex-1 flex-col items-center gap-2 text-center"
+          >
+            <Icon className="h-4 w-4 text-brand-orange" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.5px] text-[#6b7280]">
+              {label}
+            </span>
+          </span>
+        ))}
       </div>
     </div>
   );
