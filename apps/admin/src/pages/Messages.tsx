@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiTrash2, FiCheck, FiEye } from "react-icons/fi";
+import { FiTrash2, FiCheck, FiEye, FiMail } from "react-icons/fi";
 import Shell, { Card } from "../components/Shell";
 import { api, type ContactMsg } from "../lib/api";
 
@@ -38,10 +38,16 @@ export default function Messages() {
     }
   }
 
-  async function remove(id: string) {
-    setBusyId(id);
+  async function remove(m: ContactMsg) {
+    if (
+      !window.confirm(
+        `Delete the message from ${m.name || m.email}? This cannot be undone.`,
+      )
+    )
+      return;
+    setBusyId(m._id);
     try {
-      await api(`/api/contacts/${id}`, { method: "DELETE" });
+      await api(`/api/contacts/${m._id}`, { method: "DELETE" });
       load();
     } finally {
       setBusyId(null);
@@ -129,6 +135,14 @@ export default function Messages() {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
+                <a
+                  href={`mailto:${m.email}?subject=${encodeURIComponent(
+                    `Re: ${m.subject || "your message to AB Creation"}`,
+                  )}`}
+                  className="flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] px-3 py-2 text-[12.5px] font-bold text-[#374151] hover:border-black"
+                >
+                  <FiMail className="h-3.5 w-3.5" /> Reply
+                </a>
                 {m.status === "new" && (
                   <button
                     onClick={() => void setStatus(m._id, "reviewed")}
@@ -148,7 +162,7 @@ export default function Messages() {
                   </button>
                 )}
                 <button
-                  onClick={() => void remove(m._id)}
+                  onClick={() => void remove(m)}
                   disabled={busyId === m._id}
                   aria-label="Delete message"
                   className="flex items-center rounded-lg border border-[#fca5a5] px-3 py-2 text-[#dc2626] hover:bg-[#fef2f2] disabled:opacity-50"

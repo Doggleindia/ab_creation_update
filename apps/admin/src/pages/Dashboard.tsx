@@ -50,7 +50,7 @@ export default function Dashboard() {
     )
       .then((j) => setApps(j.data?.applications ?? []))
       .catch(() => {});
-    api<{ data: AdminProduct[] }>("/api/products/admin")
+    api<{ data: AdminProduct[] }>("/api/products/admin?limit=100")
       .then((j) =>
         setProducts(
           (Array.isArray(j.data) ? j.data : []).filter(
