@@ -24,7 +24,7 @@ const NAV: {
 }[] = [
   { icon: FiGrid, label: "Dashboard", to: "/" },
   { icon: FiUsers, label: "Seller Management", to: "/sellers" },
-  { icon: FiCheckSquare, label: "Product Approvals" },
+  { icon: FiCheckSquare, label: "Product Approvals", to: "/product-approvals" },
   { icon: FiShoppingCart, label: "All Orders", to: "/orders" },
   { icon: FiPackage, label: "Bulk Orders", to: "/bulk-orders" },
   { icon: FiLayers, label: "Production Queue", to: "/production" },
@@ -48,7 +48,7 @@ export default function Shell({
   const navigate = useNavigate();
   const location = useLocation();
   const [admin, setAdmin] = useState<AdminUser | null>(null);
-  const [badges, setBadges] = useState<{ seller: number; bulk: number }>({ seller: 0, bulk: 0 });
+  const [badges, setBadges] = useState<{ seller: number; bulk: number; products: number }>({ seller: 0, bulk: 0, products: 0 });
 
   useEffect(() => {
     const s = getSession();
@@ -66,11 +66,22 @@ export default function Shell({
     )
       .then((j) => {
         const apps = j.data?.applications ?? [];
-        setBadges({
+        setBadges((b) => ({
+          ...b,
           seller: apps.filter((a) => a.type === "seller").length,
           bulk: apps.filter((a) => a.type === "bulk").length,
-        });
+        }));
       })
+      .catch(() => {});
+    api<{ data: { sellerProducts: { status: string }[] } }>(
+      "/api/seller-products/admin?status=pending",
+    )
+      .then((j) =>
+        setBadges((b) => ({
+          ...b,
+          products: (j.data?.sellerProducts ?? []).length,
+        })),
+      )
       .catch(() => {});
     return () => window.removeEventListener("ab-admin-auth", sync);
   }, [navigate]);
@@ -112,6 +123,11 @@ export default function Shell({
                 {label === "Seller Management" && badges.seller > 0 && (
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f0c96b] text-[10px] font-bold text-black">
                     {badges.seller}
+                  </span>
+                )}
+                {label === "Product Approvals" && badges.products > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f0c96b] text-[10px] font-bold text-black">
+                    {badges.products}
                   </span>
                 )}
                 {label === "Bulk Orders" && badges.bulk > 0 && (

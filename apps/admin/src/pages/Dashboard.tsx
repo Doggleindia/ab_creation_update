@@ -37,6 +37,7 @@ export default function Dashboard() {
   const [sellers, setSellers] = useState<number>(0);
   const [balance, setBalance] = useState<number | null>(null);
   const [contacts, setContacts] = useState<number>(0);
+  const [awaiting, setAwaiting] = useState<number>(0);
   const [range, setRange] = useState<7 | 30 | 90>(30);
 
   useEffect(() => {
@@ -63,6 +64,11 @@ export default function Dashboard() {
       .catch(() => {});
     api<{ data: { balance: number } }>("/api/admin/wallet/balance")
       .then((j) => setBalance(j.data?.balance ?? null))
+      .catch(() => {});
+    api<{ data: { sellerProducts: unknown[] } }>(
+      "/api/seller-products/admin?status=pending",
+    )
+      .then((j) => setAwaiting((j.data?.sellerProducts ?? []).length))
       .catch(() => {});
     api<{ data?: unknown[]; count?: number }>("/api/contacts")
       .then((j) =>
@@ -205,7 +211,11 @@ export default function Dashboard() {
             <FiArchive className="h-5 w-5 text-[#374151]" />
           </p>
           <p className="pt-3 text-[12.5px] font-medium text-[#b45309]">
-            {balance !== null ? `Wallet ${inr(balance)}` : "—"}
+            {awaiting > 0
+              ? `${awaiting} awaiting approval`
+              : balance !== null
+                ? `Wallet ${inr(balance)}`
+                : "—"}
           </p>
         </Card>
       </div>

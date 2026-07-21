@@ -134,6 +134,27 @@ export type AdminProduct = {
   variants?: { _id: string; color?: string; media?: { images?: string[] } }[];
 };
 
+export type SellerProductSub = {
+  _id: string;
+  title: string;
+  description?: string;
+  method: string;
+  color?: string;
+  retailPrice: number;
+  sizes: string[];
+  tags: string[];
+  images: string[];
+  status: "pending" | "approved" | "rejected" | "changes";
+  adminNotes?: string;
+  checklist?: string[];
+  rejectionReason?: string;
+  createdAt?: string;
+  baseProductName?: string;
+  sellerId?: { name?: string; email?: string } | null;
+  baseProductId?: { title?: string; basePrice?: number } | string | null;
+  publishedProductId?: { slug?: string } | string | null;
+};
+
 export type ContactMsg = {
   _id: string;
   name: string;
