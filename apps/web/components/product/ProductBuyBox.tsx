@@ -32,6 +32,7 @@ export type ProductDetail = {
   colors: ProductColor[];
   inStock: number;
   images?: string[];
+  sellerName?: string | null;
 };
 
 export type SpecRow = { label: string; value: string };
@@ -88,6 +89,12 @@ export default function ProductBuyBox({
           {product.title}
         </h1>
         <p className="text-[15px] text-[#3d3d3d]">{product.subtitle}</p>
+        {product.sellerName && (
+          <p className="text-[13.5px] text-[#6b7280]">
+            By <span className="font-bold text-[#b45309]">{product.sellerName}</span>{" "}
+            · Seller Partner
+          </p>
+        )}
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1 rounded bg-[#22c55e] px-2 py-0.5 text-[13px] font-semibold text-white">
             {product.rating.toFixed(1)}

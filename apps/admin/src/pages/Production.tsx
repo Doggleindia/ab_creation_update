@@ -113,6 +113,31 @@ export default function Production() {
     ["pending", "confirmed"].includes(o.orderStatus),
   ).length;
   const totalQcFails = orders.reduce((n, o) => n + (o.qcFails ?? 0), 0);
+  // QC pass rate: orders that made it past QC vs recorded fail events
+  const qcPassed = orders.filter((o) =>
+    ["ready_to_pack", "shipped", "delivered"].includes(o.orderStatus),
+  ).length;
+  const qcRate =
+    qcPassed + totalQcFails > 0
+      ? Math.round((qcPassed / (qcPassed + totalQcFails)) * 100)
+      : null;
+  // Avg hours from production start to dispatch (last update of shipped+ orders)
+  const prodDurations = orders
+    .filter(
+      (o) =>
+        ["shipped", "delivered"].includes(o.orderStatus) &&
+        o.productionStartedAt &&
+        o.updatedAt,
+    )
+    .map(
+      (o) =>
+        (new Date(o.updatedAt!).getTime() - new Date(o.productionStartedAt!).getTime()) /
+        3600000,
+    )
+    .filter((h) => h >= 0);
+  const avgHours = prodDurations.length
+    ? prodDurations.reduce((s, h) => s + h, 0) / prodDurations.length
+    : null;
 
   const staffOptions = useMemo(() => {
     const set = new Set<string>(admins);
@@ -426,9 +451,21 @@ export default function Production() {
             <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[#22c55e]" />
             Today: <b>{dispatchedToday} dispatched</b>
           </span>
-          <span>
-            QC fails recorded: <b>{totalQcFails}</b>
-          </span>
+          {avgHours !== null && (
+            <span>
+              Avg production time:{" "}
+              <b>
+                {avgHours >= 48
+                  ? `${(avgHours / 24).toFixed(1)} days`
+                  : `${avgHours.toFixed(1)} hrs`}
+              </b>
+            </span>
+          )}
+          {qcRate !== null && (
+            <span>
+              QC pass rate: <b className="text-[#16a34a]">{qcRate}%</b>
+            </span>
+          )}
           <span>
             In production value:{" "}
             <b>{inr(allProduction.reduce((s, o) => s + o.totalAmount, 0))}</b>

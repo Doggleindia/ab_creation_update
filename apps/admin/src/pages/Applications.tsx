@@ -86,9 +86,6 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
   const [busy, setBusy] = useState(false);
   const [savingReview, setSavingReview] = useState(false);
   const [flash, setFlash] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const [quoteAmount, setQuoteAmount] = useState("");
-  const [quoteNotes, setQuoteNotes] = useState("");
-  const [sendingQuote, setSendingQuote] = useState(false);
 
   const load = useCallback(() => {
     api<{ data: { applications: Application[] } }>(
@@ -206,32 +203,6 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
       });
     } finally {
       setSavingReview(false);
-    }
-  }
-
-  async function sendQuote() {
-    if (!selected) return;
-    setSendingQuote(true);
-    setFlash(null);
-    try {
-      const j = await api<{ message: string }>(
-        `/api/applications/${selected._id}/quote`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({ amount: Number(quoteAmount), notes: quoteNotes }),
-        },
-      );
-      setFlash({ kind: "ok", text: j.message });
-      setQuoteAmount("");
-      setQuoteNotes("");
-      load();
-    } catch (err) {
-      setFlash({
-        kind: "err",
-        text: err instanceof Error ? err.message : "Could not send quote",
-      });
-    } finally {
-      setSendingQuote(false);
     }
   }
 
@@ -535,67 +506,6 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
                 </label>
               ))}
             </div>
-
-            {/* Bulk quote */}
-            {type === "bulk" && (
-              <div className="mt-4 rounded-xl border border-[#e5e7eb] bg-white p-4">
-                <p className="text-[10.5px] font-bold uppercase tracking-[0.6px] text-[#6b7280]">
-                  Quote
-                </p>
-                {selected.quote?.status && (
-                  <p className="flex items-center justify-between pt-2 text-[13.5px]">
-                    <span className="font-bold text-black">
-                      ₹{(selected.quote.amount ?? 0).toLocaleString("en-IN")}
-                    </span>
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize ${
-                        selected.quote.status === "accepted"
-                          ? "bg-[#dcfce7] text-[#16a34a]"
-                          : selected.quote.status === "declined"
-                            ? "bg-[#fee2e2] text-[#ba1a1a]"
-                            : "bg-[#dbeafe] text-[#2563eb]"
-                      }`}
-                    >
-                      {selected.quote.status}
-                    </span>
-                  </p>
-                )}
-                {selected.quote?.status !== "accepted" && (
-                  <>
-                    <div className="flex gap-2 pt-3">
-                      <input
-                        type="number"
-                        min={1}
-                        value={quoteAmount}
-                        onChange={(e) => setQuoteAmount(e.target.value)}
-                        placeholder="Amount (₹)"
-                        className="h-9 w-[110px] rounded-lg border border-[#e5e7eb] px-2.5 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
-                      />
-                      <input
-                        value={quoteNotes}
-                        onChange={(e) => setQuoteNotes(e.target.value)}
-                        placeholder="Notes (optional)"
-                        className="h-9 min-w-0 flex-1 rounded-lg border border-[#e5e7eb] px-2.5 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
-                      />
-                    </div>
-                    <button
-                      onClick={() => void sendQuote()}
-                      disabled={sendingQuote || !quoteAmount}
-                      className="mt-2.5 w-full rounded-lg bg-black py-2 text-[12.5px] font-bold text-white hover:opacity-85 disabled:opacity-40"
-                    >
-                      {sendingQuote
-                        ? "Sending…"
-                        : selected.quote?.status
-                          ? "Re-send Quote"
-                          : "Send Quote"}
-                    </button>
-                    <p className="pt-2 text-[11px] text-[#9ca3af]">
-                      Emails the applicant a link to review and accept the quote.
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
 
             <div className="flex gap-2 pt-4">
               <button

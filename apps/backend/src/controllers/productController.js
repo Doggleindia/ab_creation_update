@@ -2,6 +2,7 @@ import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import Variant from '../models/Variant.js';
 import Inventory from '../models/Inventory.js';
+import SellerProduct from '../models/SellerProduct.js';
 import AppError from '../utils/AppError.js';
 import { safeRegexFilter, toStr } from '../utils/sanitize.js';
 
@@ -601,6 +602,13 @@ export const getSingleProduct = async(req, res, next) => {
 
         if (!product) return next(new AppError("Product not found", 404));
 
+        // Seller attribution for marketplace products published from a
+        // seller submission (null for AB Creation's own catalog).
+        const sellerSub = await SellerProduct.findOne({
+            publishedProductId: product._id,
+            status: "approved",
+        }).populate("sellerId", "name");
+
         const variants = await Variant.aggregate([
             { $match: { productId: product._id } },
             {
@@ -654,6 +662,9 @@ export const getSingleProduct = async(req, res, next) => {
                 customizationTypes: product.customizationTypes,
                 printZones: product.printZones,
                 measurements: product.measurements,
+                seller: sellerSub?.sellerId?.name
+                    ? { name: sellerSub.sellerId.name }
+                    : null,
                 variants,
             },
         });

@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
-import { FiDownload, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
+import { FiDownload, FiImage, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
 import Shell, { Card } from "../components/Shell";
-import { api, inr, type Application } from "../lib/api";
+import { api, inr, type AdminProduct, type Application } from "../lib/api";
 
 const PAGE_SIZE = 5;
 
@@ -76,6 +76,7 @@ const TERMS = ["50/50 Advance", "100% Advance", "On Delivery"];
 export default function BulkOrders() {
   const [apps, setApps] = useState<Application[]>([]);
   const [admins, setAdmins] = useState<string[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
   const [tab, setTab] = useState<Stage | "all">("new");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -96,6 +97,10 @@ export default function BulkOrders() {
   useEffect(() => {
     api<{ data: { admins: { name: string }[] } }>("/api/admin")
       .then((j) => setAdmins((j.data?.admins ?? []).map((a) => a.name).filter(Boolean)))
+      .catch(() => {});
+    // Garment images used as the base layer for mockup previews
+    api<{ data: AdminProduct[] }>("/api/products/admin?limit=100")
+      .then((j) => setProducts(Array.isArray(j.data) ? j.data : []))
       .catch(() => {});
   }, []);
   useEffect(() => setPage(1), [tab, search]);
@@ -214,6 +219,63 @@ export default function BulkOrders() {
     } finally {
       setBusy(false);
     }
+  }
+
+  // Composite the client's design assets over a matching catalog garment
+  // image in a printable preview window. Pure presentation — no fake output.
+  function generateMockups(a: Application) {
+    const designs = (a.portfolioFiles ?? []).filter((f) =>
+      /\.(png|jpe?g|webp|svg)(\?|$)/i.test(f),
+    );
+    const category = (a.categories?.[0] ?? "").toLowerCase();
+    const garment =
+      products.find(
+        (p) =>
+          p.variants?.some((v) => v.media?.images?.[0]) &&
+          (p.title.toLowerCase().includes(category) ||
+            category.includes(p.title.toLowerCase().split(" ")[0] ?? "")),
+      ) ?? products.find((p) => p.variants?.some((v) => v.media?.images?.[0]));
+    const garmentImg = garment?.variants?.find((v) => v.media?.images?.[0])?.media
+      ?.images?.[0];
+    const w = window.open("", "_blank", "width=560,height=760");
+    if (!w) return;
+    const msg = parseMsg(a);
+    const blocks = designs.length
+      ? designs
+          .map(
+            (d, i) => `
+        <div class="mock">
+          <p class="cap">Mockup ${i + 1} — ${garment?.title ?? "Garment"} · Front${msg.positions ? ` (${msg.positions})` : ""}</p>
+          <div class="stage">
+            ${garmentImg ? `<img class="garment" src="${garmentImg}" alt="" />` : '<div class="blank"></div>'}
+            <img class="design" src="${d}" alt="" />
+          </div>
+        </div>`,
+          )
+          .join("")
+      : `<p class="cap">No image design assets on this request — ask the client for artwork to build mockups.</p>`;
+    w.document.write(`<html><head><title>Mockups — ${reqId(a)} ${a.businessName}</title>
+      <style>
+        body{font-family:system-ui;padding:24px;color:#111}
+        h1{font-size:17px;margin:0 0 2px}
+        .sub{font-size:12px;color:#666;margin:0 0 16px}
+        .mock{margin-bottom:24px;page-break-inside:avoid}
+        .cap{font-size:12.5px;font-weight:700;margin:0 0 8px}
+        .stage{position:relative;width:440px;height:480px;border:1px solid #e5e7eb;border-radius:12px;background:#f8f9fb;overflow:hidden}
+        .garment{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:16px;box-sizing:border-box}
+        .blank{position:absolute;inset:0;background:#eee}
+        .design{position:absolute;left:50%;top:30%;width:38%;transform:translateX(-50%);object-fit:contain;max-height:38%}
+        .note{font-size:11px;color:#888;margin-top:8px}
+        button{margin:0 0 16px;padding:8px 18px;font-weight:700;border:1px solid #111;background:#fff;border-radius:8px;cursor:pointer}
+        @media print{button{display:none}}
+      </style></head><body>
+      <h1>Mockup Preview — ${a.businessName}</h1>
+      <p class="sub">${reqId(a)} · generated ${new Date().toLocaleString("en-IN")}</p>
+      <button onclick="window.print()">Print / Save as PDF</button>
+      ${blocks}
+      <p class="note">Preview composite for proposal discussions — final print placement is confirmed during production setup.</p>
+      </body></html>`);
+    w.document.close();
   }
 
   function exportCsv() {
@@ -492,9 +554,15 @@ export default function BulkOrders() {
                   )}
 
                   <button
+                    onClick={() => generateMockups(a)}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-black py-3 text-[14px] font-bold text-black hover:bg-[#f3f4f6]"
+                  >
+                    <FiImage className="h-4 w-4" /> Generate Mockups
+                  </button>
+                  <button
                     onClick={() => void sendProposal()}
                     disabled={busy}
-                    className="mt-4 w-full rounded-xl bg-black py-3 text-[14px] font-bold text-white hover:opacity-85 disabled:opacity-40"
+                    className="mt-2.5 w-full rounded-xl bg-black py-3 text-[14px] font-bold text-white hover:opacity-85 disabled:opacity-40"
                   >
                     {busy ? "Sending…" : "Send Proposal"}
                   </button>

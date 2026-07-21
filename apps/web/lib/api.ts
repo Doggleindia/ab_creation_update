@@ -61,6 +61,7 @@ type RawProduct = {
     dpi?: number;
   }[];
   measurements?: ProductMeasurement[];
+  seller?: { name?: string } | null;
   variants?: RawVariant[];
 };
 
@@ -250,6 +251,7 @@ export async function getProductBySlug(
       colors: colors.length ? colors : [{ name: "White", hex: "#ffffff" }],
       inStock,
       images: images.length ? images : [PLACEHOLDER],
+      sellerName: p.seller?.name ?? null,
     },
     info: {
       productDetails: p.productDetails ?? [],
