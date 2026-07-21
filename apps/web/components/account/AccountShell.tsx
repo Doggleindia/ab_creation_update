@@ -116,6 +116,7 @@ export function StatusChip({ status }: { status: string }) {
     confirmed: { label: "Confirmed", cls: "bg-[#cffafe] text-[#0e7490]" },
     in_production: { label: "In Production", cls: "bg-[#fdecc8] text-[#b45309]" },
     quality_check: { label: "Quality Check", cls: "bg-[#fef3c7] text-[#b45309]" },
+    ready_to_pack: { label: "Packing", cls: "bg-[#dcfce7] text-[#16a34a]" },
     shipped: { label: "Shipped", cls: "bg-[#dbeafe] text-[#2563eb]" },
     pending: { label: "Placed", cls: "bg-[#f3f4f6] text-[#6b7280]" },
     cancelled: { label: "Cancelled", cls: "bg-[#fee2e2] text-[#ba1a1a]" },

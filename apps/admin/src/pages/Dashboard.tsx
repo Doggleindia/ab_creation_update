@@ -27,6 +27,7 @@ const QUEUE_DOT: Record<string, { label: string; color: string }> = {
   confirmed: { label: "Confirmed", color: "#0891b2" },
   in_production: { label: "Printing", color: "#ea580c" },
   quality_check: { label: "Quality Check", color: "#f59e0b" },
+  ready_to_pack: { label: "Ready to Pack", color: "#16a34a" },
   shipped: { label: "Dispatched", color: "#f59e0b" },
   delivered: { label: "Delivered", color: "#22c55e" },
   cancelled: { label: "Cancelled", color: "#ef4444" },
@@ -103,7 +104,7 @@ export default function Dashboard() {
   const pct =
     lastRevenue > 0 ? Math.round(((revenue - lastRevenue) / lastRevenue) * 100) : null;
   const pendingProduction = orders.filter((o) =>
-    ["pending", "confirmed", "in_production", "quality_check"].includes(o.orderStatus),
+    ["pending", "confirmed", "in_production", "quality_check", "ready_to_pack"].includes(o.orderStatus),
   ).length;
   const queue = orders
     .filter((o) => !["delivered", "cancelled"].includes(o.orderStatus))

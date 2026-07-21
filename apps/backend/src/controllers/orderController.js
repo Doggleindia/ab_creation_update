@@ -710,6 +710,7 @@ export const updateAdminOrderStatus = async (req, res) => {
       "confirmed",
       "in_production",
       "quality_check",
+      "ready_to_pack",
       "shipped",
       "delivered",
       "cancelled",
@@ -727,6 +728,14 @@ export const updateAdminOrderStatus = async (req, res) => {
     const order = await Order.findOne({ $or: idClauses });
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found." });
+    }
+
+    // Production floor bookkeeping: stamp when printing starts; count QC fails
+    if (orderStatus === "in_production" && !order.productionStartedAt) {
+      order.productionStartedAt = new Date();
+    }
+    if (req.body.qcFail === true) {
+      order.qcFails = (order.qcFails || 0) + 1;
     }
 
     // Seller margin payout — runs once, on the first transition into
@@ -807,6 +816,9 @@ export const updateAdminOrderMeta = async (req, res) => {
     }
     if (typeof req.body.internalNote === "string") {
       order.internalNote = toStr(req.body.internalNote);
+    }
+    if (typeof req.body.assignee === "string") {
+      order.assignee = toStr(req.body.assignee);
     }
     await order.save();
     res.status(200).json({ success: true, data: order });

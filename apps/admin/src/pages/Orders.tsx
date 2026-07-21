@@ -9,6 +9,7 @@ const STATUSES = [
   "confirmed",
   "in_production",
   "quality_check",
+  "ready_to_pack",
   "shipped",
   "delivered",
   "cancelled",
@@ -19,6 +20,7 @@ const LIFECYCLE: { key: (typeof STATUSES)[number]; label: string }[] = [
   { key: "confirmed", label: "Confirmed" },
   { key: "in_production", label: "In Production" },
   { key: "quality_check", label: "Quality Check" },
+  { key: "ready_to_pack", label: "Ready to Pack" },
   { key: "shipped", label: "Dispatched" },
   { key: "delivered", label: "Delivered" },
 ];
@@ -29,6 +31,7 @@ const FILTERS: { key: string; label: string }[] = [
   { key: "confirmed", label: "Confirmed" },
   { key: "in_production", label: "In Production" },
   { key: "quality_check", label: "Quality Check" },
+  { key: "ready_to_pack", label: "Ready to Pack" },
   { key: "shipped", label: "Dispatched" },
   { key: "delivered", label: "Delivered" },
   { key: "cancelled", label: "Cancelled" },
@@ -47,6 +50,7 @@ const STATUS_DOT: Record<string, { label: string; color: string }> = {
   confirmed: { label: "Confirmed", color: "#0891b2" },
   in_production: { label: "In Production", color: "#ea580c" },
   quality_check: { label: "Quality Check", color: "#f59e0b" },
+  ready_to_pack: { label: "Ready to Pack", color: "#16a34a" },
   shipped: { label: "Dispatched", color: "#3b82f6" },
   delivered: { label: "Delivered", color: "#16a34a" },
   cancelled: { label: "Cancelled", color: "#6b7280" },
@@ -760,9 +764,11 @@ export default function Orders() {
                                 ? "In Production"
                                 : s === "quality_check"
                                   ? "Quality Check"
-                                  : s === "shipped"
-                                    ? "Dispatched"
-                                    : s.charAt(0).toUpperCase() + s.slice(1)}
+                                  : s === "ready_to_pack"
+                                    ? "Ready to Pack"
+                                    : s === "shipped"
+                                      ? "Dispatched"
+                                      : s.charAt(0).toUpperCase() + s.slice(1)}
                         </option>
                       ))}
                     </select>

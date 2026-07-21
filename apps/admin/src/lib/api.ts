@@ -93,7 +93,7 @@ export const shortDate = (d?: string) =>
 export type AdminOrder = {
   _id: string;
   orderId: string;
-  orderStatus: "pending" | "confirmed" | "in_production" | "quality_check" | "shipped" | "delivered" | "cancelled";
+  orderStatus: "pending" | "confirmed" | "in_production" | "quality_check" | "ready_to_pack" | "shipped" | "delivered" | "cancelled";
   paymentStatus: string;
   totalAmount: number;
   quantity: number;
@@ -107,6 +107,10 @@ export type AdminOrder = {
   carrier?: string;
   trackingNumber?: string;
   internalNote?: string;
+  assignee?: string;
+  productionStartedAt?: string;
+  qcFails?: number;
+  updatedAt?: string;
   createdAt?: string;
   shippingAddress?: {
     street?: string;

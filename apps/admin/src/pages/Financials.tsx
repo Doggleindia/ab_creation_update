@@ -133,7 +133,7 @@ export default function Financials() {
   const inProduction = orders.filter(
     (o) =>
       o.paymentStatus === "paid" &&
-      ["pending", "confirmed", "in_production", "quality_check"].includes(o.orderStatus),
+      ["pending", "confirmed", "in_production", "quality_check", "ready_to_pack"].includes(o.orderStatus),
   );
   const pendingSettlement = inProduction.reduce((s, o) => s + o.totalAmount, 0);
 

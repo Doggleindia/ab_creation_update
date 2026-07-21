@@ -94,10 +94,15 @@ const orderSchema = new mongoose.Schema(
     trackingNumber: { type: String, trim: true },
     internalNote: { type: String, trim: true },
 
+    // Production floor metadata
+    assignee: { type: String, trim: true },
+    productionStartedAt: { type: Date },
+    qcFails: { type: Number, default: 0 },
+
     orderStatus: {
       type: String,
       required: true,
-      enum: ["pending", "confirmed", "in_production", "quality_check", "shipped", "delivered", "cancelled"],
+      enum: ["pending", "confirmed", "in_production", "quality_check", "ready_to_pack", "shipped", "delivered", "cancelled"],
       default: "pending",
     },
     paymentStatus: {
