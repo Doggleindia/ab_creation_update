@@ -53,7 +53,23 @@ type RawProduct = {
   productDetails?: string[];
   materialAndCare?: { material?: string; careInstructions?: string[] };
   specifications?: Record<string, string | undefined>;
+  printZones?: {
+    name: string;
+    side?: string;
+    widthIn?: number;
+    heightIn?: number;
+    dpi?: number;
+  }[];
+  measurements?: ProductMeasurement[];
   variants?: RawVariant[];
+};
+
+export type ProductMeasurement = {
+  size: string;
+  chest?: number;
+  length?: number;
+  shoulder?: number;
+  sleeve?: number;
 };
 
 export type ProductsMeta = {
@@ -161,10 +177,12 @@ export type FullProduct = {
     ProductInfo,
     "productDetails" | "specifications" | "material" | "careInstructions"
   >;
+  measurements: ProductMeasurement[];
 };
 
 const SPEC_LABELS: [keyof NonNullable<RawProduct["specifications"]>, string][] = [
   ["fabric", "Fabrics"],
+  ["gsm", "GSM"],
   ["fashionType", "Fashion Trends"],
   ["fit", "Fit"],
   ["type", "Type"],
@@ -203,6 +221,20 @@ export async function getProductBySlug(
     ([key]) => p.specifications?.[key],
   ).map(([key, label]) => ({ label, value: p.specifications![key] as string }));
 
+  // Surface configured print zones as a spec row (e.g. "Full Front 12″×16″")
+  if (p.printZones?.length) {
+    specifications.push({
+      label: "Print Areas",
+      value: p.printZones
+        .map((z) =>
+          z.widthIn && z.heightIn
+            ? `${z.name} ${z.widthIn}″×${z.heightIn}″`
+            : z.name,
+        )
+        .join(" · "),
+    });
+  }
+
   return {
     detail: {
       productId: p._id,
@@ -225,5 +257,6 @@ export async function getProductBySlug(
       material: p.materialAndCare?.material ?? "",
       careInstructions: (p.materialAndCare?.careInstructions ?? []).join(" "),
     },
+    measurements: p.measurements ?? [],
   };
 }

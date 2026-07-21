@@ -8,6 +8,9 @@ import {
   rejectApplication,
   uploadPortfolio,
   updateApplicationReview,
+  sendQuote,
+  getPublicQuote,
+  respondToQuote,
 } from "../controllers/applicationController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { upload } from "../middleware/uploadMiddleware.js";
@@ -26,6 +29,8 @@ router.post(
   upload.array("designs", 5),
   asyncHandler(uploadPortfolio),
 );
+router.get("/:id/quote", asyncHandler(getPublicQuote));
+router.post("/:id/quote/respond", asyncHandler(respondToQuote));
 
 /**
  * ADMIN — review queues and decisions.
@@ -35,5 +40,6 @@ router.get("/:id", adminAuth, asyncHandler(getApplication));
 router.patch("/:id/approve", adminAuth, asyncHandler(approveApplication));
 router.patch("/:id/reject", adminAuth, asyncHandler(rejectApplication));
 router.patch("/:id/review", adminAuth, asyncHandler(updateApplicationReview));
+router.patch("/:id/quote", adminAuth, asyncHandler(sendQuote));
 
 export default router;

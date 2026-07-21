@@ -8,6 +8,7 @@ const TABS = [
   { key: "all", label: "All" },
   { key: "credit", label: "Credits" },
   { key: "refund", label: "Refunds" },
+  { key: "payout", label: "Payouts" },
   { key: "withdrawal", label: "Withdrawals" },
 ] as const;
 
@@ -20,7 +21,7 @@ type BankAccount = { bankName?: string; accountHolder?: string; last4?: string }
 // (user recharges, user-side debits/credits) are excluded.
 type LedgerRow = {
   txn: WalletTxn;
-  kind: "credit" | "refund" | "withdrawal";
+  kind: "credit" | "refund" | "payout" | "withdrawal";
   signed: number;
   description: string;
 };
@@ -44,6 +45,14 @@ function toLedger(t: WalletTxn, bank: BankAccount | null): LedgerRow | null {
       kind: "refund",
       signed: -t.amount,
       description: `Refund issued — Order #${rid.replace("refund-admin-", "").slice(-8)}`,
+    };
+  }
+  if (t.type === "refund" && rid.startsWith("payout-admin-")) {
+    return {
+      txn: t,
+      kind: "payout",
+      signed: -t.amount,
+      description: `Seller payout — Order #${rid.replace("payout-admin-", "").slice(-8)}`,
     };
   }
   if (t.type === "withdrawal") {
@@ -124,7 +133,7 @@ export default function Financials() {
   const inProduction = orders.filter(
     (o) =>
       o.paymentStatus === "paid" &&
-      ["pending", "confirmed", "quality_check"].includes(o.orderStatus),
+      ["pending", "confirmed", "in_production", "quality_check"].includes(o.orderStatus),
   );
   const pendingSettlement = inProduction.reduce((s, o) => s + o.totalAmount, 0);
 

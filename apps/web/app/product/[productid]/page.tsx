@@ -91,7 +91,7 @@ export default async function ProductDetailPage({
         </div>
       </section>
 
-      <SizeChartSection />
+      <SizeChartSection measurements={product.measurements} />
 
       <ProductDetailInfo
         info={{

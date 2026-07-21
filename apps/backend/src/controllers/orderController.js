@@ -11,7 +11,9 @@ import {
   creditToAdminWallet,
   creditToUserWallet,
   deductFromAdminWallet,
+  creditSellerPayout,
 } from "../services/walletService.js";
+import WalletTransaction from "../models/WalletTransaction.js";
 import { toStr } from "../utils/sanitize.js";
 import { uploadFileToS3 } from "../config/s3Service.js";
 import SellerProduct from "../models/SellerProduct.js";
@@ -706,6 +708,7 @@ export const updateAdminOrderStatus = async (req, res) => {
     const allowed = [
       "pending",
       "confirmed",
+      "in_production",
       "quality_check",
       "shipped",
       "delivered",
@@ -721,20 +724,64 @@ export const updateAdminOrderStatus = async (req, res) => {
     const idClauses = mongoose.isValidObjectId(orderId)
       ? [{ _id: orderId }, { orderId: orderId }]
       : [{ orderId: orderId }];
-    const order = await Order.findOneAndUpdate(
-      { $or: idClauses },
-      { orderStatus },
-      { new: true },
-    )
-      .populate("userId", "name email")
-      .populate("productId")
-      .populate("variantId");
-
+    const order = await Order.findOne({ $or: idClauses });
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found." });
     }
 
-    res.status(200).json({ success: true, data: order });
+    // Seller margin payout — runs once, on the first transition into
+    // "delivered" for a paid order of a seller-published product.
+    let payoutInfo = null;
+    if (
+      orderStatus === "delivered" &&
+      order.orderStatus !== "delivered" &&
+      order.paymentStatus === "paid" &&
+      order.productId
+    ) {
+      const sub = await SellerProduct.findOne({
+        status: "approved",
+        publishedProductId: order.productId,
+      }).populate("baseProductId", "basePrice");
+      const marginPerUnit = sub
+        ? Math.max(0, (sub.retailPrice || 0) - (sub.baseProductId?.basePrice || 0))
+        : 0;
+      const payout = Math.round(marginPerUnit * (order.quantity || 1));
+      const requestId = `payout-seller-${order.orderId}`;
+      const alreadyPaid = payout > 0 && (await WalletTransaction.exists({ requestId }));
+      if (sub && payout > 0 && !alreadyPaid) {
+        const session = await mongoose.startSession();
+        try {
+          await session.withTransaction(async () => {
+            await deductFromAdminWallet(payout, `payout-admin-${order.orderId}`, session);
+            await creditSellerPayout(sub.sellerId, payout, requestId, session);
+            order.orderStatus = "delivered";
+            await order.save({ session });
+          });
+          payoutInfo = { sellerId: sub.sellerId, amount: payout };
+        } finally {
+          session.endSession();
+        }
+      } else {
+        order.orderStatus = orderStatus;
+        await order.save();
+      }
+    } else {
+      order.orderStatus = orderStatus;
+      await order.save();
+    }
+
+    const populated = await Order.findById(order._id)
+      .populate("userId", "name email")
+      .populate("productId")
+      .populate("variantId");
+
+    res.status(200).json({
+      success: true,
+      ...(payoutInfo
+        ? { message: `Seller payout of Rs ${payoutInfo.amount} credited.` }
+        : {}),
+      data: populated,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

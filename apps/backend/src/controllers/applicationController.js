@@ -8,6 +8,7 @@ import {
   generateTempPassword,
   sendCredentialsEmail,
 } from "../utils/sendCredentials.js";
+import EmailTransporter from "../utils/EmailTransporter.js";
 
 // Fields a public applicant is allowed to set. Everything else (status,
 // reviewedBy, linkedUserId, …) is server-controlled.
@@ -309,5 +310,106 @@ export const updateApplicationReview = async (req, res, next) => {
         checklist: application.checklist,
       },
     },
+  });
+};
+
+/**
+ * ADMIN — send (or re-send) a quote for a bulk application. Emails the
+ * applicant a link to the public quote page.
+ */
+export const sendQuote = async (req, res, next) => {
+  const application = await BusinessApplication.findById(req.params.id);
+  if (!application) return next(new AppError("Application not found", 404));
+  if (application.type !== "bulk") {
+    return next(new AppError("Quotes can only be sent for bulk applications", 400));
+  }
+  const amount = Math.round(Number(req.body.amount));
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return next(new AppError("A positive quote amount is required", 400));
+  }
+  application.quote = {
+    amount,
+    notes: toStr(req.body.notes),
+    status: "sent",
+    sentAt: new Date(),
+    respondedAt: undefined,
+  };
+  await application.save();
+
+  const quoteUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/bulk-order/quote/${application._id}`;
+  let emailSent = true;
+  try {
+    await EmailTransporter.sendEmail(
+      application.email,
+      "Your AB Creation bulk order quote is ready",
+      `Hello ${application.contactName},\n\nWe've prepared a quote for your bulk order enquiry (${application.businessName}).\n\n  Quoted amount: Rs ${amount.toLocaleString("en-IN")}\n${application.quote.notes ? `  Notes: ${application.quote.notes}\n` : ""}\nReview and respond to the quote here:\n${quoteUrl}\n\nThanks,\nAB Creation Team\n`,
+    );
+  } catch {
+    emailSent = false;
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: emailSent
+      ? `Quote of Rs ${amount.toLocaleString("en-IN")} sent to ${application.email}.`
+      : `Quote saved, but the email could not be sent. Share the link manually: ${quoteUrl}`,
+    data: { quote: application.quote, quoteUrl, emailSent },
+  });
+};
+
+/**
+ * PUBLIC — the applicant views their quote (minimal fields only).
+ */
+export const getPublicQuote = async (req, res, next) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return next(new AppError("Quote not found", 404));
+  }
+  const application = await BusinessApplication.findById(req.params.id).select(
+    "businessName contactName type expectedVolume quote createdAt",
+  );
+  if (!application || application.type !== "bulk" || !application.quote?.status) {
+    return next(new AppError("Quote not found", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      businessName: application.businessName,
+      contactName: application.contactName,
+      expectedVolume: application.expectedVolume,
+      quote: application.quote,
+    },
+  });
+};
+
+/**
+ * PUBLIC — the applicant accepts or declines a sent quote.
+ */
+export const respondToQuote = async (req, res, next) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return next(new AppError("Quote not found", 404));
+  }
+  const application = await BusinessApplication.findById(req.params.id);
+  if (!application || application.type !== "bulk" || !application.quote?.status) {
+    return next(new AppError("Quote not found", 404));
+  }
+  if (application.quote.status !== "sent") {
+    return next(
+      new AppError(`This quote has already been ${application.quote.status}`, 409),
+    );
+  }
+  const decision = toStr(req.body.decision);
+  if (!["accepted", "declined"].includes(decision)) {
+    return next(new AppError("Decision must be 'accepted' or 'declined'", 400));
+  }
+  application.quote.status = decision;
+  application.quote.respondedAt = new Date();
+  await application.save();
+  res.status(200).json({
+    status: "success",
+    message:
+      decision === "accepted"
+        ? "Quote accepted — our team will reach out to arrange payment and production."
+        : "Quote declined — thanks for letting us know.",
+    data: { quote: application.quote },
   });
 };

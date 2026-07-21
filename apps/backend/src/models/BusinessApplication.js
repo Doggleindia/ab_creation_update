@@ -77,6 +77,16 @@ const businessApplicationSchema = new mongoose.Schema(
     internalNotes: { type: String, trim: true },
     checklist: { type: [String], default: [] },
 
+    // Bulk-order quote sent by the admin; the applicant reviews it on a
+    // public quote page and accepts or declines.
+    quote: {
+      amount: { type: Number, min: 0 },
+      notes: { type: String, trim: true },
+      status: { type: String, enum: ["sent", "accepted", "declined"] },
+      sentAt: Date,
+      respondedAt: Date,
+    },
+
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],

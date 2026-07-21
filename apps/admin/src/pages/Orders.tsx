@@ -7,6 +7,7 @@ import { api, inr, type AdminOrder } from "../lib/api";
 const STATUSES = [
   "pending",
   "confirmed",
+  "in_production",
   "quality_check",
   "shipped",
   "delivered",
@@ -15,7 +16,8 @@ const STATUSES = [
 
 const LIFECYCLE: { key: (typeof STATUSES)[number]; label: string }[] = [
   { key: "pending", label: "Order Placed" },
-  { key: "confirmed", label: "In Production" },
+  { key: "confirmed", label: "Confirmed" },
+  { key: "in_production", label: "In Production" },
   { key: "quality_check", label: "Quality Check" },
   { key: "shipped", label: "Dispatched" },
   { key: "delivered", label: "Delivered" },
@@ -24,7 +26,8 @@ const LIFECYCLE: { key: (typeof STATUSES)[number]; label: string }[] = [
 const FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "All" },
   { key: "pending", label: "New" },
-  { key: "confirmed", label: "In Production" },
+  { key: "confirmed", label: "Confirmed" },
+  { key: "in_production", label: "In Production" },
   { key: "quality_check", label: "Quality Check" },
   { key: "shipped", label: "Dispatched" },
   { key: "delivered", label: "Delivered" },
@@ -41,7 +44,8 @@ const RANGES = [
 // Mock-style status: colored dot + label. Payment failures win over status.
 const STATUS_DOT: Record<string, { label: string; color: string }> = {
   pending: { label: "New", color: "#2563eb" },
-  confirmed: { label: "In Production", color: "#ea580c" },
+  confirmed: { label: "Confirmed", color: "#0891b2" },
+  in_production: { label: "In Production", color: "#ea580c" },
   quality_check: { label: "Quality Check", color: "#f59e0b" },
   shipped: { label: "Dispatched", color: "#3b82f6" },
   delivered: { label: "Delivered", color: "#16a34a" },
@@ -467,7 +471,7 @@ export default function Orders() {
                       setSelected(o);
                       setError("");
                       const idx = STATUSES.indexOf(o.orderStatus);
-                      setNextStatus(STATUSES[Math.min(idx + 1, 4)]);
+                      setNextStatus(STATUSES[Math.min(idx + 1, STATUSES.length - 2)]);
                     }}
                     className="text-[13px] font-bold text-black hover:underline"
                   >
@@ -751,12 +755,14 @@ export default function Orders() {
                           {s === "pending"
                             ? "Order Placed"
                             : s === "confirmed"
-                              ? "In Production"
-                              : s === "quality_check"
-                                ? "Quality Check"
-                                : s === "shipped"
-                                  ? "Dispatched"
-                                  : s.charAt(0).toUpperCase() + s.slice(1)}
+                              ? "Confirmed"
+                              : s === "in_production"
+                                ? "In Production"
+                                : s === "quality_check"
+                                  ? "Quality Check"
+                                  : s === "shipped"
+                                    ? "Dispatched"
+                                    : s.charAt(0).toUpperCase() + s.slice(1)}
                         </option>
                       ))}
                     </select>

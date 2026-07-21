@@ -36,7 +36,7 @@ type StepState = "done" | "current" | "pending";
 // Backend order shape (GET /api/orders/:orderId), only the fields we render
 type ApiOrder = {
   orderId: string;
-  orderStatus: "pending" | "confirmed" | "quality_check" | "shipped" | "delivered" | "cancelled";
+  orderStatus: "pending" | "confirmed" | "in_production" | "quality_check" | "shipped" | "delivered" | "cancelled";
   paymentStatus: "pending" | "paid" | "failed";
   totalAmount: number;
   quantity: number;
@@ -102,25 +102,29 @@ export default function TrackOrderPage() {
   const currentIdx =
     status === "pending" || status === "cancelled"
       ? 0
-      : status === "quality_check"
-        ? 3
-        : status === "shipped"
-          ? 4
-          : status === "delivered"
-            ? 5
-            : 2; // confirmed → In Production
+      : status === "confirmed"
+        ? 1
+        : status === "quality_check"
+          ? 3
+          : status === "shipped"
+            ? 4
+            : status === "delivered"
+              ? 5
+              : 2; // in_production → In Production step
   const badgeLabel =
     status === "pending"
       ? "Order Placed"
-      : status === "quality_check"
-        ? "Quality Check"
-      : status === "shipped"
-        ? "Dispatched"
-        : status === "delivered"
-          ? "Delivered"
-          : status === "cancelled"
-            ? "Cancelled"
-            : "In Production";
+      : status === "confirmed"
+        ? "Confirmed"
+        : status === "quality_check"
+          ? "Quality Check"
+          : status === "shipped"
+            ? "Dispatched"
+            : status === "delivered"
+              ? "Delivered"
+              : status === "cancelled"
+                ? "Cancelled"
+                : "In Production";
 
   const stepState = (i: number): StepState =>
     delivered || i < currentIdx ? "done" : i === currentIdx ? "current" : "pending";

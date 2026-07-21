@@ -37,7 +37,36 @@ const PAGE_SIZE = 8;
 
 type Category = { _id: string; name: string };
 type ColorRow = { color: string; stock: string; files: File[] };
+type ZoneRow = { name: string; side: "front" | "back"; widthIn: string; heightIn: string; dpi: string };
+type MeasureRow = { size: string; chest: string; length: string; shoulder: string; sleeve: string };
 type Flash = { kind: "ok" | "err"; text: string } | null;
+
+const DEFAULT_ZONES: ZoneRow[] = [
+  { name: "Full Front", side: "front", widthIn: "12", heightIn: "16", dpi: "300" },
+  { name: "Left Chest", side: "front", widthIn: "4", heightIn: "4", dpi: "300" },
+];
+
+const zonesToPayload = (rows: ZoneRow[]) =>
+  rows
+    .filter((z) => z.name.trim())
+    .map((z) => ({
+      name: z.name.trim(),
+      side: z.side,
+      widthIn: Number(z.widthIn) || undefined,
+      heightIn: Number(z.heightIn) || undefined,
+      dpi: Number(z.dpi) || 300,
+    }));
+
+const measuresToPayload = (rows: MeasureRow[]) =>
+  rows
+    .filter((m) => m.chest || m.length || m.shoulder || m.sleeve)
+    .map((m) => ({
+      size: m.size,
+      chest: Number(m.chest) || undefined,
+      length: Number(m.length) || undefined,
+      shoulder: Number(m.shoulder) || undefined,
+      sleeve: Number(m.sleeve) || undefined,
+    }));
 
 const slugify = (s: string) =>
   s
@@ -92,6 +121,26 @@ export default function Catalog() {
   const [colorRows, setColorRows] = useState<ColorRow[]>([
     { color: "White", stock: "100", files: [] },
   ]);
+  const [zoneRows, setZoneRows] = useState<ZoneRow[]>(
+    DEFAULT_ZONES.map((z) => ({ ...z })),
+  );
+  const [measureRows, setMeasureRows] = useState<MeasureRow[]>([]);
+
+  // Keep the measurement table rows in sync with the selected sizes
+  useEffect(() => {
+    setMeasureRows((prev) =>
+      form.sizes.map(
+        (s) =>
+          prev.find((m) => m.size === s) ?? {
+            size: s,
+            chest: "",
+            length: "",
+            shoulder: "",
+            sleeve: "",
+          },
+      ),
+    );
+  }, [form.sizes]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
   const [formFlash, setFormFlash] = useState<Flash>(null);
@@ -106,6 +155,7 @@ export default function Catalog() {
     gsm: "",
     status: "published",
   });
+  const [editZones, setEditZones] = useState<ZoneRow[]>([]);
   const [editBusy, setEditBusy] = useState(false);
   const [editFlash, setEditFlash] = useState<Flash>(null);
 
@@ -229,6 +279,8 @@ export default function Catalog() {
                   careInstructions: form.care ? splitList(form.care) : undefined,
                 }
               : undefined,
+          printZones: zonesToPayload(zoneRows),
+          measurements: measuresToPayload(measureRows),
         }),
       });
       const pid = created.data._id;
@@ -275,6 +327,7 @@ export default function Catalog() {
       });
       setForm({ ...EMPTY_FORM, categoryId: cats[0]?._id ?? "" });
       setColorRows([{ color: "White", stock: "100", files: [] }]);
+      setZoneRows(DEFAULT_ZONES.map((z) => ({ ...z })));
       load();
     } catch (err) {
       setFormFlash({
@@ -307,6 +360,8 @@ export default function Catalog() {
           colors: p.colors ?? [],
           status: "draft",
           specifications: p.specifications,
+          printZones: p.printZones ?? [],
+          measurements: p.measurements ?? [],
         }),
       });
       const pid = created.data._id;
@@ -347,6 +402,15 @@ export default function Catalog() {
       gsm: p.specifications?.gsm ?? "",
       status: p.status === "draft" ? "draft" : "published",
     });
+    setEditZones(
+      (p.printZones ?? []).map((z) => ({
+        name: z.name ?? "",
+        side: z.side === "back" ? "back" : "front",
+        widthIn: z.widthIn != null ? String(z.widthIn) : "",
+        heightIn: z.heightIn != null ? String(z.heightIn) : "",
+        dpi: z.dpi != null ? String(z.dpi) : "300",
+      })),
+    );
   }
 
   async function saveEdit(e: React.FormEvent) {
@@ -367,6 +431,7 @@ export default function Catalog() {
             fabric: editForm.fabric || undefined,
             gsm: editForm.gsm || undefined,
           },
+          printZones: zonesToPayload(editZones),
         }),
       });
       setEditing(null);
@@ -544,12 +609,16 @@ export default function Catalog() {
                   <div className="flex items-center justify-between pt-3">
                     <p
                       className={`text-[12px] font-bold ${
-                        (p.variants?.length ?? 0) > 0 ? "text-[#16a34a]" : "text-[#d97706]"
+                        (p.variants?.length ?? 0) > 0 && (p.printZones?.length ?? 0) > 0
+                          ? "text-[#16a34a]"
+                          : "text-[#d97706]"
                       }`}
                     >
-                      {(p.variants?.length ?? 0) > 0
-                        ? `✓ ${p.variants!.length} variant${p.variants!.length > 1 ? "s" : ""} defined`
-                        : "⚠ No variants defined"}
+                      {(p.variants?.length ?? 0) === 0
+                        ? "⚠ No variants defined"
+                        : (p.printZones?.length ?? 0) > 0
+                          ? `✓ ${p.printZones!.length} zone${p.printZones!.length > 1 ? "s" : ""} defined`
+                          : "⚠ No print zones defined"}
                     </p>
                     <CardActions p={p} />
                   </div>
@@ -814,6 +883,137 @@ export default function Catalog() {
                 </div>
               </section>
 
+              {/* Measurements */}
+              {measureRows.length > 0 && (
+                <section className="border-t border-[#f3f4f6] pt-5">
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                    Sizing &amp; Measurement (inches, optional)
+                  </h3>
+                  <div className="mt-3 overflow-x-auto rounded-lg border border-[#f3f4f6]">
+                    <table className="w-full min-w-[420px] text-left text-[12.5px]">
+                      <thead>
+                        <tr className="bg-[#f8f9fb] text-[10.5px] font-bold uppercase tracking-[0.5px] text-[#6b7280]">
+                          <th className="px-3 py-2">Size</th>
+                          <th className="px-2 py-2">Chest</th>
+                          <th className="px-2 py-2">Length</th>
+                          <th className="px-2 py-2">Shoulder</th>
+                          <th className="px-2 py-2">Sleeve</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {measureRows.map((m, i) => (
+                          <tr key={m.size} className="border-t border-[#f3f4f6]">
+                            <td className="px-3 py-1.5 font-bold text-black">{m.size}</td>
+                            {(["chest", "length", "shoulder", "sleeve"] as const).map((k) => (
+                              <td key={k} className="px-2 py-1.5">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step="0.5"
+                                  value={m[k]}
+                                  onChange={(e) =>
+                                    setMeasureRows((rows) =>
+                                      rows.map((r, j) =>
+                                        j === i ? { ...r, [k]: e.target.value } : r,
+                                      ),
+                                    )
+                                  }
+                                  className="h-8 w-16 rounded border border-[#e5e7eb] px-2 text-[12.5px] text-black focus:border-black focus:outline-none"
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="pt-2 text-[11.5px] text-[#9ca3af]">
+                    Shown as the size chart on the product page when filled in.
+                  </p>
+                </section>
+              )}
+
+              {/* Print zones */}
+              <section className="border-t border-[#f3f4f6] pt-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                    Print Zones
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setZoneRows((r) => [
+                        ...r,
+                        { name: "", side: "front", widthIn: "", heightIn: "", dpi: "300" },
+                      ])
+                    }
+                    className="flex items-center gap-1 text-[12.5px] font-bold text-black hover:underline"
+                  >
+                    <FiPlus className="h-3.5 w-3.5" /> Add zone
+                  </button>
+                </div>
+                <div className="flex flex-col gap-2 pt-3">
+                  {zoneRows.map((z, i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-[1fr_86px_64px_64px_64px_26px] items-center gap-2 rounded-lg border border-[#f3f4f6] bg-[#f8f9fb] p-2.5"
+                    >
+                      <input
+                        value={z.name}
+                        onChange={(e) =>
+                          setZoneRows((rows) =>
+                            rows.map((r, j) => (j === i ? { ...r, name: e.target.value } : r)),
+                          )
+                        }
+                        placeholder="Zone name"
+                        className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-2.5 text-[12.5px] text-black focus:border-black focus:outline-none"
+                      />
+                      <select
+                        value={z.side}
+                        onChange={(e) =>
+                          setZoneRows((rows) =>
+                            rows.map((r, j) =>
+                              j === i ? { ...r, side: e.target.value as "front" | "back" } : r,
+                            ),
+                          )
+                        }
+                        className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-2 text-[12.5px] text-black focus:border-black focus:outline-none"
+                      >
+                        <option value="front">Front</option>
+                        <option value="back">Back</option>
+                      </select>
+                      {(["widthIn", "heightIn", "dpi"] as const).map((k) => (
+                        <input
+                          key={k}
+                          type="number"
+                          min={0}
+                          value={z[k]}
+                          onChange={(e) =>
+                            setZoneRows((rows) =>
+                              rows.map((r, j) => (j === i ? { ...r, [k]: e.target.value } : r)),
+                            )
+                          }
+                          placeholder={k === "widthIn" ? "W″" : k === "heightIn" ? "H″" : "DPI"}
+                          title={k === "widthIn" ? "Width (inches)" : k === "heightIn" ? "Height (inches)" : "DPI"}
+                          className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-2 text-[12.5px] text-black focus:border-black focus:outline-none"
+                        />
+                      ))}
+                      <button
+                        type="button"
+                        aria-label="Remove zone"
+                        onClick={() => setZoneRows((rows) => rows.filter((_, j) => j !== i))}
+                        className="text-[#dc2626] hover:opacity-70"
+                      >
+                        <FiTrash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="pt-2 text-[11.5px] text-[#9ca3af]">
+                  Zone name · side · width″ · height″ · DPI. Used for print production specs.
+                </p>
+              </section>
+
               {/* Pricing */}
               <section className="border-t border-[#f3f4f6] pt-5">
                 <h3 className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
@@ -994,7 +1194,7 @@ export default function Catalog() {
           <div className="absolute inset-0 bg-black/30" onClick={() => setEditing(null)} />
           <form
             onSubmit={(e) => void saveEdit(e)}
-            className="relative z-10 w-full max-w-[440px] rounded-2xl bg-white p-6 shadow-2xl"
+            className="relative z-10 max-h-[90vh] w-full max-w-[520px] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
           >
             <div className="flex items-start justify-between">
               <div>
@@ -1071,6 +1271,81 @@ export default function Catalog() {
                   className="w-full rounded-lg border border-[#e5e7eb] p-3 text-[13px] text-black focus:border-black focus:outline-none"
                 />
               </label>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className={labelCls}>Print Zones</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setEditZones((r) => [
+                      ...r,
+                      { name: "", side: "front", widthIn: "", heightIn: "", dpi: "300" },
+                    ])
+                  }
+                  className="flex items-center gap-1 text-[12px] font-bold text-black hover:underline"
+                >
+                  <FiPlus className="h-3 w-3" /> Add zone
+                </button>
+              </div>
+              {editZones.length === 0 && (
+                <p className="text-[12px] text-[#d97706]">
+                  ⚠ No print zones defined yet.
+                </p>
+              )}
+              {editZones.map((z, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-[1fr_80px_58px_58px_58px_24px] items-center gap-2 rounded-lg border border-[#f3f4f6] bg-[#f8f9fb] p-2"
+                >
+                  <input
+                    value={z.name}
+                    onChange={(e) =>
+                      setEditZones((rows) =>
+                        rows.map((r, j) => (j === i ? { ...r, name: e.target.value } : r)),
+                      )
+                    }
+                    placeholder="Zone name"
+                    className="h-8 rounded border border-[#e5e7eb] bg-white px-2 text-[12px] text-black focus:border-black focus:outline-none"
+                  />
+                  <select
+                    value={z.side}
+                    onChange={(e) =>
+                      setEditZones((rows) =>
+                        rows.map((r, j) =>
+                          j === i ? { ...r, side: e.target.value as "front" | "back" } : r,
+                        ),
+                      )
+                    }
+                    className="h-8 rounded border border-[#e5e7eb] bg-white px-1.5 text-[12px] text-black focus:border-black focus:outline-none"
+                  >
+                    <option value="front">Front</option>
+                    <option value="back">Back</option>
+                  </select>
+                  {(["widthIn", "heightIn", "dpi"] as const).map((k) => (
+                    <input
+                      key={k}
+                      type="number"
+                      min={0}
+                      value={z[k]}
+                      onChange={(e) =>
+                        setEditZones((rows) =>
+                          rows.map((r, j) => (j === i ? { ...r, [k]: e.target.value } : r)),
+                        )
+                      }
+                      placeholder={k === "widthIn" ? "W″" : k === "heightIn" ? "H″" : "DPI"}
+                      className="h-8 rounded border border-[#e5e7eb] bg-white px-1.5 text-[12px] text-black focus:border-black focus:outline-none"
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    aria-label="Remove zone"
+                    onClick={() => setEditZones((rows) => rows.filter((_, j) => j !== i))}
+                    className="text-[#dc2626] hover:opacity-70"
+                  >
+                    <FiTrash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
               {editFlash && (
                 <p className="w-fit rounded-lg bg-[#fee2e2] px-3 py-2 text-[12.5px] font-medium text-[#ba1a1a]">
                   {editFlash.text}

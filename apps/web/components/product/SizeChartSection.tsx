@@ -1,6 +1,8 @@
 import { Printer, Leaf } from "lucide-react";
+import type { ProductMeasurement } from "@/lib/api";
 
-const CHART = [
+// Generic fallback used when the garment has no measurements configured yet.
+const CHART: ProductMeasurement[] = [
   { size: "XS", chest: 36, length: 26, sleeve: 7.5 },
   { size: "S", chest: 38, length: 27, sleeve: 8 },
   { size: "M", chest: 40, length: 28, sleeve: 8.5 },
@@ -21,7 +23,13 @@ const METHODS = [
   },
 ];
 
-export default function SizeChartSection() {
+export default function SizeChartSection({
+  measurements,
+}: {
+  measurements?: ProductMeasurement[];
+}) {
+  const rows = measurements?.length ? measurements : CHART;
+  const hasShoulder = rows.some((r) => r.shoulder != null);
   return (
     <section
       id="size-chart"
@@ -40,21 +48,25 @@ export default function SizeChartSection() {
                   <th className="py-3 pr-4">Size</th>
                   <th className="py-3 pr-4">Chest (in)</th>
                   <th className="py-3 pr-4">Length (in)</th>
+                  {hasShoulder && <th className="py-3 pr-4">Shoulder (in)</th>}
                   <th className="py-3">Sleeve (in)</th>
                 </tr>
               </thead>
               <tbody>
-                {CHART.map((r, i) => (
+                {rows.map((r) => (
                   <tr
                     key={r.size}
                     className={`border-b border-[#f3f4f6] ${
-                      i % 2 === 1 ? "" : ""
-                    } ${r.size === "M" ? "bg-[#f9fafb]" : ""}`}
+                      r.size === "M" ? "bg-[#f9fafb]" : ""
+                    }`}
                   >
                     <td className="py-4 pr-4 font-bold text-black">{r.size}</td>
-                    <td className="py-4 pr-4 text-[#374151]">{r.chest}</td>
-                    <td className="py-4 pr-4 text-[#374151]">{r.length}</td>
-                    <td className="py-4 text-[#374151]">{r.sleeve}</td>
+                    <td className="py-4 pr-4 text-[#374151]">{r.chest ?? "—"}</td>
+                    <td className="py-4 pr-4 text-[#374151]">{r.length ?? "—"}</td>
+                    {hasShoulder && (
+                      <td className="py-4 pr-4 text-[#374151]">{r.shoulder ?? "—"}</td>
+                    )}
+                    <td className="py-4 text-[#374151]">{r.sleeve ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>

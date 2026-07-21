@@ -9,8 +9,9 @@ const COLUMNS: {
   next: AdminOrder["orderStatus"] | null;
   nextLabel: string | null;
 }[] = [
-  { key: "pending", label: "Queued", dot: "#9ca3af", next: "confirmed", nextLabel: "Start Production" },
-  { key: "confirmed", label: "In Production", dot: "#3b82f6", next: "quality_check", nextLabel: "Send to QC" },
+  { key: "pending", label: "Queued", dot: "#9ca3af", next: "confirmed", nextLabel: "Confirm Order" },
+  { key: "confirmed", label: "Confirmed", dot: "#0891b2", next: "in_production", nextLabel: "Start Production" },
+  { key: "in_production", label: "In Production", dot: "#ea580c", next: "quality_check", nextLabel: "Send to QC" },
   { key: "quality_check", label: "Quality Check", dot: "#f59e0b", next: "shipped", nextLabel: "QC Pass — Dispatch" },
   { key: "shipped", label: "Dispatched", dot: "#3b82f6", next: "delivered", nextLabel: "Mark Delivered" },
   { key: "delivered", label: "Delivered", dot: "#22c55e", next: null, nextLabel: null },
@@ -43,7 +44,7 @@ export default function Production() {
   }
 
   const pendingCount = orders.filter((o) =>
-    ["pending", "confirmed", "quality_check"].includes(o.orderStatus),
+    ["pending", "confirmed", "in_production", "quality_check"].includes(o.orderStatus),
   ).length;
 
   return (
@@ -51,7 +52,7 @@ export default function Production() {
       title="Production Queue"
       subtitle={`${pendingCount} jobs pending`}
     >
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
         {COLUMNS.map((col) => {
           const items = orders
             .filter((o) => o.orderStatus === col.key)

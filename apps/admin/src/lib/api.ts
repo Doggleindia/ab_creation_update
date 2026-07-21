@@ -93,7 +93,7 @@ export const shortDate = (d?: string) =>
 export type AdminOrder = {
   _id: string;
   orderId: string;
-  orderStatus: "pending" | "confirmed" | "quality_check" | "shipped" | "delivered" | "cancelled";
+  orderStatus: "pending" | "confirmed" | "in_production" | "quality_check" | "shipped" | "delivered" | "cancelled";
   paymentStatus: string;
   totalAmount: number;
   quantity: number;
@@ -139,6 +139,13 @@ export type Application = {
   priority?: boolean;
   internalNotes?: string;
   checklist?: string[];
+  quote?: {
+    amount?: number;
+    notes?: string;
+    status?: "sent" | "accepted" | "declined";
+    sentAt?: string;
+    respondedAt?: string;
+  };
   createdAt?: string;
   address?: { street?: string; city?: string; state?: string; pincode?: string };
 };
@@ -158,6 +165,20 @@ export type AdminProduct = {
   customizationTypes?: string[];
   categoryId?: { _id: string; name?: string } | string | null;
   specifications?: { fabric?: string; gsm?: string; fit?: string; neck?: string };
+  printZones?: {
+    name: string;
+    side?: "front" | "back";
+    widthIn?: number;
+    heightIn?: number;
+    dpi?: number;
+  }[];
+  measurements?: {
+    size: string;
+    chest?: number;
+    length?: number;
+    shoulder?: number;
+    sleeve?: number;
+  }[];
   variants?: {
     _id: string;
     color?: string;

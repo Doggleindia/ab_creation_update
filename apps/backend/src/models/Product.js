@@ -113,6 +113,24 @@ const productSchema = new mongoose.Schema({
         trim: true,
     }],
 
+    // ✅ PRINT ZONES — printable areas used by the design studio / production
+    printZones: [{
+        name: { type: String, trim: true, required: true },
+        side: { type: String, enum: ["front", "back"], default: "front" },
+        widthIn: { type: Number, min: 0 },
+        heightIn: { type: Number, min: 0 },
+        dpi: { type: Number, default: 300 },
+    }],
+
+    // ✅ SIZE MEASUREMENTS (inches)
+    measurements: [{
+        size: { type: String, trim: true, required: true },
+        chest: { type: Number, min: 0 },
+        length: { type: Number, min: 0 },
+        shoulder: { type: Number, min: 0 },
+        sleeve: { type: Number, min: 0 },
+    }],
+
     // ✅ MATERIAL & CARE
     materialAndCare: {
         material: {

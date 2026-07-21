@@ -316,3 +316,26 @@ export const deductFromAdminWallet = async (amount, requestId, session) => {
   await transaction.save({ session });
   return adminWallet.balance;
 };
+
+/**
+ * Credit a seller's wallet with their margin from a delivered order.
+ * Ledgered as type "payout" (distinct from refunds) for honest reporting.
+ */
+export const creditSellerPayout = async (userId, amount, requestId, session) => {
+  let userWallet = await UserWallet.findOne({ userId }).session(session);
+  if (!userWallet) {
+    const [created] = await UserWallet.create([{ userId, balance: 0 }], session ? { session } : {});
+    userWallet = created;
+  }
+  userWallet.balance += amount;
+  await userWallet.save({ session });
+  const transaction = new WalletTransaction({
+    type: "payout",
+    amount,
+    userId,
+    status: "completed",
+    requestId,
+  });
+  await transaction.save({ session });
+  return userWallet.balance;
+};

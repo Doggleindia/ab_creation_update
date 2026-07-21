@@ -87,7 +87,7 @@ export default function SellerOverviewPage() {
       icon: IndianRupee,
       label: "Sales Value",
       value: inr(revenue),
-      sub: "Paid orders of your products",
+      sub: "Margins are credited to your wallet on delivery",
     },
     {
       icon: Clock,

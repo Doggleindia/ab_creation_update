@@ -28,6 +28,8 @@ export const createProduct = async(req, res, next) => {
             productDetails,
             materialAndCare,
             specifications,
+            printZones,
+            measurements,
         } = req.body;
 
 
@@ -59,6 +61,8 @@ export const createProduct = async(req, res, next) => {
             productDetails,
             materialAndCare,
             specifications,
+            printZones,
+            measurements,
         });
 
 
@@ -99,6 +103,8 @@ export const updateProduct = async(req, res, next) => {
             "productDetails",
             "materialAndCare",
             "specifications",
+            "printZones",
+            "measurements",
         ];
         const updates = {};
         for (const key of ALLOWED_FIELDS) {
@@ -645,6 +651,9 @@ export const getSingleProduct = async(req, res, next) => {
                 productDetails: product.productDetails,
                 materialAndCare: product.materialAndCare,
                 specifications: product.specifications,
+                customizationTypes: product.customizationTypes,
+                printZones: product.printZones,
+                measurements: product.measurements,
                 variants,
             },
         });

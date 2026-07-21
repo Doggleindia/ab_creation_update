@@ -5,7 +5,7 @@ const walletTransactionSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ['recharge', 'payment', 'refund', 'withdrawal'],
+      enum: ['recharge', 'payment', 'refund', 'withdrawal', 'payout'],
     },
     amount: {
       type: Number,
