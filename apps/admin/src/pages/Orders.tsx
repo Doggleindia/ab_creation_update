@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FiX, FiDownload, FiUser, FiBox, FiCreditCard, FiActivity } from "react-icons/fi";
+import { FiX, FiDownload, FiUser, FiBox, FiCreditCard, FiActivity, FiTruck, FiPrinter } from "react-icons/fi";
 import Shell, { Card, StatusChip } from "../components/Shell";
 import { api, inr, type AdminOrder } from "../lib/api";
 
@@ -80,6 +80,32 @@ function fullDate(d?: string) {
       })
     : "—";
 }
+
+function fullDateTime(d?: string) {
+  return d
+    ? new Date(d).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+    : "—";
+}
+
+const SHIP_LABEL: Record<string, string> = {
+  standard: "Standard",
+  express: "Express",
+  rush: "Super Rush",
+};
+
+const PAY_CHIP: Record<string, { label: string; cls: string }> = {
+  paid: { label: "✓ Paid", cls: "bg-[#dcfce7] text-[#16a34a]" },
+  pending: { label: "Pending", cls: "bg-[#f3f4f6] text-[#6b7280]" },
+  failed: { label: "Failed", cls: "bg-[#fee2e2] text-[#ba1a1a]" },
+  refunded: { label: "Refunded", cls: "bg-[#f5f3ff] text-[#7c3aed]" },
+};
 
 export default function Orders() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
@@ -522,8 +548,7 @@ export default function Orders() {
                   <StatusChip status={selected.orderStatus} />
                 </p>
                 <p className="pt-1 text-[12.5px] text-[#6b7280]">
-                  Placed {fullDate(selected.createdAt)} · Payment{" "}
-                  {selected.paymentStatus}
+                  Placed {fullDateTime(selected.createdAt)}
                 </p>
               </div>
               <button
@@ -577,8 +602,8 @@ export default function Orders() {
                 <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
                   <FiBox /> Product Information
                 </h3>
-                <div className="flex gap-4 pt-4">
-                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-[#e5e7eb] bg-[#f3f4f6]">
+                <div className="flex gap-5 pt-4">
+                  <div className="h-32 w-32 shrink-0 overflow-hidden rounded-xl border border-[#e5e7eb] bg-[#f3f4f6]">
                     {selected.variantId?.media?.images?.[0] && (
                       <img
                         src={selected.variantId.media.images[0]}
@@ -587,22 +612,35 @@ export default function Orders() {
                       />
                     )}
                   </div>
-                  <div className="text-[13.5px]">
-                    <p className="text-[16px] font-bold leading-snug text-black">
+                  <div className="min-w-0 flex-1 text-[13.5px]">
+                    <p className="text-[17px] font-bold leading-snug text-black">
                       {selected.productId?.title ?? "Custom order"}
                       {selected.customDesign ? " — Custom Design" : ""}
                     </p>
-                    <p className="pt-1.5 text-[#374151]">
-                      Color: <b>{selected.color ?? "—"}</b> · Size:{" "}
-                      <b>{selected.size ?? "—"}</b> · Qty:{" "}
-                      <b>{selected.quantity}</b>
-                    </p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-2.5 text-[#374151]">
+                      <p>
+                        <span className="text-[#9ca3af]">Color:</span>{" "}
+                        <b>{selected.color ?? "—"}</b>
+                      </p>
+                      <p>
+                        <span className="text-[#9ca3af]">Size:</span>{" "}
+                        <b>{selected.size ?? "—"}</b>
+                      </p>
+                      <p>
+                        <span className="text-[#9ca3af]">Method:</span>{" "}
+                        <b>{selected.customDesign ? "DTF" : "Catalog"}</b>
+                      </p>
+                      <p>
+                        <span className="text-[#9ca3af]">Qty:</span>{" "}
+                        <b>{selected.quantity}</b>
+                      </p>
+                    </div>
                     {(selected.designFiles?.length ?? 0) > 0 && (
                       <a
                         href={selected.designFiles![0]}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-bold text-black underline"
+                        className="mt-2.5 inline-flex items-center gap-1.5 text-[13px] font-bold text-black underline"
                       >
                         <FiDownload /> Download Design File
                       </a>
@@ -614,16 +652,39 @@ export default function Orders() {
               {/* Pricing */}
               <section className="border-t border-[#f3f4f6] pt-6">
                 <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
-                  <FiCreditCard /> Pricing
+                  <FiCreditCard /> Pricing Breakdown
                 </h3>
-                <div className="mt-3 rounded-lg bg-[#f8f9fb] p-4">
-                  <div className="flex justify-between border-t-0 text-[15px] font-bold text-black">
+                <div className="mt-3 rounded-lg bg-[#f8f9fb] p-4 text-[13.5px]">
+                  <div className="flex justify-between py-1">
+                    <span className="text-[#6b7280]">
+                      {selected.productId?.title ?? "Custom order"} × {selected.quantity}
+                    </span>
+                    <span className="font-semibold text-black">
+                      {inr(selected.totalAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-[#6b7280]">
+                      Shipping ({SHIP_LABEL[selected.shippingMethod ?? "standard"] ?? "Standard"})
+                    </span>
+                    <span className="font-semibold text-black">Included</span>
+                  </div>
+                  <div className="mt-2 flex justify-between border-t border-[#e5e7eb] pt-3 text-[15px] font-bold text-black">
                     <span>Total Amount</span>
                     <span>{inr(selected.totalAmount)}</span>
                   </div>
-                  <p className="pt-1 text-[12px] text-[#6b7280]">
-                    Paid via wallet · {selected.paymentStatus}
-                  </p>
+                  <div className="mt-3 flex items-center justify-between border-t border-[#e5e7eb] pt-3">
+                    <span className="text-[12.5px] text-[#6b7280]">
+                      Wallet Payment
+                    </span>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                        (PAY_CHIP[selected.paymentStatus] ?? PAY_CHIP.pending).cls
+                      }`}
+                    >
+                      {(PAY_CHIP[selected.paymentStatus] ?? PAY_CHIP.pending).label}
+                    </span>
+                  </div>
                 </div>
               </section>
 
@@ -652,7 +713,7 @@ export default function Orders() {
                           </span>
                           {i < LIFECYCLE.length - 1 && (
                             <span
-                              className={`h-6 w-px ${done ? "bg-black" : "bg-[#e5e7eb]"}`}
+                              className={`min-h-[24px] w-px flex-1 ${done ? "bg-black" : "bg-[#e5e7eb]"}`}
                             />
                           )}
                         </div>
@@ -662,6 +723,11 @@ export default function Orders() {
                           }`}
                         >
                           {l.label}
+                          {i === 0 && done && (
+                            <span className="block text-[11.5px] font-normal text-[#9ca3af]">
+                              {fullDateTime(selected.createdAt)}
+                            </span>
+                          )}
                         </span>
                       </li>
                     );
@@ -702,6 +768,17 @@ export default function Orders() {
                       {updating ? "Updating…" : "Update"}
                     </button>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById("internal-note");
+                      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      el?.focus();
+                    }}
+                    className="pt-3 text-[12.5px] font-bold text-black hover:underline"
+                  >
+                    + Add Internal Note
+                  </button>
                   {error && (
                     <p className="pt-3 text-[12.5px] text-[#ba1a1a]">{error}</p>
                   )}
@@ -710,8 +787,8 @@ export default function Orders() {
 
               {/* Shipping info + internal note */}
               <section className="border-t border-[#f3f4f6] pt-6">
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
-                  Shipping Info
+                <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                  <FiTruck /> Shipping Info
                 </h3>
                 <div className="grid grid-cols-2 gap-3 pt-3">
                   <label className="flex flex-col gap-1.5">
@@ -746,6 +823,7 @@ export default function Orders() {
                     Internal Note
                   </span>
                   <textarea
+                    id="internal-note"
                     value={meta.internalNote}
                     onChange={(e) =>
                       setMeta((m) => ({ ...m, internalNote: e.target.value }))
@@ -764,40 +842,41 @@ export default function Orders() {
                 </button>
               </section>
 
-              {/* Actions footer */}
-              <section className="flex flex-wrap items-center justify-between gap-3 border-t border-[#f3f4f6] pt-6">
-                <button
-                  onClick={printOrder}
-                  className="rounded-full border border-black px-5 py-2.5 text-[13.5px] font-bold text-black hover:bg-[#f3f4f6]"
-                >
-                  🖨 Print Order
-                </button>
-                <span className="flex items-center gap-4">
-                  {selected.paymentStatus === "paid" && (
-                    <button
-                      onClick={() => void refundOrder()}
-                      disabled={updating}
-                      className="text-[13.5px] font-bold text-[#dc2626] hover:underline disabled:opacity-40"
-                    >
-                      Issue Refund
-                    </button>
-                  )}
-                  {selected.paymentStatus === "refunded" && (
-                    <span className="text-[13px] font-bold text-[#16a34a]">
-                      ✓ Refunded
-                    </span>
-                  )}
-                  {!["cancelled", "delivered"].includes(selected.orderStatus) && (
-                    <button
-                      onClick={() => void cancelOrder()}
-                      disabled={updating}
-                      className="text-[13.5px] font-bold text-[#dc2626] hover:underline disabled:opacity-40"
-                    >
-                      Cancel Order
-                    </button>
-                  )}
-                </span>
-              </section>
+            </div>
+
+            {/* Sticky actions footer */}
+            <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e7eb] bg-white px-6 py-4">
+              <button
+                onClick={printOrder}
+                className="flex items-center gap-2 rounded-full border border-black px-5 py-2.5 text-[13.5px] font-bold text-black hover:bg-[#f3f4f6]"
+              >
+                <FiPrinter className="h-4 w-4" /> Print Order
+              </button>
+              <span className="flex items-center gap-5">
+                {selected.paymentStatus === "paid" && (
+                  <button
+                    onClick={() => void refundOrder()}
+                    disabled={updating}
+                    className="text-[13.5px] font-bold text-[#dc2626] hover:underline disabled:opacity-40"
+                  >
+                    Issue Refund
+                  </button>
+                )}
+                {selected.paymentStatus === "refunded" && (
+                  <span className="text-[13px] font-bold text-[#16a34a]">
+                    ✓ Refunded
+                  </span>
+                )}
+                {!["cancelled", "delivered"].includes(selected.orderStatus) && (
+                  <button
+                    onClick={() => void cancelOrder()}
+                    disabled={updating}
+                    className="text-[13.5px] font-bold text-[#dc2626] hover:underline disabled:opacity-40"
+                  >
+                    Cancel Order
+                  </button>
+                )}
+              </span>
             </div>
           </div>
         </div>
