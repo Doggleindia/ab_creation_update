@@ -61,7 +61,7 @@ export default function Shell({
       if (!getSession()) navigate("/login", { replace: true });
     };
     window.addEventListener("ab-admin-auth", sync);
-    api<{ data: { applications: { type: string }[] } }>(
+    api<{ data: { applications: { type: string; quote?: { status?: string } }[] } }>(
       "/api/applications?status=pending",
     )
       .then((j) => {
@@ -69,7 +69,8 @@ export default function Shell({
         setBadges((b) => ({
           ...b,
           seller: apps.filter((a) => a.type === "seller").length,
-          bulk: apps.filter((a) => a.type === "bulk").length,
+          // A bulk request with a proposal already sent is no longer "new"
+          bulk: apps.filter((a) => a.type === "bulk" && !a.quote?.status).length,
         }));
       })
       .catch(() => {});

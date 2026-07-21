@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { FiDownload, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
 import Shell, { Card } from "../components/Shell";
 import { api, inr, type Application } from "../lib/api";
@@ -261,7 +261,10 @@ export default function BulkOrders() {
   const inputCls =
     "h-10 w-full rounded-lg border border-[#e5e7eb] px-3 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none";
 
-  const Detail = ({ a }: { a: Application }) => {
+  // Rendered via function call (not <Detail/>) so the subtree keeps its
+  // identity across re-renders — an inline component here would remount on
+  // every keystroke and drop focus from the proposal inputs.
+  const renderDetail = (a: Application) => {
     const msg = parseMsg(a);
     const prod = parseProducts(a);
     const stage = stageOf(a);
@@ -644,8 +647,8 @@ export default function BulkOrders() {
             {pageRows.map((a) => {
               const stage = stageOf(a);
               return (
-                <>
-                  <tr key={a._id} className="border-t border-[#f3f4f6] text-[13.5px]">
+                <Fragment key={a._id}>
+                  <tr className="border-t border-[#f3f4f6] text-[13.5px]">
                     <td className="px-6 py-4 font-bold text-black">{reqId(a)}</td>
                     <td className="px-3 py-4 text-[#374151]">{a.businessName}</td>
                     <td className="px-3 py-4 text-[#374151]">
@@ -668,8 +671,8 @@ export default function BulkOrders() {
                       </button>
                     </td>
                   </tr>
-                  {openId === a._id && <Detail key={`${a._id}-detail`} a={a} />}
-                </>
+                  {openId === a._id && renderDetail(a)}
+                </Fragment>
               );
             })}
           </tbody>

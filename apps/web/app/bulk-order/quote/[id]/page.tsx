@@ -9,7 +9,7 @@ import { BACKEND } from "@/lib/auth";
 type Quote = {
   amount?: number;
   notes?: string;
-  status?: "sent" | "accepted" | "declined";
+  status?: "sent" | "accepted" | "declined" | "in_production" | "completed";
   sentAt?: string;
 };
 
@@ -166,17 +166,27 @@ export default function BulkQuotePage() {
             ) : (
               <p
                 className={`mt-6 flex items-center gap-2 text-[15px] font-bold ${
-                  quote.status === "accepted" ? "text-[#16a34a]" : "text-[#ba1a1a]"
+                  quote.status === "declined" ? "text-[#ba1a1a]" : "text-[#16a34a]"
                 }`}
               >
-                {quote.status === "accepted" ? (
+                {quote.status === "declined" ? (
                   <>
-                    <BadgeCheck className="h-4 w-4" /> You accepted this quote —
-                    our team will contact you shortly.
+                    <XCircle className="h-4 w-4" /> You declined this quote.
+                  </>
+                ) : quote.status === "in_production" ? (
+                  <>
+                    <BadgeCheck className="h-4 w-4" /> Quote accepted — your
+                    order is now in production.
+                  </>
+                ) : quote.status === "completed" ? (
+                  <>
+                    <BadgeCheck className="h-4 w-4" /> This bulk order has been
+                    completed. Thank you!
                   </>
                 ) : (
                   <>
-                    <XCircle className="h-4 w-4" /> You declined this quote.
+                    <BadgeCheck className="h-4 w-4" /> You accepted this quote —
+                    our team will contact you shortly.
                   </>
                 )}
               </p>
