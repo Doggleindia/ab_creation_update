@@ -133,6 +133,11 @@ const productSchema = new mongoose.Schema({
             trim: true,
         },
 
+        gsm: {
+            type: String,
+            trim: true,
+        },
+
         fashionType: {
             type: String,
             trim: true,
@@ -190,6 +195,13 @@ productSchema.virtual("variantsCount", {
     localField: "_id",
     foreignField: "productId",
     count: true,
+});
+
+// Virtual for the variant documents themselves (populate explicitly)
+productSchema.virtual("variants", {
+    ref: "Variant",
+    localField: "_id",
+    foreignField: "productId",
 });
 
 // Pre-save validation for publishing

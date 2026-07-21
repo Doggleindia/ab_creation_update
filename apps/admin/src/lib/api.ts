@@ -151,11 +151,19 @@ export type AdminProduct = {
   basePrice: number;
   isActive?: boolean;
   status?: string;
+  description?: string;
+  discountPercentage?: number;
   colors?: string[];
   sizes?: string[];
   customizationTypes?: string[];
-  specifications?: { fabric?: string };
-  variants?: { _id: string; color?: string; media?: { images?: string[] } }[];
+  categoryId?: { _id: string; name?: string } | string | null;
+  specifications?: { fabric?: string; gsm?: string; fit?: string; neck?: string };
+  variants?: {
+    _id: string;
+    color?: string;
+    sku?: string;
+    media?: { images?: string[] };
+  }[];
 };
 
 export type SellerProductSub = {
