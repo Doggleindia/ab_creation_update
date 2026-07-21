@@ -9,6 +9,7 @@ import {
   deleteAdmin,
   getAllUsers,
   logoutAdmin,
+  changeAdminPassword,
 } from "../../controllers/auth/adminController.js";
 
 import { adminAuth, optionalAdminAuth } from '../../middleware/adminAuth.js';
@@ -31,7 +32,8 @@ router.post('/reset-password', resetPassword);
  */
 router.get('/', adminAuth, getAllAdmins);         
 router.delete('/:adminId', adminAuth, deleteAdmin);
-router.post("/logout", adminAuth, logoutAdmin); 
+router.post("/logout", adminAuth, logoutAdmin);
+router.post("/change-password", adminAuth, changeAdminPassword);
 router.get("/users/all", adminAuth, getAllUsers);
 
 export default router;

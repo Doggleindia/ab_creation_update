@@ -71,6 +71,15 @@ export default function CheckoutPage() {
   const [payment, setPayment] = useState<"razorpay" | "cod">("razorpay");
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
+  const [prefill, setPrefill] = useState<{
+    email?: string;
+    phone?: string;
+    name?: string;
+    street?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+  } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -78,7 +87,37 @@ export default function CheckoutPage() {
     // Purchases require login (wallet payment) — send guests to log in first.
     if (!getToken()) {
       router.replace("/login?next=/checkout");
+      return;
     }
+    // Pre-fill contact + shipping from the saved profile/default address.
+    apiFetch<{
+      data: {
+        user: {
+          name?: string;
+          email?: string;
+          phone?: string | null;
+          address?: {
+            street?: string | null;
+            city?: string | null;
+            state?: string | null;
+            pincode?: string | null;
+          } | null;
+        };
+      };
+    }>("/api/users/profile")
+      .then((j) => {
+        const u = j.data.user;
+        setPrefill({
+          email: u.email ?? undefined,
+          phone: u.phone ?? undefined,
+          name: u.name ?? undefined,
+          street: u.address?.street ?? undefined,
+          city: u.address?.city ?? undefined,
+          state: u.address?.state ?? undefined,
+          pincode: u.address?.pincode ?? undefined,
+        });
+      })
+      .catch(() => setPrefill({}));
   }, [router]);
 
   const subtotal = cartSubtotal(items);
@@ -187,6 +226,26 @@ export default function CheckoutPage() {
       } catch {
         // snapshot is a nicety; the order itself is placed
       }
+      // Optionally persist the shipping address to the profile (best-effort;
+      // never blocks the order that was already placed).
+      if (fd.get("saveAddr")) {
+        try {
+          await apiFetch("/api/users/profile", {
+            method: "PUT",
+            body: JSON.stringify({
+              address: {
+                street,
+                city: fd.get("city"),
+                state: fd.get("state"),
+                pincode: fd.get("pin"),
+                country: "India",
+              },
+            }),
+          });
+        } catch {
+          // saved-address is a nicety; the order itself is placed
+        }
+      }
       clearCart();
       router.push(`/order-confirmed?orderId=${encodeURIComponent(orderId)}`);
     } catch (err) {
@@ -212,6 +271,7 @@ export default function CheckoutPage() {
     <main className="min-h-[60vh] w-full bg-white px-4 py-10 sm:px-8 lg:px-16">
       <div className="mx-auto max-w-[1152px]">
         <form
+          key={prefill ? "prefilled" : "blank"}
           onSubmit={placeOrder}
           className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_420px]"
         >
@@ -228,6 +288,7 @@ export default function CheckoutPage() {
                     type="email"
                     name="email"
                     required
+                    defaultValue={prefill?.email}
                     placeholder="email@example.com"
                     className={inputCls}
                   />
@@ -241,6 +302,7 @@ export default function CheckoutPage() {
                       type="tel"
                       name="phone"
                       required
+                      defaultValue={prefill?.phone}
                       placeholder="00000 00000"
                       className="min-w-0 flex-1 px-4 text-[15px] text-black placeholder:text-[#6b7280] focus:outline-none"
                     />
@@ -257,12 +319,12 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <Field label="Full Name">
-                    <input name="fullName" required placeholder="Enter your full name" className={inputCls} />
+                    <input name="fullName" required defaultValue={prefill?.name} placeholder="Enter your full name" className={inputCls} />
                   </Field>
                 </div>
                 <div className="sm:col-span-2">
                   <Field label="Address Line 1">
-                    <input name="addr1" required placeholder="House no., Building, Street" className={inputCls} />
+                    <input name="addr1" required defaultValue={prefill?.street} placeholder="House no., Building, Street" className={inputCls} />
                   </Field>
                 </div>
                 <div className="sm:col-span-2">
@@ -271,10 +333,10 @@ export default function CheckoutPage() {
                   </Field>
                 </div>
                 <Field label="City">
-                  <input name="city" required placeholder="City" className={inputCls} />
+                  <input name="city" required defaultValue={prefill?.city} placeholder="City" className={inputCls} />
                 </Field>
                 <Field label="State">
-                  <select name="state" required defaultValue="" className={inputCls}>
+                  <select name="state" required defaultValue={prefill?.state ?? ""} className={inputCls}>
                     <option value="" disabled>Select State</option>
                     {STATES.map((s) => (
                       <option key={s} value={s}>{s}</option>
@@ -282,7 +344,7 @@ export default function CheckoutPage() {
                   </select>
                 </Field>
                 <Field label="PIN Code">
-                  <input name="pin" required pattern="\d{6}" placeholder="6-digit PIN" className={inputCls} />
+                  <input name="pin" required pattern="\d{6}" defaultValue={prefill?.pincode} placeholder="6-digit PIN" className={inputCls} />
                 </Field>
                 <Field label="Country">
                   <input
@@ -295,6 +357,7 @@ export default function CheckoutPage() {
               <label className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-black">
                 <input
                   type="checkbox"
+                  name="saveAddr"
                   className="h-4 w-4 rounded border-[#c4c7c7] accent-black"
                 />
                 Save this address for future orders

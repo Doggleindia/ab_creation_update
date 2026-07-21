@@ -13,6 +13,7 @@ const SUPPORT_LINKS = [
   { label: "Track Order", href: "/dashboard/orders" },
   { label: "Shipping Policy", href: "/shipping-policy" },
   { label: "Sustainability", href: "/sustainability" },
+  { label: "Lookbook", href: "/lookbook" },
   { label: "Affiliates", href: "/become-a-seller" },
 ];
 

@@ -49,6 +49,26 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   return j as T;
 }
 
+// Multipart variant — lets the browser set the boundary header itself.
+export async function apiForm<T>(
+  path: string,
+  form: FormData,
+  method = "POST",
+): Promise<T> {
+  const token = getSession()?.token;
+  const res = await fetch(`${BACKEND}${path}`, {
+    method,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+  const j = await res.json().catch(() => null);
+  if (!res.ok) {
+    if (res.status === 401) setSession(null);
+    throw new ApiError(j?.message || `Request failed (${res.status})`, res.status);
+  }
+  return j as T;
+}
+
 export async function adminLogin(email: string, password: string) {
   const j = await api<{
     token: string;
@@ -125,6 +145,7 @@ export type Application = {
 
 export type AdminProduct = {
   _id: string;
+  id?: string; // human code PROD###
   title: string;
   slug: string;
   basePrice: number;

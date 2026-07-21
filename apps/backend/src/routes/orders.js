@@ -10,6 +10,7 @@ import {
   updateAdminOrderStatus,
   updateAdminOrderMeta,
   refundAdminOrder,
+  getSellerOrders,
 } from "../controllers/orderController.js";
 import { userAuth } from "../middleware/userAuth.js";
 import { adminAuth } from "../middleware/adminAuth.js";
@@ -22,6 +23,7 @@ router.post("/upload-designs", userAuth, upload.array("designs", 10), uploadDesi
 router.post("/buynow", userAuth, buyNow);
 router.post("/checkout", userAuth, checkoutCart); // atomic multi-item cart checkout
 router.get("/history", userAuth, getUserOrderHistory);
+router.get("/seller/mine", userAuth, getSellerOrders);
 router.get("/:orderId", userAuth, getOrderById);
 
 // Admin Routes

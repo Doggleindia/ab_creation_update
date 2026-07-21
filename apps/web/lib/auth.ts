@@ -56,6 +56,14 @@ export function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+// Patch the cached user snapshot (e.g. after a profile update) and notify
+// subscribers so the navbar/account UI refresh immediately.
+export function updateCachedUser(partial: Partial<AuthUser>) {
+  const session = read();
+  if (!session) return;
+  write({ ...session, user: { ...session.user, ...partial } });
+}
+
 export function subscribeAuth(cb: () => void): () => void {
   window.addEventListener(EVENT, cb);
   window.addEventListener("storage", cb);

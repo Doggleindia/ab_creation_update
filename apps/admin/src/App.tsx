@@ -8,6 +8,8 @@ import Financials from "./pages/Financials";
 import Production from "./pages/Production";
 import Messages from "./pages/Messages";
 import ProductApprovals from "./pages/ProductApprovals";
+import Content from "./pages/Content";
+import Settings from "./pages/Settings";
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
         <Route path="/production" element={<Production />} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/product-approvals" element={<ProductApprovals />} />
+        <Route path="/content" element={<Content />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

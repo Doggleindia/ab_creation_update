@@ -14,6 +14,36 @@ import {
 } from "../services/walletService.js";
 import { toStr } from "../utils/sanitize.js";
 import { uploadFileToS3 } from "../config/s3Service.js";
+import SellerProduct from "../models/SellerProduct.js";
+
+/**
+ * SELLER — orders placed against this seller's published catalog products.
+ */
+export const getSellerOrders = async (req, res, next) => {
+  try {
+    if (req.user?.accountType !== "seller") {
+      return next(new AppError("Seller account required", 403));
+    }
+    const subs = await SellerProduct.find({
+      sellerId: req.user._id,
+      status: "approved",
+      publishedProductId: { $ne: null },
+    }).select("publishedProductId title retailPrice");
+    const ids = subs.map((s) => s.publishedProductId);
+    const orders = await Order.find({ productId: { $in: ids } })
+      .sort({ createdAt: -1 })
+      .populate("productId", "title slug")
+      .select(
+        "orderId quantity totalAmount orderStatus paymentStatus createdAt productId size color",
+      );
+    res.status(200).json({
+      status: "success",
+      data: { orders, products: subs },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * Upload one or more customer design files to S3 and return their URLs.

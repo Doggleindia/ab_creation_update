@@ -31,7 +31,7 @@ const NAV: {
   { icon: FiCreditCard, label: "Financials", to: "/financials" },
   { icon: FiArchive, label: "Garment Catalog", to: "/catalog" },
   { icon: FiMail, label: "Messages", to: "/messages" },
-  { icon: FiFileText, label: "Content Management" },
+  { icon: FiFileText, label: "Content Management", to: "/content" },
 ];
 
 export default function Shell({
@@ -146,12 +146,16 @@ export default function Shell({
               </span>
             );
           })}
-          <span
-            title="Coming soon"
-            className="mt-2 flex cursor-not-allowed items-center gap-3 border-t border-[#f3f4f6] px-3 pb-1 pt-4 text-[13.5px] font-semibold text-[#c4c7c7]"
+          <Link
+            to="/settings"
+            className={`mt-2 flex items-center gap-3 border-t border-[#f3f4f6] px-3 pb-1 pt-4 text-[13.5px] font-semibold ${
+              location.pathname.startsWith("/settings")
+                ? "text-black"
+                : "text-[#374151] hover:text-black"
+            }`}
           >
             <FiSettings className="h-4 w-4" /> Settings
-          </span>
+          </Link>
         </nav>
         <div className="flex items-center justify-between border-t border-[#e5e7eb] px-4 py-4">
           <div className="flex min-w-0 items-center gap-3">

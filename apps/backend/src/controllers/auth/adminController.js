@@ -239,6 +239,50 @@ export const deleteAdmin = async (req, res, next) => {
 
 /**
  * ======================
+ * CHANGE PASSWORD (self)
+ * ======================
+ */
+export const changeAdminPassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Current and new password are required",
+      });
+    }
+    if (typeof newPassword !== "string" || newPassword.length < 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "New password must be at least 6 characters",
+      });
+    }
+
+    const admin = await Admin.findById(req.admin._id).select("+password");
+    if (!admin) {
+      return next(new AppError("Admin not found", 404));
+    }
+    if (!(await admin.correctPassword(currentPassword, admin.password))) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Current password is incorrect",
+      });
+    }
+
+    admin.password = newPassword; // pre-save hook re-hashes
+    await admin.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ======================
  * LOGOUT ADMIN
  * ======================
  */

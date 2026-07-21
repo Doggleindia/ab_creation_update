@@ -20,8 +20,8 @@ const NAV = [
   { icon: Wallet, label: "Wallet", href: "/dashboard/wallet" },
   { icon: Palette, label: "Saved Designs", href: "/design-studio" },
   { icon: Heart, label: "Wishlist", href: "/dashboard/wishlist" },
-  { icon: MapPin, label: "Addresses", href: null },
-  { icon: Settings, label: "Account Settings", href: null },
+  { icon: MapPin, label: "Addresses", href: "/dashboard/addresses" },
+  { icon: Settings, label: "Account Settings", href: "/dashboard/settings" },
 ];
 
 export default function AccountShell({

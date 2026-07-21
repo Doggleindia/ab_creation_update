@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, PlusCircle, Package } from "lucide-react";
+import { LayoutGrid, PlusCircle, Package, UserRound } from "lucide-react";
 import { getToken, getUser } from "@/lib/auth";
 
 const NAV = [
+  { icon: LayoutGrid, label: "Overview", href: "/seller" },
   { icon: Package, label: "My Products", href: "/seller/products" },
   { icon: PlusCircle, label: "New Submission", href: "/seller/new" },
-  { icon: LayoutGrid, label: "Buyer Dashboard", href: "/dashboard" },
+  { icon: UserRound, label: "Buyer Dashboard", href: "/dashboard" },
 ];
 
 export default function SellerShell({
