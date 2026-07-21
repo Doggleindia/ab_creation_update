@@ -16,8 +16,19 @@ const NAV_LINKS = [
 ];
 
 function AccountMenu({ user }: { user: AuthUser }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const initial = (user.name || user.email || "?").charAt(0).toUpperCase();
+
+  async function confirmLogout() {
+    setLoggingOut(true);
+    await logout();
+    setLoggingOut(false);
+    setConfirming(false);
+    router.push("/");
+  }
 
   return (
     <div className="relative">
@@ -57,7 +68,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
             <button
               onClick={() => {
                 setOpen(false);
-                void logout();
+                setConfirming(true);
               }}
               className="mt-1 flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-left text-[14px] text-[#ba1a1a] hover:bg-[#fef2f2]"
             >
@@ -65,6 +76,46 @@ function AccountMenu({ user }: { user: AuthUser }) {
             </button>
           </div>
         </>
+      )}
+
+      {/* Logout confirmation (Figma frame: beige backdrop, white banner) */}
+      {confirming && (
+        <div className="fixed inset-0 z-[100] bg-[#f1efe9]">
+          <button
+            onClick={() => setConfirming(false)}
+            className="absolute right-8 top-8 flex items-center gap-2 text-[15px] font-bold text-black hover:opacity-70 sm:right-16 sm:top-16"
+          >
+            <X className="h-5 w-5" /> Close
+          </button>
+          <div className="flex h-full items-center justify-center px-4">
+            <div className="grid w-full max-w-[1140px] grid-cols-1 overflow-hidden bg-white md:grid-cols-2">
+              <div className="flex flex-col items-center justify-center gap-4 px-8 py-14 text-center">
+                <p className="flex items-center gap-2.5 text-[17px] font-bold text-[#b07d1a]">
+                  <LogOut className="h-5 w-5" /> Log out
+                </p>
+                <p className="text-[24px] leading-snug text-black sm:text-[26px]">
+                  Are you sure you want to log out?
+                </p>
+                <button
+                  onClick={() => void confirmLogout()}
+                  disabled={loggingOut}
+                  className="mt-2 rounded-[4px] bg-brand-orange px-14 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {loggingOut ? "Logging out…" : "Log out"}
+                </button>
+              </div>
+              <div className="relative hidden h-[305px] md:block">
+                <Image
+                  src="/images/auth/login-side.png"
+                  alt="Custom printed apparel"
+                  fill
+                  className="object-cover"
+                  sizes="570px"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
