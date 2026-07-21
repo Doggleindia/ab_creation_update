@@ -7,6 +7,12 @@ const adminWalletSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    // Payout destination on file — only the last 4 digits are ever stored.
+    bankAccount: {
+      bankName: { type: String, trim: true },
+      accountHolder: { type: String, trim: true },
+      last4: { type: String, trim: true, maxlength: 4 },
+    },
   },
   { timestamps: true }
 );

@@ -1,5 +1,12 @@
 import express from 'express';
-import { getBalance, getTransactions, getUsersReport } from '../controllers/adminWalletController.js';
+import {
+  getBalance,
+  getTransactions,
+  getUsersReport,
+  getBankAccount,
+  updateBankAccount,
+  requestWithdrawal,
+} from '../controllers/adminWalletController.js';
 import { adminAuth } from '../middleware/adminAuth.js';
 
 const router = express.Router();
@@ -15,5 +22,10 @@ router.get('/transactions', getTransactions);
 
 // GET /api/admin/wallet/users-report
 router.get('/users-report', getUsersReport);
+
+// Payouts
+router.get('/bank', getBankAccount);
+router.patch('/bank', updateBankAccount);
+router.post('/withdraw', requestWithdrawal);
 
 export default router;
