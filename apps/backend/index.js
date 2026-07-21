@@ -24,6 +24,7 @@ import adminWalletRoutes from "./src/routes/adminWalletRoutes.js";
 import ticketRoutes from "./src/routes/ticketRoutes.js";
 import applicationRoutes from "./src/routes/applicationRoutes.js";
 import sellerProductRoutes from "./src/routes/sellerProductRoutes.js";
+import siteContentRoutes from "./src/routes/siteContentRoutes.js";
 
 dotenv.config();
 
@@ -85,6 +86,7 @@ app.use("/api/admin/wallet", adminWalletRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/seller-products", sellerProductRoutes);
+app.use("/api/site-content", siteContentRoutes);
 
 // 404 handler for unmatched routes
 app.use((req, res, next) => {

@@ -117,6 +117,42 @@ function toCardProduct(p: RawProduct): CardProduct {
   };
 }
 
+// ---- Site content (homepage CMS) ----
+export type SiteTestimonial = {
+  title?: string;
+  body: string;
+  name: string;
+  role?: string;
+};
+
+export type SiteContent = {
+  hero?: {
+    visible?: boolean;
+    badge?: string;
+    heading1?: string;
+    heading2?: string;
+    subheading?: string;
+    cta1?: string;
+    cta2?: string;
+    image?: string;
+  };
+  trustBadges?: { visible?: boolean; items?: { icon?: string; label: string }[] };
+  topCategories?: { visible?: boolean };
+  orderingProcess?: { visible?: boolean };
+  printingServices?: { visible?: boolean };
+  testimonials?: { visible?: boolean; items?: SiteTestimonial[] };
+  collectionCarousel?: { visible?: boolean };
+  sellerBanner?: { visible?: boolean };
+  announcement?: { visible?: boolean; text?: string; hours?: string };
+};
+
+export async function getSiteContent(): Promise<SiteContent> {
+  const json = await apiGet<{ data: { content: SiteContent } }>(
+    "/api/site-content",
+  );
+  return json?.data?.content ?? {};
+}
+
 // ---- Public API ----
 export type CollectionParams = {
   category?: string;

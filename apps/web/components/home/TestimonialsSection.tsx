@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Quote } from "lucide-react";
+import type { SiteTestimonial } from "@/lib/api";
 
 // Neutral, on-brand testimonials. (The Figma mock used competitor placeholder
 // copy — swapped here so we don't ship another brand's name on the site.)
@@ -27,7 +28,31 @@ const TESTIMONIALS = [
   },
 ];
 
-export default function TestimonialsSection() {
+const initialsOf = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((w) => w.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+export default function TestimonialsSection({
+  items,
+}: {
+  items?: SiteTestimonial[];
+}) {
+  const cards =
+    items?.filter((t) => t.name && t.body).length
+      ? items!
+          .filter((t) => t.name && t.body)
+          .map((t) => ({
+            title: t.title || `${t.name.split(" ")[0]}'s experience`,
+            body: t.body,
+            name: t.name,
+            role: t.role ?? "",
+            initials: initialsOf(t.name),
+          }))
+      : TESTIMONIALS;
   return (
     <section className="w-full bg-[#faf3ea] px-4 py-20 sm:px-8 lg:px-[86.5px]">
       <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-8">
@@ -42,7 +67,7 @@ export default function TestimonialsSection() {
         </div>
 
         <div className="grid w-full grid-cols-1 gap-7 md:grid-cols-3">
-          {TESTIMONIALS.map((t) => (
+          {cards.map((t) => (
             <div
               key={t.name}
               className="flex flex-col rounded-lg border border-[#e5e5e5] bg-white p-5"

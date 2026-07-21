@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import type { SiteContent } from "@/lib/api";
 
 const FEATURES = [
   { icon: "💰", label: "Lowest Price Guaranteed" },
@@ -8,7 +9,25 @@ const FEATURES = [
   { icon: "⚡", label: "Super Rush Delivery" },
 ];
 
-export default function Hero() {
+export default function Hero({
+  content,
+  trust,
+}: {
+  content?: SiteContent["hero"];
+  trust?: SiteContent["trustBadges"];
+}) {
+  const heading1 = content?.heading1 || "Printed for You.";
+  const heading2 = content?.heading2 || "Built for Your Brand.";
+  const subheading =
+    content?.subheading ||
+    "Shop ready-made printed tees or bring your own design. We print it exactly the way you want it.";
+  const cta1 = content?.cta1 || "Customize Product";
+  const cta2 = content?.cta2 || "Explore Collection";
+  const badges =
+    trust?.items?.filter((i) => i.label?.trim()).length
+      ? trust.items!.filter((i) => i.label?.trim())
+      : FEATURES;
+
   return (
     <section className="w-full bg-white">
       <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-16 px-4 pb-16 pt-10 sm:px-8">
@@ -17,14 +36,18 @@ export default function Hero() {
           {/* Copy */}
           <div className="flex w-full max-w-[694px] flex-col items-start gap-14">
             <div className="flex flex-col gap-4">
+              {content?.badge && (
+                <span className="w-fit rounded-full bg-[#111827] px-4 py-1.5 text-[12px] font-bold uppercase tracking-[1px] text-white">
+                  {content.badge}
+                </span>
+              )}
               <h1 className="font-poppins text-4xl font-semibold leading-[1.25] text-[#111827] sm:text-5xl lg:text-[60px]">
-                Printed for You.
+                {heading1}
                 <br />
-                Built for Your Brand.
+                {heading2}
               </h1>
               <p className="max-w-[572px] text-[18px] font-medium leading-7 text-black sm:text-[20px]">
-                Shop ready-made printed tees or bring your own design. We print
-                it exactly the way you want it.
+                {subheading}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2.5">
@@ -32,14 +55,14 @@ export default function Hero() {
                 href="/design-studio"
                 className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-[18px] font-bold text-white shadow-[0px_10px_15px_-3px_#fed7aa,0px_4px_6px_-4px_#fed7aa] transition-opacity hover:opacity-90"
               >
-                Customize Product
+                {cta1}
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <Link
                 href="/collection"
                 className="inline-flex items-center gap-2 rounded-full border border-black px-8 py-4 text-[18px] font-bold text-black transition-colors hover:bg-black hover:text-white"
               >
-                Explore Collection
+                {cta2}
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
@@ -58,13 +81,22 @@ export default function Hero() {
             {/* Top-left tee tile */}
             <div className="absolute left-[7%] top-[11%] h-[32.8%] w-[27.1%] rounded-[2.3%] bg-[#add7dc]" />
             <div className="absolute left-[8.3%] top-[6%] h-[37.8%] w-[24.3%] overflow-hidden rounded-[2.3%]">
-              <Image
-                src="/images/home/hero-tee.png"
-                alt="Printed tee"
-                fill
-                className="object-cover"
-                sizes="150px"
-              />
+              {content?.image ? (
+                /* eslint-disable-next-line @next/next/no-img-element -- CMS media lives on S3, host not in next.config images */
+                <img
+                  src={content.image}
+                  alt="Printed tee"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Image
+                  src="/images/home/hero-tee.png"
+                  alt="Printed tee"
+                  fill
+                  className="object-cover"
+                  sizes="150px"
+                />
+              )}
             </div>
             {/* Bottom-right jacket tile */}
             <div className="absolute left-[48.1%] top-[62%] h-[32.5%] w-[44.6%] rounded-[4.7%] bg-[#10b981]" />
@@ -81,19 +113,21 @@ export default function Hero() {
         </div>
 
         {/* Feature banner */}
-        <div className="grid w-full grid-cols-1 gap-4 rounded-md border border-[#bfd6e4] bg-white p-3 shadow-[-1px_1px_3.5px_rgba(0,0,0,0.13)] sm:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div
-              key={f.label}
-              className="flex items-center justify-center gap-4 rounded-2xl bg-[#f9fafb] px-6 py-5"
-            >
-              <span className="text-3xl leading-9">{f.icon}</span>
-              <span className="text-[16px] font-bold text-[#111827]">
-                {f.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        {trust?.visible !== false && (
+          <div className="grid w-full grid-cols-1 gap-4 rounded-md border border-[#bfd6e4] bg-white p-3 shadow-[-1px_1px_3.5px_rgba(0,0,0,0.13)] sm:grid-cols-3">
+            {badges.map((f) => (
+              <div
+                key={f.label}
+                className="flex items-center justify-center gap-4 rounded-2xl bg-[#f9fafb] px-6 py-5"
+              >
+                <span className="text-3xl leading-9">{f.icon ?? "✨"}</span>
+                <span className="text-[16px] font-bold text-[#111827]">
+                  {f.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
