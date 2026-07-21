@@ -210,11 +210,10 @@ export default function Content() {
   }
 
   function setSection<K extends keyof SiteContent>(key: K, patch: Partial<SiteContent[K]>, persist = false) {
-    setDraft((d) => {
-      const next = { ...d, [key]: { ...d[key], ...patch } };
-      if (persist) void saveDraft(next);
-      return next;
-    });
+    // Compute outside the updater — state updaters must stay pure.
+    const next = { ...draft, [key]: { ...draft[key], ...patch } };
+    setDraft(next);
+    if (persist) void saveDraft(next);
   }
 
   async function publishAll() {
@@ -343,10 +342,16 @@ export default function Content() {
     visible: boolean | null,
     onToggle: (() => void) | null,
   ) => (
-    <button
-      type="button"
+    // div, not <button>: the visibility switch nests inside this header and
+    // interactive elements must not nest inside a button.
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => setOpen((o) => ({ ...o, [key]: !o[key] }))}
-      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+      onKeyDown={(e) => {
+        if (e.key === "Enter") setOpen((o) => ({ ...o, [key]: !o[key] }));
+      }}
+      className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left"
     >
       <span className="flex min-w-0 items-center gap-3">
         <span className="text-[#c4c7c7]">⠿</span>
@@ -385,7 +390,7 @@ export default function Content() {
           <FiChevronRight className="h-4 w-4 text-[#6b7280]" />
         )}
       </span>
-    </button>
+    </div>
   );
 
   const visToggle = (key: keyof SiteContent) => () =>
