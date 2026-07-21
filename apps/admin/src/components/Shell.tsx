@@ -14,7 +14,7 @@ import {
   FiLogOut,
   FiSearch,
 } from "react-icons/fi";
-import { getSession, setSession, type AdminUser } from "../lib/api";
+import { api, getSession, setSession, type AdminUser } from "../lib/api";
 
 const NAV: {
   icon: React.ComponentType<{ className?: string }>;
@@ -46,6 +46,7 @@ export default function Shell({
   const navigate = useNavigate();
   const location = useLocation();
   const [admin, setAdmin] = useState<AdminUser | null>(null);
+  const [badges, setBadges] = useState<{ seller: number; bulk: number }>({ seller: 0, bulk: 0 });
 
   useEffect(() => {
     const s = getSession();
@@ -58,6 +59,17 @@ export default function Shell({
       if (!getSession()) navigate("/login", { replace: true });
     };
     window.addEventListener("ab-admin-auth", sync);
+    api<{ data: { applications: { type: string }[] } }>(
+      "/api/applications?status=pending",
+    )
+      .then((j) => {
+        const apps = j.data?.applications ?? [];
+        setBadges({
+          seller: apps.filter((a) => a.type === "seller").length,
+          bulk: apps.filter((a) => a.type === "bulk").length,
+        });
+      })
+      .catch(() => {});
     return () => window.removeEventListener("ab-admin-auth", sync);
   }, [navigate]);
 
@@ -72,7 +84,7 @@ export default function Shell({
             AB Creation
           </p>
           <p className="pt-1 text-[10px] font-bold uppercase tracking-[1.5px] text-[#9ca3af]">
-            Admin Console
+            Admin Panel
           </p>
         </div>
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 pt-6">
@@ -93,7 +105,18 @@ export default function Shell({
                     : "text-[#374151] hover:bg-[#f3f4f6]"
                 }`}
               >
-                <Icon className="h-4 w-4 shrink-0" /> {label}
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="flex-1">{label}</span>
+                {label === "Seller Management" && badges.seller > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f0c96b] text-[10px] font-bold text-black">
+                    {badges.seller}
+                  </span>
+                )}
+                {label === "Bulk Orders" && badges.bulk > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f0c96b] text-[10px] font-bold text-black">
+                    {badges.bulk}
+                  </span>
+                )}
               </Link>
             ) : (
               <span
