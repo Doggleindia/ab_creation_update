@@ -66,6 +66,17 @@ const businessApplicationSchema = new mongoose.Schema(
       default: [],
     },
 
+    // Hosted portfolio images uploaded with the application
+    portfolioFiles: {
+      type: [String],
+      default: [],
+    },
+
+    // Admin review aids
+    priority: { type: Boolean, default: false },
+    internalNotes: { type: String, trim: true },
+    checklist: { type: [String], default: [] },
+
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],

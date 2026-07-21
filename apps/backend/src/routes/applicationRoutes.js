@@ -6,8 +6,11 @@ import {
   getApplication,
   approveApplication,
   rejectApplication,
+  uploadPortfolio,
+  updateApplicationReview,
 } from "../controllers/applicationController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
+import { upload } from "../middleware/uploadMiddleware.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 const router = express.Router();
@@ -18,6 +21,11 @@ const router = express.Router();
  */
 router.post("/bulk", asyncHandler(submitBulkApplication));
 router.post("/seller", asyncHandler(submitSellerApplication));
+router.post(
+  "/upload-portfolio",
+  upload.array("designs", 5),
+  asyncHandler(uploadPortfolio),
+);
 
 /**
  * ADMIN — review queues and decisions.
@@ -26,5 +34,6 @@ router.get("/", adminAuth, asyncHandler(getApplications));
 router.get("/:id", adminAuth, asyncHandler(getApplication));
 router.patch("/:id/approve", adminAuth, asyncHandler(approveApplication));
 router.patch("/:id/reject", adminAuth, asyncHandler(rejectApplication));
+router.patch("/:id/review", adminAuth, asyncHandler(updateApplicationReview));
 
 export default router;

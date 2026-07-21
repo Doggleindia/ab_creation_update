@@ -112,6 +112,10 @@ export type Application = {
   categories?: string[];
   message?: string;
   rejectionReason?: string;
+  portfolioFiles?: string[];
+  priority?: boolean;
+  internalNotes?: string;
+  checklist?: string[];
   createdAt?: string;
   address?: { street?: string; city?: string; state?: string; pincode?: string };
 };

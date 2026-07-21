@@ -39,7 +39,7 @@ const labelCls =
 const inputCls =
   "h-11 w-full rounded-[8px] border border-[#c4c7c7] bg-white px-4 text-[15px] text-black placeholder:text-[#9ca3af] focus:border-brand-orange focus:outline-none";
 
-type PortfolioFile = { name: string; preview: string };
+type PortfolioFile = { name: string; preview: string; file: File };
 
 function Stepper({ current }: { current: number }) {
   return (
@@ -144,7 +144,7 @@ export default function SellerRegistrationPage() {
     for (const file of Array.from(list).slice(0, 5 - files.length)) {
       if (!file.type.startsWith("image/")) continue;
       if (file.size > 10 * 1024 * 1024) continue;
-      next.push({ name: file.name, preview: URL.createObjectURL(file) });
+      next.push({ name: file.name, preview: URL.createObjectURL(file), file });
     }
     setFiles((f) => [...f, ...next].slice(0, 5));
   }
@@ -152,6 +152,26 @@ export default function SellerRegistrationPage() {
   async function submit() {
     setBusy(true);
     setError("");
+
+    // Upload portfolio images so reviewers see the real artwork.
+    let portfolioFiles: string[] = [];
+    if (files.length > 0) {
+      try {
+        const fd = new FormData();
+        files.forEach((f) => fd.append("designs", f.file, f.name));
+        const up = await fetch(`${BACKEND}/api/applications/upload-portfolio`, {
+          method: "POST",
+          body: fd,
+        });
+        if (up.ok) {
+          const j = await up.json();
+          portfolioFiles = j.data?.urls ?? [];
+        }
+      } catch {
+        // uploads are best-effort; the application still goes through
+      }
+    }
+
     const messageParts = [
       form.businessType && `Business type: ${form.businessType}`,
       form.panNumber && `PAN: ${form.panNumber}`,
@@ -179,6 +199,7 @@ export default function SellerRegistrationPage() {
             country: "India",
           },
           gstNumber: form.gstNumber || undefined,
+          portfolioFiles: portfolioFiles.length > 0 ? portfolioFiles : undefined,
           productsToSell: form.style || undefined,
           message: messageParts.join(" | "),
         }),
@@ -570,8 +591,8 @@ export default function SellerRegistrationPage() {
                     )}
                   </div>
                   <p className="text-[12px] text-[#9ca3af]">
-                    Files stay on your device for now — our curation team will
-                    request them by email during review.
+                    Your designs are uploaded securely with the application for
+                    our curation team to review.
                   </p>
 
                   <label className="flex flex-col gap-2">

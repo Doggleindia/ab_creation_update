@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import BusinessApplication from "../models/BusinessApplication.js";
 import User from "../models/auth/userModel.js";
 import AppError from "../utils/AppError.js";
+import { uploadFileToS3 } from "../config/s3Service.js";
 import { toStr } from "../utils/sanitize.js";
 import {
   generateTempPassword,
@@ -24,6 +25,15 @@ const pickApplicationInput = (body = {}) => ({
   website: body.website,
   productsToSell: body.productsToSell,
   categories: Array.isArray(body.categories) ? body.categories : undefined,
+  portfolioFiles: Array.isArray(body.portfolioFiles)
+    ? body.portfolioFiles
+        .filter(
+          (f) =>
+            typeof f === "string" &&
+            (f.startsWith("http://") || f.startsWith("https://")),
+        )
+        .slice(0, 10)
+    : undefined,
 });
 
 /**
@@ -240,6 +250,63 @@ export const rejectApplication = async (req, res, next) => {
       application: {
         id: application._id,
         status: application.status,
+      },
+    },
+  });
+};
+
+
+/**
+ * PUBLIC — upload portfolio images for an application (max 5, images only).
+ * Returns hosted URLs the intake form submits as portfolioFiles.
+ */
+export const uploadPortfolio = async (req, res, next) => {
+  const files = (req.files || []).filter((f) =>
+    (f.mimetype || "").startsWith("image/"),
+  );
+  if (!files.length) {
+    return next(new AppError("No image files uploaded", 400));
+  }
+  const urls = [];
+  for (const file of files.slice(0, 5)) {
+    const result = await uploadFileToS3(file);
+    if (result?.Location) urls.push(result.Location);
+  }
+  res.status(200).json({ status: "success", data: { urls } });
+};
+
+/**
+ * ADMIN — persist review aids (notes, checklist, priority flag).
+ */
+export const updateApplicationReview = async (req, res, next) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new AppError("Invalid application id", 400));
+  }
+  const application = await BusinessApplication.findById(id);
+  if (!application) {
+    return next(new AppError("Application not found", 404));
+  }
+  if (typeof req.body.internalNotes === "string") {
+    application.internalNotes = req.body.internalNotes;
+  }
+  if (Array.isArray(req.body.checklist)) {
+    application.checklist = req.body.checklist
+      .filter((x) => typeof x === "string")
+      .slice(0, 20);
+  }
+  if (typeof req.body.priority === "boolean") {
+    application.priority = req.body.priority;
+  }
+  await application.save();
+  res.status(200).json({
+    status: "success",
+    data: {
+      application: {
+        id: application._id,
+        priority: application.priority,
+        internalNotes: application.internalNotes,
+        checklist: application.checklist,
       },
     },
   });

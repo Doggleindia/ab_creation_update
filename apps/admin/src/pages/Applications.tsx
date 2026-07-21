@@ -10,6 +10,8 @@ import {
   FiDownload,
   FiFileText,
   FiImage,
+  FiStar,
+  FiSave,
 } from "react-icons/fi";
 import Shell, { Card, StatusChip } from "../components/Shell";
 import { api, type Application } from "../lib/api";
@@ -82,6 +84,7 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
   const [notes, setNotes] = useState("");
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
+  const [savingReview, setSavingReview] = useState(false);
   const [flash, setFlash] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const load = useCallback(() => {
@@ -102,6 +105,21 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
       .catch(() => {});
   }, [type]);
   useEffect(load, [load]);
+
+  // Hydrate persisted review aids whenever the selected application changes
+  useEffect(() => {
+    if (!selected) return;
+    setNotes(selected.internalNotes ?? "");
+    setChecks(
+      Object.fromEntries(
+        CHECKLIST[type].map((l) => [
+          `${selected._id}:${l}`,
+          (selected.checklist ?? []).includes(l),
+        ]),
+      ),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?._id]);
 
   const categories = useMemo(
     () =>
@@ -148,6 +166,33 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
       });
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function saveReview(extra?: { priority?: boolean }) {
+    if (!selected) return;
+    setSavingReview(true);
+    try {
+      const checked = CHECKLIST[type].filter(
+        (l) => checks[`${selected._id}:${l}`],
+      );
+      await api(`/api/applications/${selected._id}/review`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          internalNotes: notes,
+          checklist: checked,
+          ...(extra ?? {}),
+        }),
+      });
+      setFlash({ kind: "ok", text: "Review saved." });
+      load();
+    } catch (err) {
+      setFlash({
+        kind: "err",
+        text: err instanceof Error ? err.message : "Could not save review",
+      });
+    } finally {
+      setSavingReview(false);
     }
   }
 
@@ -260,7 +305,14 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
                 </div>
               </div>
               <div className="text-right">
-                <StatusChip status={selected.status} />
+                <span className="flex items-center justify-end gap-2">
+                  {selected.priority && (
+                    <span className="rounded-md bg-[#f0c96b] px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-[0.5px] text-black">
+                      Priority Review
+                    </span>
+                  )}
+                  <StatusChip status={selected.status} />
+                </span>
                 <p className="pt-2 text-[13px] text-[#6b7280]">
                   Applied {ago(selected.createdAt)}
                 </p>
@@ -341,7 +393,26 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
                   <FiImage />{" "}
                   {type === "seller" ? "Design Portfolio" : "Request Details"}
                 </h3>
-                {parsed.portfolioFiles.length > 0 ? (
+                {(selected.portfolioFiles?.length ?? 0) > 0 ? (
+                  <div className="flex flex-wrap gap-2 pt-4">
+                    {selected.portfolioFiles!.slice(0, 4).map((url, i) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="relative block h-20 w-20 overflow-hidden rounded-lg border border-[#e5e7eb] bg-[#f3f4f6]"
+                      >
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        {i === 3 && selected.portfolioFiles!.length > 4 && (
+                          <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-[13px] font-bold text-white">
+                            +{selected.portfolioFiles!.length - 4}
+                          </span>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                ) : parsed.portfolioFiles.length > 0 ? (
                   <div className="flex flex-wrap gap-2 pt-4">
                     {parsed.portfolioFiles.map((f) => (
                       <span
@@ -424,6 +495,30 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
                   {label}
                 </label>
               ))}
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <button
+                onClick={() => void saveReview()}
+                disabled={savingReview}
+                className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white text-[12.5px] font-bold text-black hover:border-black disabled:opacity-50"
+              >
+                <FiSave className="h-3.5 w-3.5" />
+                {savingReview ? "Saving…" : "Save Review"}
+              </button>
+              <button
+                onClick={() => void saveReview({ priority: !selected.priority })}
+                disabled={savingReview}
+                title={selected.priority ? "Remove priority flag" : "Flag for priority review"}
+                className={`flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-[12.5px] font-bold disabled:opacity-50 ${
+                  selected.priority
+                    ? "bg-[#f0c96b] text-black"
+                    : "border border-[#e5e7eb] bg-white text-[#374151] hover:border-black"
+                }`}
+              >
+                <FiStar className="h-3.5 w-3.5" />
+                Priority
+              </button>
             </div>
 
             {flash && (
@@ -520,6 +615,11 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
                       {c}
                     </span>
                   ))}
+                  {a.priority && (
+                    <span className="rounded-md bg-[#f0c96b] px-2 py-1 text-[10px] font-bold uppercase text-black">
+                      Priority
+                    </span>
+                  )}
                   {tab === "all" && <StatusChip status={a.status} />}
                   <button
                     onClick={() => {
