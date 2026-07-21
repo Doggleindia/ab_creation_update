@@ -872,3 +872,147 @@ export const refundAdminOrder = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+/**
+ * ADMIN — per-seller payout summary.
+ * pending  = delivered + paid seller-product orders not yet settled
+ * upcoming = paid seller-product orders still in production
+ * products = margin map so the console can compute platform share per order
+ */
+export const getSellerPayoutSummary = async (req, res, next) => {
+  try {
+    const subs = await SellerProduct.find({
+      status: "approved",
+      publishedProductId: { $ne: null },
+    })
+      .populate("baseProductId", "basePrice")
+      .populate("sellerId", "name email");
+    const byProduct = new Map(
+      subs.map((s) => [
+        String(s.publishedProductId),
+        {
+          sellerId: String(s.sellerId?._id ?? s.sellerId),
+          name: s.sellerId?.name ?? "Seller",
+          email: s.sellerId?.email ?? "",
+          marginPerUnit: Math.max(
+            0,
+            (s.retailPrice || 0) - (s.baseProductId?.basePrice || 0),
+          ),
+        },
+      ]),
+    );
+    const orders = await Order.find({
+      productId: { $in: [...byProduct.keys()] },
+      paymentStatus: "paid",
+      orderStatus: { $ne: "cancelled" },
+    }).select("orderId productId quantity totalAmount orderStatus createdAt");
+
+    const groups = { pending: new Map(), upcoming: new Map() };
+    for (const order of orders) {
+      const info = byProduct.get(String(order.productId));
+      if (!info || info.marginPerUnit <= 0) continue;
+      const margin = Math.round(info.marginPerUnit * (order.quantity || 1));
+      let bucket;
+      if (order.orderStatus === "delivered") {
+        const settled = await WalletTransaction.exists({
+          requestId: `payout-seller-${order.orderId}`,
+        });
+        if (settled) continue;
+        bucket = groups.pending;
+      } else {
+        bucket = groups.upcoming;
+      }
+      const g = bucket.get(info.sellerId) ?? {
+        sellerId: info.sellerId,
+        name: info.name,
+        email: info.email,
+        sales: 0,
+        revenue: 0,
+        payout: 0,
+      };
+      g.sales += 1;
+      g.revenue += order.totalAmount || 0;
+      g.payout += margin;
+      bucket.set(info.sellerId, g);
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        pending: [...groups.pending.values()],
+        upcoming: [...groups.upcoming.values()],
+        products: [...byProduct.entries()].map(([productId, i]) => ({
+          productId,
+          sellerId: i.sellerId,
+          name: i.name,
+          marginPerUnit: i.marginPerUnit,
+        })),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ADMIN — settle outstanding payouts (all sellers, or one via sellerId).
+ * Covers delivered paid seller-product orders that have no payout ledger
+ * entry yet. Each order settles in its own transaction; an insufficient
+ * platform balance stops the run and reports what happened.
+ */
+export const processSellerPayouts = async (req, res, next) => {
+  try {
+    const sellerFilter = toStr(req.body.sellerId);
+    const subs = await SellerProduct.find({
+      status: "approved",
+      publishedProductId: { $ne: null },
+      ...(sellerFilter ? { sellerId: sellerFilter } : {}),
+    }).populate("baseProductId", "basePrice");
+    const byProduct = new Map(subs.map((s) => [String(s.publishedProductId), s]));
+    const orders = await Order.find({
+      productId: { $in: [...byProduct.keys()] },
+      orderStatus: "delivered",
+      paymentStatus: "paid",
+    });
+
+    let processed = 0;
+    let total = 0;
+    let halted = null;
+    for (const order of orders) {
+      const requestId = `payout-seller-${order.orderId}`;
+      if (await WalletTransaction.exists({ requestId })) continue;
+      const sub = byProduct.get(String(order.productId));
+      const margin = Math.round(
+        Math.max(0, (sub.retailPrice || 0) - (sub.baseProductId?.basePrice || 0)) *
+          (order.quantity || 1),
+      );
+      if (margin <= 0) continue;
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          await deductFromAdminWallet(margin, `payout-admin-${order.orderId}`, session);
+          await creditSellerPayout(sub.sellerId, margin, requestId, session);
+        });
+        processed += 1;
+        total += margin;
+      } catch (err) {
+        halted = err.message;
+        break;
+      } finally {
+        session.endSession();
+      }
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: halted
+        ? `Processed ${processed} payout(s) totalling ₹${total.toLocaleString("en-IN")} before stopping: ${halted}`
+        : processed
+          ? `Processed ${processed} payout(s) totalling ₹${total.toLocaleString("en-IN")}.`
+          : "No pending payouts — everything is settled.",
+      data: { processed, total, halted },
+    });
+  } catch (err) {
+    next(err);
+  }
+};

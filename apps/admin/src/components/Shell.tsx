@@ -28,7 +28,7 @@ const NAV: {
   { icon: FiShoppingCart, label: "All Orders", to: "/orders" },
   { icon: FiPackage, label: "Bulk Orders", to: "/bulk-orders" },
   { icon: FiLayers, label: "Production Queue", to: "/production" },
-  { icon: FiCreditCard, label: "Earnings & Payouts", to: "/financials" },
+  { icon: FiCreditCard, label: "Financials", to: "/financials" },
   { icon: FiArchive, label: "Garment Catalog", to: "/catalog" },
   { icon: FiMail, label: "Messages", to: "/messages" },
   { icon: FiFileText, label: "Content Management", to: "/content" },

@@ -11,6 +11,8 @@ import {
   updateAdminOrderMeta,
   refundAdminOrder,
   getSellerOrders,
+  getSellerPayoutSummary,
+  processSellerPayouts,
 } from "../controllers/orderController.js";
 import { userAuth } from "../middleware/userAuth.js";
 import { adminAuth } from "../middleware/adminAuth.js";
@@ -28,6 +30,8 @@ router.get("/:orderId", userAuth, getOrderById);
 
 // Admin Routes
 router.get("/admin/all", adminAuth, getAdminAllOrders);
+router.get("/admin/payouts/summary", adminAuth, getSellerPayoutSummary);
+router.post("/admin/payouts/process", adminAuth, processSellerPayouts);
 router.get("/admin/user/:userId", adminAuth, getAdminUserOrderHistory);
 router.patch("/admin/:orderId/status", adminAuth, updateAdminOrderStatus);
 router.patch("/admin/:orderId/meta", adminAuth, updateAdminOrderMeta);
