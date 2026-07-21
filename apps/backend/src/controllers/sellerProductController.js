@@ -6,6 +6,20 @@ import Variant from "../models/Variant.js";
 import Inventory from "../models/Inventory.js";
 import { uploadFileToS3 } from "../config/s3Service.js";
 import { toStr } from "../utils/sanitize.js";
+import EmailTransporter from "../utils/EmailTransporter.js";
+import User from "../models/auth/userModel.js";
+
+// Best-effort decision email — review outcomes never fail on SMTP issues.
+const notifySeller = async (submission, subject, text) => {
+  try {
+    const seller = await User.findById(submission.sellerId);
+    if (seller?.email) {
+      await EmailTransporter.sendEmail(seller.email, subject, text);
+    }
+  } catch (err) {
+    console.error("seller decision email failed:", err.message);
+  }
+};
 
 const requireSeller = (req, next) => {
   if (req.user?.accountType !== "seller") {
@@ -246,6 +260,12 @@ export const approveSellerProduct = async (req, res, next) => {
   submission.publishedProductId = product._id;
   await submission.save();
 
+  await notifySeller(
+    submission,
+    `Your design "${submission.title}" is live on AB Creation`,
+    `Hi,\n\nGreat news — your design "${submission.title}" was approved and is now live on the AB Creation storefront at /product/${slug} (retail price Rs. ${submission.retailPrice}).\n\nThe AB Creation Team`,
+  );
+
   res.status(200).json({
     status: "success",
     message: `Approved and published to the catalog as /product/${slug}.`,
@@ -268,6 +288,22 @@ const closeWith = (status) => async (req, res, next) => {
   submission.reviewedBy = req.admin._id;
   submission.reviewedAt = new Date();
   await submission.save();
+
+  const feedback = submission.rejectionReason
+    ? `\n\nReviewer feedback: ${submission.rejectionReason}`
+    : "";
+  await notifySeller(
+    submission,
+    status === "rejected"
+      ? `Update on your design "${submission.title}"`
+      : `Changes requested for "${submission.title}"`,
+    `Hi,\n\n${
+      status === "rejected"
+        ? `We reviewed your design "${submission.title}" and can't publish it this time.`
+        : `We reviewed your design "${submission.title}" and need a few changes before it can go live.`
+    }${feedback}\n\nYou can update and resubmit it from your seller area.\n\nThe AB Creation Team`,
+  );
+
   res.status(200).json({
     status: "success",
     message:
@@ -280,3 +316,52 @@ const closeWith = (status) => async (req, res, next) => {
 
 export const rejectSellerProduct = closeWith("rejected");
 export const requestSellerProductChanges = closeWith("changes");
+
+/** SELLER — update a rejected/changes submission and send it back to review. */
+export const resubmitSellerProduct = async (req, res, next) => {
+  if (!requireSeller(req, next)) return;
+  const submission = await findSubmission(req.params.id, next);
+  if (!submission) return;
+  if (String(submission.sellerId) !== String(req.user._id)) {
+    return next(new AppError("Not your submission", 403));
+  }
+  if (!["rejected", "changes"].includes(submission.status)) {
+    return next(
+      new AppError(
+        "Only rejected or changes-requested submissions can be resubmitted",
+        409,
+      ),
+    );
+  }
+  const b = req.body;
+  if (b.title) submission.title = toStr(b.title);
+  if (typeof b.description === "string") submission.description = toStr(b.description);
+  if (b.retailPrice) submission.retailPrice = Number(b.retailPrice);
+  if (["DTF", "Screen", "Embroidery", "Heat Transfer"].includes(b.method)) {
+    submission.method = b.method;
+  }
+  if (b.color) submission.color = toStr(b.color);
+  if (Array.isArray(b.sizes)) {
+    submission.sizes = b.sizes.filter((s) => typeof s === "string").slice(0, 10);
+  }
+  if (Array.isArray(b.tags)) {
+    submission.tags = b.tags.filter((t) => typeof t === "string").slice(0, 10);
+  }
+  if (Array.isArray(b.images)) {
+    submission.images = b.images
+      .filter(
+        (u) =>
+          typeof u === "string" &&
+          (u.startsWith("http://") || u.startsWith("https://")),
+      )
+      .slice(0, 5);
+  }
+  submission.status = "pending";
+  submission.rejectionReason = undefined;
+  await submission.save();
+  res.status(200).json({
+    status: "success",
+    message: "Resubmitted for review.",
+    data: { sellerProduct: { id: submission._id, status: submission.status } },
+  });
+};

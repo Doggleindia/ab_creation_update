@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Search, User, Menu, X, LogOut } from "lucide-react";
+import { ChevronDown, Search, User, Menu, X, LogOut, Store } from "lucide-react";
 import { type AuthUser, getUser, logout, subscribeAuth } from "@/lib/auth";
 
 const NAV_LINKS = [
@@ -45,6 +45,15 @@ function AccountMenu({ user }: { user: AuthUser }) {
             >
               <User className="h-4 w-4" /> My Account
             </Link>
+            {user.accountType === "seller" && (
+              <Link
+                href="/seller/products"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-[14px] text-black hover:bg-[#f3f3f4]"
+              >
+                <Store className="h-4 w-4" /> Seller Studio
+              </Link>
+            )}
             <button
               onClick={() => {
                 setOpen(false);

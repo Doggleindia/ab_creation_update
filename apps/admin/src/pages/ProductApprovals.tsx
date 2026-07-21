@@ -4,11 +4,10 @@ import { api, inr, type SellerProductSub } from "../lib/api";
 
 const TABS = ["pending", "changes", "approved", "rejected"] as const;
 
-const CHECKLIST = [
-  "No copyright issues",
-  "Print resolution OK",
-  "Design within print bounds",
-];
+const CHECKLIST = ["No copyright issues", "Design within print bounds"];
+
+const PAGE_SIZE = 10;
+const PRINT_WIDTH_IN = 12; // print area width used for the DPI estimate
 
 const METHOD_LABEL: Record<string, string> = {
   DTF: "DTF (Direct to Film)",
@@ -36,6 +35,8 @@ export default function ProductApprovals() {
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [dpi, setDpi] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
 
   const load = useCallback(() => {
     api<{ data: { sellerProducts: SellerProductSub[] } }>(
@@ -65,10 +66,22 @@ export default function ProductApprovals() {
         CHECKLIST.map((l) => [l, (selected.checklist ?? []).includes(l)]),
       ),
     );
+    // Computed check: estimate print DPI from the artwork's pixel width
+    setDpi(null);
+    if (selected.images[0]) {
+      const img = new Image();
+      img.onload = () =>
+        setDpi(Math.round(img.naturalWidth / PRINT_WIDTH_IN));
+      img.src = selected.images[0];
+    }
   }, [selected?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => setPage(1), [tab]);
 
   const count = (s: string) => subs.filter((x) => x.status === s).length;
   const rows = subs.filter((s) => s.status === tab);
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   async function saveReview() {
     if (!selected) return;
@@ -176,9 +189,14 @@ export default function ProductApprovals() {
             </h2>
             <p className="pt-1 text-[14px] text-[#374151]">
               by{" "}
-              <span className="font-semibold text-[#2563eb]">
+              <a
+                href={`mailto:${selected.sellerId?.email ?? ""}?subject=${encodeURIComponent(
+                  `About your submission "${selected.title}"`,
+                )}`}
+                className="font-semibold text-[#2563eb] hover:underline"
+              >
                 {selected.sellerId?.name ?? "Seller"}
-              </span>
+              </a>
             </p>
 
             <div className="grid grid-cols-2 gap-x-6 gap-y-5 pt-6 text-[14px]">
@@ -279,6 +297,16 @@ export default function ProductApprovals() {
             <h3 className="text-[11px] font-bold uppercase tracking-[1px] text-[#374151]">
               Review Checklist
             </h3>
+            {dpi !== null && (
+              <p
+                className={`flex items-center gap-2 pt-3 text-[13.5px] font-semibold ${
+                  dpi >= 200 ? "text-[#16a34a]" : "text-[#dc2626]"
+                }`}
+              >
+                {dpi >= 200 ? "✓" : "⚠"} ~{dpi} DPI at {PRINT_WIDTH_IN}&quot; print
+                width
+              </p>
+            )}
             <div className="flex flex-col gap-2.5 pt-3">
               {CHECKLIST.map((label) => (
                 <label
@@ -385,7 +413,7 @@ export default function ProductApprovals() {
                 </td>
               </tr>
             )}
-            {rows.map((s) => (
+            {pageRows.map((s) => (
               <tr key={s._id} className="border-t border-[#f3f4f6] text-[13.5px]">
                 <td className="px-6 py-3.5">
                   <span className="block h-12 w-12 overflow-hidden rounded-lg border border-[#e5e7eb] bg-[#f3f4f6]">
@@ -424,9 +452,44 @@ export default function ProductApprovals() {
             ))}
           </tbody>
         </table>
-        <p className="border-t border-[#f3f4f6] px-6 py-4 text-[12.5px] text-[#6b7280]">
-          Showing {rows.length} {tab} of {subs.length} total entries
-        </p>
+        <div className="flex items-center justify-between border-t border-[#f3f4f6] px-6 py-4">
+          <p className="text-[12.5px] text-[#6b7280]">
+            Showing {pageRows.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1} to{" "}
+            {(page - 1) * PAGE_SIZE + pageRows.length} of {rows.length} {tab}{" "}
+            entries
+          </p>
+          {pages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-[12.5px] font-semibold text-[#374151] hover:border-black disabled:opacity-40"
+              >
+                Previous
+              </button>
+              {Array.from({ length: pages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i + 1)}
+                  className={`h-8 w-8 rounded-lg text-[12.5px] font-bold ${
+                    page === i + 1
+                      ? "bg-black text-white"
+                      : "border border-[#e5e7eb] text-[#374151] hover:border-black"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+                disabled={page === pages}
+                className="rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-[12.5px] font-semibold text-[#374151] hover:border-black disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </Card>
     </Shell>
   );

@@ -8,6 +8,7 @@ import {
   approveSellerProduct,
   rejectSellerProduct,
   requestSellerProductChanges,
+  resubmitSellerProduct,
 } from "../controllers/sellerProductController.js";
 import { userAuth } from "../middleware/userAuth.js";
 import { adminAuth } from "../middleware/adminAuth.js";
@@ -25,6 +26,7 @@ router.post(
 );
 router.post("/", userAuth, asyncHandler(createSellerProduct));
 router.get("/mine", userAuth, asyncHandler(getMySellerProducts));
+router.patch("/:id/resubmit", userAuth, asyncHandler(resubmitSellerProduct));
 
 // Admin approvals queue
 router.get("/admin", adminAuth, asyncHandler(getAdminSellerProducts));
