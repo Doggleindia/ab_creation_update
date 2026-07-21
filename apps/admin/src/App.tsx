@@ -6,6 +6,7 @@ import Applications from "./pages/Applications";
 import Catalog from "./pages/Catalog";
 import Financials from "./pages/Financials";
 import Production from "./pages/Production";
+import Messages from "./pages/Messages";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/catalog" element={<Catalog />} />
         <Route path="/financials" element={<Financials />} />
         <Route path="/production" element={<Production />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

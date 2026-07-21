@@ -80,6 +80,7 @@ export type AdminOrder = {
   size?: string;
   color?: string;
   productType: "ready" | "bulk";
+  shippingMethod?: "standard" | "express" | "rush";
   customDesign?: string;
   designFiles?: string[];
   phoneNumber?: string;
@@ -127,6 +128,16 @@ export type AdminProduct = {
   customizationTypes?: string[];
   specifications?: { fabric?: string };
   variants?: { _id: string; color?: string; media?: { images?: string[] } }[];
+};
+
+export type ContactMsg = {
+  _id: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  status: "new" | "reviewed" | "resolved";
+  createdAt?: string;
 };
 
 export type WalletTxn = {

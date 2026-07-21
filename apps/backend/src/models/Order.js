@@ -85,6 +85,11 @@ const orderSchema = new mongoose.Schema(
     anyText: {
       type: String,
     },
+    shippingMethod: {
+      type: String,
+      enum: ["standard", "express", "rush"],
+      default: "standard",
+    },
     orderStatus: {
       type: String,
       required: true,

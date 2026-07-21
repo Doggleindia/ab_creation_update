@@ -16,6 +16,12 @@ import {
   type AdminProduct,
 } from "../lib/api";
 
+const PRIORITY_CHIP: Record<string, { label: string; cls: string }> = {
+  rush: { label: "Super Rush", cls: "bg-[#fdecc8] text-[#b45309]" },
+  express: { label: "Rush", cls: "bg-[#fdf3dd] text-[#b07d1a]" },
+  standard: { label: "Normal", cls: "bg-[#f3f4f6] text-[#6b7280]" },
+};
+
 const QUEUE_DOT: Record<string, { label: string; color: string }> = {
   pending: { label: "Queued", color: "#9ca3af" },
   confirmed: { label: "Printing", color: "#3b82f6" },
@@ -31,6 +37,7 @@ export default function Dashboard() {
   const [sellers, setSellers] = useState<number>(0);
   const [balance, setBalance] = useState<number | null>(null);
   const [contacts, setContacts] = useState<number>(0);
+  const [range, setRange] = useState<7 | 30 | 90>(30);
 
   useEffect(() => {
     api<{ data: AdminOrder[] }>("/api/orders/admin/all")
@@ -92,17 +99,17 @@ export default function Dashboard() {
 
   // Smooth 30-day revenue curve (Catmull-Rom → cubic bezier)
   const chart = useMemo(() => {
-    const days: number[] = Array.from({ length: 30 }, () => 0);
+    const days: number[] = Array.from({ length: range }, () => 0);
     for (const o of orders) {
       if (!o.createdAt || o.orderStatus === "cancelled") continue;
       const diff = Math.floor(
         (now.getTime() - new Date(o.createdAt).getTime()) / 86400000,
       );
-      if (diff >= 0 && diff < 30) days[29 - diff] += o.totalAmount || 0;
+      if (diff >= 0 && diff < range) days[range - 1 - diff] += o.totalAmount || 0;
     }
     const max = Math.max(...days, 1);
     const pts = days.map((v, i) => [
-      (i / 29) * 100,
+      (i / (range - 1)) * 100,
       42 - (v / max) * 34,
     ]) as [number, number][];
     let d = `M ${pts[0][0]},${pts[0][1]}`;
@@ -120,7 +127,7 @@ export default function Dashboard() {
     const end = pts[pts.length - 1];
     return { d, end };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orders]);
+  }, [orders, range]);
 
   const axisLabel = (daysAgo: number) =>
     new Date(now.getTime() - daysAgo * 86400000).toLocaleDateString("en-IN", {
@@ -224,6 +231,7 @@ export default function Dashboard() {
                 <th className="px-3 py-3">Mockup</th>
                 <th className="px-3 py-3">Customer</th>
                 <th className="px-3 py-3">Method</th>
+                <th className="px-3 py-3">Priority</th>
                 <th className="px-3 py-3">Amount</th>
                 <th className="px-6 py-3">Status</th>
               </tr>
@@ -231,7 +239,7 @@ export default function Dashboard() {
             <tbody>
               {queue.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-[13px] text-[#9ca3af]">
+                  <td colSpan={7} className="px-6 py-8 text-center text-[13px] text-[#9ca3af]">
                     Nothing in production.
                   </td>
                 </tr>
@@ -261,6 +269,16 @@ export default function Dashboard() {
                     </td>
                     <td className="px-3 py-4 text-[#374151]">
                       {o.customDesign ? "DTF" : "Catalog"}
+                    </td>
+                    <td className="px-3 py-4">
+                      {(() => {
+                        const p = PRIORITY_CHIP[o.shippingMethod ?? "standard"];
+                        return (
+                          <span className={`rounded px-2 py-1 text-[10px] font-bold uppercase ${p.cls}`}>
+                            {p.label}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-3 py-4 text-[#374151]">{inr(o.totalAmount)}</td>
                     <td className="px-6 py-4">
@@ -344,6 +362,12 @@ export default function Dashboard() {
                 <p className="text-[12.5px] text-[#6b7280]">
                   Customer enquiries from the contact form.
                 </p>
+                <Link
+                  to="/messages"
+                  className="mt-1 inline-block text-[12.5px] font-bold text-black underline"
+                >
+                  Open Messages
+                </Link>
               </div>
             </div>
           </div>
@@ -354,15 +378,27 @@ export default function Dashboard() {
       <Card className="mt-6 p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-[16px] font-bold text-black">
-            Revenue Trend (Last 30 Days)
+            Revenue Trend (Last {range} Days)
           </h2>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-[12px] text-[#6b7280]">
               <span className="h-2 w-2 rounded-full bg-black" /> Revenue in ₹
             </span>
-            <span className="rounded-lg border border-[#e5e7eb] bg-[#f8f9fb] px-3 py-1.5 text-[12.5px] font-semibold text-[#374151]">
-              Last 30 Days
-            </span>
+            <div className="flex overflow-hidden rounded-lg border border-[#e5e7eb]">
+              {([7, 30, 90] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRange(r)}
+                  className={`px-3 py-1.5 text-[12.5px] font-semibold ${
+                    range === r
+                      ? "bg-black text-white"
+                      : "bg-[#f8f9fb] text-[#374151] hover:bg-[#f3f4f6]"
+                  }`}
+                >
+                  {r}D
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         <svg viewBox="0 0 100 46" preserveAspectRatio="none" className="mt-6 h-[190px] w-full">
@@ -395,10 +431,10 @@ export default function Dashboard() {
           />
         </svg>
         <div className="flex justify-between pt-2 text-[11px] text-[#9ca3af]">
-          <span>{axisLabel(29)}</span>
-          <span>{axisLabel(22)}</span>
-          <span>{axisLabel(15)}</span>
-          <span>{axisLabel(7)}</span>
+          <span>{axisLabel(range - 1)}</span>
+          <span>{axisLabel(Math.round((range - 1) * 0.75))}</span>
+          <span>{axisLabel(Math.round((range - 1) * 0.5))}</span>
+          <span>{axisLabel(Math.round((range - 1) * 0.25))}</span>
           <span>Today</span>
         </div>
       </Card>

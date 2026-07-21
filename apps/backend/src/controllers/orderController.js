@@ -58,6 +58,7 @@ export const buyNow = async (req, res) => {
       phoneNumber,
       customDesign,
       designFiles,
+      shippingMethod,
       designState,
       anyText,
     } = req.body;
@@ -268,6 +269,7 @@ export const buyNow = async (req, res) => {
               phoneNumber: finalPhoneNumber,
               customDesign,
               designFiles: Array.isArray(designFiles) ? designFiles : [],
+              shippingMethod: ["standard", "express", "rush"].includes(shippingMethod) ? shippingMethod : "standard",
               designState: designState || undefined,
               anyText,
               orderStatus: "pending",
@@ -406,7 +408,8 @@ const resolveCheckoutItem = async (item) => {
 export const checkoutCart = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { items, shippingAddress, phoneNumber } = req.body;
+    const { items, shippingAddress, phoneNumber, shippingMethod } = req.body;
+    const finalShippingMethod = ["standard", "express", "rush"].includes(shippingMethod) ? shippingMethod : "standard";
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty." });
@@ -481,6 +484,7 @@ export const checkoutCart = async (req, res) => {
           shippingAddress: finalShippingAddress,
           phoneNumber: finalPhoneNumber,
           customDesign: r.customDesign,
+          shippingMethod: finalShippingMethod,
           designFiles: Array.isArray(r.designFiles) ? r.designFiles : [],
           designState: r.designState || undefined,
           anyText: r.anyText,

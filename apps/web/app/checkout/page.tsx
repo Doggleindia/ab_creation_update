@@ -153,6 +153,7 @@ export default function CheckoutPage() {
             country: "India",
           },
           phoneNumber: `+91${String(fd.get("phone")).replace(/\D/g, "")}`,
+          shippingMethod: method.id,
         }),
       });
 

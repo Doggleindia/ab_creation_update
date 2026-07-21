@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
+  FiMail,
   FiGrid,
   FiUsers,
   FiCheckSquare,
@@ -29,6 +30,7 @@ const NAV: {
   { icon: FiLayers, label: "Production Queue", to: "/production" },
   { icon: FiCreditCard, label: "Financials", to: "/financials" },
   { icon: FiArchive, label: "Garment Catalog", to: "/catalog" },
+  { icon: FiMail, label: "Messages", to: "/messages" },
   { icon: FiFileText, label: "Content Management" },
 ];
 
