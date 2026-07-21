@@ -299,6 +299,9 @@ export const updateApplicationReview = async (req, res, next) => {
   if (typeof req.body.priority === "boolean") {
     application.priority = req.body.priority;
   }
+  if (typeof req.body.assignee === "string") {
+    application.assignee = toStr(req.body.assignee);
+  }
   await application.save();
   res.status(200).json({
     status: "success",
@@ -410,6 +413,37 @@ export const respondToQuote = async (req, res, next) => {
       decision === "accepted"
         ? "Quote accepted — our team will reach out to arrange payment and production."
         : "Quote declined — thanks for letting us know.",
+    data: { quote: application.quote },
+  });
+};
+
+/**
+ * ADMIN — advance a bulk order's fulfilment stage after quote acceptance.
+ * accepted -> in_production -> completed
+ */
+export const advanceQuoteStage = async (req, res, next) => {
+  const application = await BusinessApplication.findById(req.params.id);
+  if (!application || application.type !== "bulk" || !application.quote?.status) {
+    return next(new AppError("Bulk request not found", 404));
+  }
+  const stage = toStr(req.body.stage);
+  const allowed = {
+    accepted: "in_production",
+    in_production: "completed",
+  };
+  if (allowed[application.quote.status] !== stage) {
+    return next(
+      new AppError(
+        `Cannot move a ${application.quote.status} request to ${stage || "(none)"}`,
+        409,
+      ),
+    );
+  }
+  application.quote.status = stage;
+  await application.save();
+  res.status(200).json({
+    status: "success",
+    message: stage === "in_production" ? "Bulk order moved to production." : "Bulk order completed.",
     data: { quote: application.quote },
   });
 };

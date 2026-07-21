@@ -10,6 +10,7 @@ import Messages from "./pages/Messages";
 import ProductApprovals from "./pages/ProductApprovals";
 import Content from "./pages/Content";
 import Settings from "./pages/Settings";
+import BulkOrders from "./pages/BulkOrders";
 
 export default function App() {
   return (
@@ -19,7 +20,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/sellers" element={<Applications type="seller" />} />
-        <Route path="/bulk-orders" element={<Applications type="bulk" />} />
+        <Route path="/bulk-orders" element={<BulkOrders />} />
         <Route path="/catalog" element={<Catalog />} />
         <Route path="/financials" element={<Financials />} />
         <Route path="/production" element={<Production />} />

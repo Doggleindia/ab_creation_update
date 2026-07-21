@@ -146,10 +146,11 @@ export type Application = {
   quote?: {
     amount?: number;
     notes?: string;
-    status?: "sent" | "accepted" | "declined";
+    status?: "sent" | "accepted" | "declined" | "in_production" | "completed";
     sentAt?: string;
     respondedAt?: string;
   };
+  assignee?: string;
   createdAt?: string;
   address?: { street?: string; city?: string; state?: string; pincode?: string };
 };

@@ -11,6 +11,7 @@ import {
   sendQuote,
   getPublicQuote,
   respondToQuote,
+  advanceQuoteStage,
 } from "../controllers/applicationController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { upload } from "../middleware/uploadMiddleware.js";
@@ -41,5 +42,6 @@ router.patch("/:id/approve", adminAuth, asyncHandler(approveApplication));
 router.patch("/:id/reject", adminAuth, asyncHandler(rejectApplication));
 router.patch("/:id/review", adminAuth, asyncHandler(updateApplicationReview));
 router.patch("/:id/quote", adminAuth, asyncHandler(sendQuote));
+router.patch("/:id/quote/stage", adminAuth, asyncHandler(advanceQuoteStage));
 
 export default router;

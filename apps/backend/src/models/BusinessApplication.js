@@ -78,14 +78,21 @@ const businessApplicationSchema = new mongoose.Schema(
     checklist: { type: [String], default: [] },
 
     // Bulk-order quote sent by the admin; the applicant reviews it on a
-    // public quote page and accepts or declines.
+    // public quote page and accepts or declines. After acceptance the admin
+    // advances fulfilment: accepted -> in_production -> completed.
     quote: {
       amount: { type: Number, min: 0 },
       notes: { type: String, trim: true },
-      status: { type: String, enum: ["sent", "accepted", "declined"] },
+      status: {
+        type: String,
+        enum: ["sent", "accepted", "declined", "in_production", "completed"],
+      },
       sentAt: Date,
       respondedAt: Date,
     },
+
+    // Team member handling this request
+    assignee: { type: String, trim: true },
 
     status: {
       type: String,
