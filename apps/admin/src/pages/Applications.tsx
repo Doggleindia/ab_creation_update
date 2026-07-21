@@ -134,6 +134,16 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
       (tab === "all" || a.status === tab) &&
       (category === "all" || (a.categories ?? []).includes(category)),
   );
+
+  // Keep the featured card within the active tab/category
+  useEffect(() => {
+    setSelected((prev) =>
+      rows.length === 0 || rows.some((a) => a._id === prev?._id)
+        ? prev
+        : rows[0],
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, category, apps]);
   const others = rows.filter((a) => a._id !== selected?._id);
   const count = (s: string) =>
     s === "all" ? apps.length : apps.filter((a) => a.status === s).length;

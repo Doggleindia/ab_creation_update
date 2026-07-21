@@ -51,7 +51,13 @@ export default function Dashboard() {
       .then((j) => setApps(j.data?.applications ?? []))
       .catch(() => {});
     api<{ data: AdminProduct[] }>("/api/products/admin")
-      .then((j) => setProducts(Array.isArray(j.data) ? j.data : []))
+      .then((j) =>
+        setProducts(
+          (Array.isArray(j.data) ? j.data : []).filter(
+            (p) => !p.status || p.status === "published",
+          ),
+        ),
+      )
       .catch(() => {});
     api<{ data: { users: { accountType?: string }[] } }>(
       "/api/admin/users/all",
@@ -71,10 +77,10 @@ export default function Dashboard() {
     )
       .then((j) => setAwaiting((j.data?.sellerProducts ?? []).length))
       .catch(() => {});
-    api<{ data?: unknown[]; count?: number }>("/api/contacts")
+    api<{ data: { contacts: { status?: string }[] } }>("/api/contacts")
       .then((j) =>
         setContacts(
-          typeof j.count === "number" ? j.count : (j.data?.length ?? 0),
+          (j.data?.contacts ?? []).filter((c) => c.status === "new").length,
         ),
       )
       .catch(() => {});
@@ -96,7 +102,7 @@ export default function Dashboard() {
   const pct =
     lastRevenue > 0 ? Math.round(((revenue - lastRevenue) / lastRevenue) * 100) : null;
   const pendingProduction = orders.filter((o) =>
-    ["pending", "confirmed"].includes(o.orderStatus),
+    ["pending", "confirmed", "quality_check"].includes(o.orderStatus),
   ).length;
   const queue = orders
     .filter((o) => !["delivered", "cancelled"].includes(o.orderStatus))

@@ -47,11 +47,16 @@ const STATUS_DOT: Record<string, { label: string; color: string }> = {
   delivered: { label: "Delivered", color: "#16a34a" },
   cancelled: { label: "Cancelled", color: "#6b7280" },
   failed: { label: "Payment Failed", color: "#dc2626" },
+  refunded: { label: "Refunded", color: "#7c3aed" },
 };
 
 function StatusDot({ order }: { order: AdminOrder }) {
   const key =
-    order.paymentStatus === "failed" ? "failed" : order.orderStatus;
+    order.paymentStatus === "failed"
+      ? "failed"
+      : order.paymentStatus === "refunded"
+        ? "refunded"
+        : order.orderStatus;
   const s = STATUS_DOT[key] ?? STATUS_DOT.pending;
   return (
     <span
@@ -182,13 +187,15 @@ export default function Orders() {
         o.orderId,
         o.userId?.name ?? "",
         o.userId?.email ?? "",
-        (o.productId?.title ?? "Custom order").replace(/,/g, " "),
+        o.productId?.title ?? "Custom order",
         o.customDesign ? "Custom" : o.productType,
         o.quantity,
         o.totalAmount,
         o.orderStatus,
         o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 10) : "",
-      ].join(","),
+      ]
+        .map((v) => String(v).replace(/,/g, " "))
+        .join(","),
     );
     const blob = new Blob([[header.join(","), ...lines].join(String.fromCharCode(10))], {
       type: "text/csv",
@@ -434,7 +441,7 @@ export default function Orders() {
                       setSelected(o);
                       setError("");
                       const idx = STATUSES.indexOf(o.orderStatus);
-                      setNextStatus(STATUSES[Math.min(idx + 1, 3)]);
+                      setNextStatus(STATUSES[Math.min(idx + 1, 4)]);
                     }}
                     className="text-[13px] font-bold text-black hover:underline"
                   >

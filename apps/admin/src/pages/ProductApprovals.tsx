@@ -80,6 +80,16 @@ export default function ProductApprovals() {
 
   const count = (s: string) => subs.filter((x) => x.status === s).length;
   const rows = subs.filter((s) => s.status === tab);
+
+  // Keep the featured card within the active tab
+  useEffect(() => {
+    setSelected((prev) =>
+      rows.length === 0 || rows.some((s) => s._id === prev?._id)
+        ? prev
+        : rows[0],
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, subs]);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
