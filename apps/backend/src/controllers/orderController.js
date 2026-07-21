@@ -9,6 +9,8 @@ import Inventory from "../models/Inventory.js";
 import {
   deductFromUserWallet,
   creditToAdminWallet,
+  creditToUserWallet,
+  deductFromAdminWallet,
 } from "../services/walletService.js";
 import { toStr } from "../utils/sanitize.js";
 import { uploadFileToS3 } from "../config/s3Service.js";
@@ -671,7 +673,14 @@ export const updateAdminOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const orderStatus = toStr(req.body.orderStatus);
 
-    const allowed = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+    const allowed = [
+      "pending",
+      "confirmed",
+      "quality_check",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
     if (!allowed.includes(orderStatus)) {
       return res.status(400).json({
         success: false,
@@ -696,6 +705,80 @@ export const updateAdminOrderStatus = async (req, res) => {
     }
 
     res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * ADMIN — update shipping meta / internal note.
+ * PATCH /api/orders/admin/:orderId/meta  { carrier?, trackingNumber?, internalNote? }
+ */
+export const updateAdminOrderMeta = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
+    const order = await Order.findOne({ $or: idClauses });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+    if (typeof req.body.carrier === "string") order.carrier = toStr(req.body.carrier);
+    if (typeof req.body.trackingNumber === "string") {
+      order.trackingNumber = toStr(req.body.trackingNumber);
+    }
+    if (typeof req.body.internalNote === "string") {
+      order.internalNote = toStr(req.body.internalNote);
+    }
+    await order.save();
+    res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * ADMIN — refund a paid order to the buyer's wallet and cancel it.
+ * The user credit and admin debit happen in one transaction, mirroring
+ * checkout in reverse. Idempotent via the refunded paymentStatus.
+ * POST /api/orders/admin/:orderId/refund
+ */
+export const refundAdminOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
+    const order = await Order.findOne({ $or: idClauses });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+    if (order.paymentStatus !== "paid") {
+      return res.status(409).json({
+        success: false,
+        message: `Order payment status is '${order.paymentStatus}' — only paid orders can be refunded.`,
+      });
+    }
+
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await deductFromAdminWallet(order.totalAmount, `refund-admin-${order.orderId}`, session);
+        await creditToUserWallet(order.userId, order.totalAmount, `refund-user-${order.orderId}`, session);
+        order.paymentStatus = "refunded";
+        order.orderStatus = "cancelled";
+        await order.save({ session });
+      });
+    } finally {
+      session.endSession();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Refunded ₹${order.totalAmount} to the customer's wallet and cancelled the order.`,
+      data: order,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

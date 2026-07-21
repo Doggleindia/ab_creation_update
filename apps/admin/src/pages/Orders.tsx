@@ -7,6 +7,7 @@ import { api, inr, type AdminOrder } from "../lib/api";
 const STATUSES = [
   "pending",
   "confirmed",
+  "quality_check",
   "shipped",
   "delivered",
   "cancelled",
@@ -15,6 +16,7 @@ const STATUSES = [
 const LIFECYCLE: { key: (typeof STATUSES)[number]; label: string }[] = [
   { key: "pending", label: "Order Placed" },
   { key: "confirmed", label: "In Production" },
+  { key: "quality_check", label: "Quality Check" },
   { key: "shipped", label: "Dispatched" },
   { key: "delivered", label: "Delivered" },
 ];
@@ -23,6 +25,7 @@ const FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "All" },
   { key: "pending", label: "New" },
   { key: "confirmed", label: "In Production" },
+  { key: "quality_check", label: "Quality Check" },
   { key: "shipped", label: "Dispatched" },
   { key: "delivered", label: "Delivered" },
   { key: "cancelled", label: "Cancelled" },
@@ -39,6 +42,7 @@ const RANGES = [
 const STATUS_DOT: Record<string, { label: string; color: string }> = {
   pending: { label: "New", color: "#2563eb" },
   confirmed: { label: "In Production", color: "#ea580c" },
+  quality_check: { label: "Quality Check", color: "#f59e0b" },
   shipped: { label: "Dispatched", color: "#3b82f6" },
   delivered: { label: "Delivered", color: "#16a34a" },
   cancelled: { label: "Cancelled", color: "#6b7280" },
@@ -199,6 +203,104 @@ export default function Orders() {
   const lifecycleIdx = selected
     ? LIFECYCLE.findIndex((l) => l.key === selected.orderStatus)
     : -1;
+
+  // Shipping meta + internal note (drawer)
+  const [meta, setMeta] = useState({ carrier: "", trackingNumber: "", internalNote: "" });
+  const [savingMeta, setSavingMeta] = useState(false);
+  useEffect(() => {
+    if (!selected) return;
+    setMeta({
+      carrier: selected.carrier ?? "",
+      trackingNumber: selected.trackingNumber ?? "",
+      internalNote: selected.internalNote ?? "",
+    });
+  }, [selected?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function saveMeta() {
+    if (!selected) return;
+    setSavingMeta(true);
+    setError("");
+    try {
+      const j = await api<{ data: AdminOrder }>(
+        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/meta`,
+        { method: "PATCH", body: JSON.stringify(meta) },
+      );
+      setSelected(j.data);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSavingMeta(false);
+    }
+  }
+
+  async function cancelOrder() {
+    if (!selected) return;
+    if (!window.confirm(`Cancel order #${selected.orderId.slice(-8)}? The customer keeps their payment unless you also issue a refund.`)) return;
+    setUpdating(true);
+    try {
+      const j = await api<{ data: AdminOrder }>(
+        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/status`,
+        { method: "PATCH", body: JSON.stringify({ orderStatus: "cancelled" }) },
+      );
+      setSelected(j.data);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Cancel failed");
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function refundOrder() {
+    if (!selected) return;
+    if (!window.confirm(`Refund ${inr(selected.totalAmount)} to ${selected.userId?.name ?? "the customer"}'s wallet and cancel the order? This cannot be undone.`)) return;
+    setUpdating(true);
+    setError("");
+    try {
+      const j = await api<{ message: string; data: AdminOrder }>(
+        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/refund`,
+        { method: "POST", body: JSON.stringify({}) },
+      );
+      setSelected(j.data);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Refund failed");
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  function printOrder() {
+    if (!selected) return;
+    const w = window.open("", "_blank", "width=720,height=900");
+    if (!w) return;
+    const addr = [
+      selected.shippingAddress?.street,
+      selected.shippingAddress?.city,
+      selected.shippingAddress?.state,
+      selected.shippingAddress?.pincode,
+    ]
+      .filter(Boolean)
+      .join(", ");
+    w.document.write(`<html><head><title>Order ${selected.orderId}</title>
+      <style>body{font-family:system-ui;padding:32px;color:#111}h1{font-size:20px}table{border-collapse:collapse;margin-top:16px}td{padding:6px 16px 6px 0;font-size:14px}td:first-child{color:#666}</style>
+      </head><body>
+      <h1>AB Creation — Order #${selected.orderId}</h1>
+      <table>
+        <tr><td>Customer</td><td>${selected.userId?.name ?? "—"} (${selected.userId?.email ?? ""})</td></tr>
+        <tr><td>Phone</td><td>${selected.phoneNumber ?? "—"}</td></tr>
+        <tr><td>Product</td><td>${selected.productId?.title ?? "Custom order"}${selected.customDesign ? " — Custom Design" : ""}</td></tr>
+        <tr><td>Details</td><td>${selected.color ?? ""} · ${selected.size ?? ""} · Qty ${selected.quantity}</td></tr>
+        <tr><td>Amount</td><td>${inr(selected.totalAmount)} (${selected.paymentStatus})</td></tr>
+        <tr><td>Status</td><td>${selected.orderStatus}</td></tr>
+        <tr><td>Priority</td><td>${selected.shippingMethod ?? "standard"}</td></tr>
+        <tr><td>Ship to</td><td>${addr || "—"}</td></tr>
+        <tr><td>Carrier</td><td>${selected.carrier ?? "—"} ${selected.trackingNumber ? `· ${selected.trackingNumber}` : ""}</td></tr>
+      </table>
+      <script>window.print()</script></body></html>`);
+    w.document.close();
+  }
 
   return (
     <Shell
@@ -577,9 +679,11 @@ export default function Orders() {
                             ? "Order Placed"
                             : s === "confirmed"
                               ? "In Production"
-                              : s === "shipped"
-                                ? "Dispatched"
-                                : s.charAt(0).toUpperCase() + s.slice(1)}
+                              : s === "quality_check"
+                                ? "Quality Check"
+                                : s === "shipped"
+                                  ? "Dispatched"
+                                  : s.charAt(0).toUpperCase() + s.slice(1)}
                         </option>
                       ))}
                     </select>
@@ -595,6 +699,97 @@ export default function Orders() {
                     <p className="pt-3 text-[12.5px] text-[#ba1a1a]">{error}</p>
                   )}
                 </div>
+              </section>
+
+              {/* Shipping info + internal note */}
+              <section className="border-t border-[#f3f4f6] pt-6">
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+                  Shipping Info
+                </h3>
+                <div className="grid grid-cols-2 gap-3 pt-3">
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[11.5px] font-semibold text-[#374151]">
+                      Carrier
+                    </span>
+                    <input
+                      value={meta.carrier}
+                      onChange={(e) =>
+                        setMeta((m) => ({ ...m, carrier: e.target.value }))
+                      }
+                      placeholder="e.g. Delhivery, Bluedart"
+                      className="h-10 rounded-lg border border-[#e5e7eb] px-3 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[11.5px] font-semibold text-[#374151]">
+                      Tracking Number
+                    </span>
+                    <input
+                      value={meta.trackingNumber}
+                      onChange={(e) =>
+                        setMeta((m) => ({ ...m, trackingNumber: e.target.value }))
+                      }
+                      placeholder="e.g. 1234567890"
+                      className="h-10 rounded-lg border border-[#e5e7eb] px-3 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
+                    />
+                  </label>
+                </div>
+                <label className="mt-3 flex flex-col gap-1.5">
+                  <span className="text-[11.5px] font-semibold text-[#374151]">
+                    Internal Note
+                  </span>
+                  <textarea
+                    value={meta.internalNote}
+                    onChange={(e) =>
+                      setMeta((m) => ({ ...m, internalNote: e.target.value }))
+                    }
+                    rows={2}
+                    placeholder="Only visible to admins…"
+                    className="rounded-lg border border-[#e5e7eb] p-3 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
+                  />
+                </label>
+                <button
+                  onClick={() => void saveMeta()}
+                  disabled={savingMeta}
+                  className="mt-3 rounded-lg bg-black px-5 py-2 text-[13px] font-bold text-white hover:opacity-85 disabled:opacity-40"
+                >
+                  {savingMeta ? "Saving…" : "Save Shipping Info"}
+                </button>
+              </section>
+
+              {/* Actions footer */}
+              <section className="flex flex-wrap items-center justify-between gap-3 border-t border-[#f3f4f6] pt-6">
+                <button
+                  onClick={printOrder}
+                  className="rounded-full border border-black px-5 py-2.5 text-[13.5px] font-bold text-black hover:bg-[#f3f4f6]"
+                >
+                  🖨 Print Order
+                </button>
+                <span className="flex items-center gap-4">
+                  {selected.paymentStatus === "paid" && (
+                    <button
+                      onClick={() => void refundOrder()}
+                      disabled={updating}
+                      className="text-[13.5px] font-bold text-[#dc2626] hover:underline disabled:opacity-40"
+                    >
+                      Issue Refund
+                    </button>
+                  )}
+                  {selected.paymentStatus === "refunded" && (
+                    <span className="text-[13px] font-bold text-[#16a34a]">
+                      ✓ Refunded
+                    </span>
+                  )}
+                  {!["cancelled", "delivered"].includes(selected.orderStatus) && (
+                    <button
+                      onClick={() => void cancelOrder()}
+                      disabled={updating}
+                      className="text-[13.5px] font-bold text-[#dc2626] hover:underline disabled:opacity-40"
+                    >
+                      Cancel Order
+                    </button>
+                  )}
+                </span>
               </section>
             </div>
           </div>

@@ -8,6 +8,8 @@ import {
   getOrderById,
   uploadDesigns,
   updateAdminOrderStatus,
+  updateAdminOrderMeta,
+  refundAdminOrder,
 } from "../controllers/orderController.js";
 import { userAuth } from "../middleware/userAuth.js";
 import { adminAuth } from "../middleware/adminAuth.js";
@@ -26,5 +28,7 @@ router.get("/:orderId", userAuth, getOrderById);
 router.get("/admin/all", adminAuth, getAdminAllOrders);
 router.get("/admin/user/:userId", adminAuth, getAdminUserOrderHistory);
 router.patch("/admin/:orderId/status", adminAuth, updateAdminOrderStatus);
+router.patch("/admin/:orderId/meta", adminAuth, updateAdminOrderMeta);
+router.post("/admin/:orderId/refund", adminAuth, refundAdminOrder);
 
 export default router;

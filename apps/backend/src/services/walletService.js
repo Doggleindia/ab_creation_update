@@ -275,3 +275,44 @@ export const getUserWalletReports = async () => {
     throw error;
   }
 };
+
+
+/**
+ * Refund helpers — mirror the payment path in reverse, inside the caller's
+ * transaction session.
+ */
+export const creditToUserWallet = async (userId, amount, requestId, session) => {
+  let userWallet = await UserWallet.findOne({ userId }).session(session);
+  if (!userWallet) {
+    const [created] = await UserWallet.create([{ userId, balance: 0 }], session ? { session } : {});
+    userWallet = created;
+  }
+  userWallet.balance += amount;
+  await userWallet.save({ session });
+  const transaction = new WalletTransaction({
+    type: "refund",
+    amount,
+    userId,
+    status: "completed",
+    requestId,
+  });
+  await transaction.save({ session });
+  return userWallet.balance;
+};
+
+export const deductFromAdminWallet = async (amount, requestId, session) => {
+  const adminWallet = await AdminWallet.getGlobalWallet(session);
+  if (adminWallet.balance < amount) {
+    throw new Error("Admin wallet balance is insufficient for this refund");
+  }
+  adminWallet.balance -= amount;
+  await adminWallet.save({ session });
+  const transaction = new WalletTransaction({
+    type: "refund",
+    amount,
+    status: "completed",
+    requestId,
+  });
+  await transaction.save({ session });
+  return adminWallet.balance;
+};

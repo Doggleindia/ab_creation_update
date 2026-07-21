@@ -114,6 +114,7 @@ export function StatusChip({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     delivered: { label: "Delivered", cls: "bg-[#dcfce7] text-[#16a34a]" },
     confirmed: { label: "In Production", cls: "bg-[#fdecc8] text-[#b45309]" },
+    quality_check: { label: "Quality Check", cls: "bg-[#fef3c7] text-[#b45309]" },
     shipped: { label: "Shipped", cls: "bg-[#dbeafe] text-[#2563eb]" },
     pending: { label: "Placed", cls: "bg-[#f3f4f6] text-[#6b7280]" },
     cancelled: { label: "Cancelled", cls: "bg-[#fee2e2] text-[#ba1a1a]" },

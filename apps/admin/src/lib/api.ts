@@ -73,7 +73,7 @@ export const shortDate = (d?: string) =>
 export type AdminOrder = {
   _id: string;
   orderId: string;
-  orderStatus: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  orderStatus: "pending" | "confirmed" | "quality_check" | "shipped" | "delivered" | "cancelled";
   paymentStatus: string;
   totalAmount: number;
   quantity: number;
@@ -84,6 +84,9 @@ export type AdminOrder = {
   customDesign?: string;
   designFiles?: string[];
   phoneNumber?: string;
+  carrier?: string;
+  trackingNumber?: string;
+  internalNote?: string;
   createdAt?: string;
   shippingAddress?: {
     street?: string;

@@ -36,7 +36,7 @@ type StepState = "done" | "current" | "pending";
 // Backend order shape (GET /api/orders/:orderId), only the fields we render
 type ApiOrder = {
   orderId: string;
-  orderStatus: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  orderStatus: "pending" | "confirmed" | "quality_check" | "shipped" | "delivered" | "cancelled";
   paymentStatus: "pending" | "paid" | "failed";
   totalAmount: number;
   quantity: number;
@@ -44,6 +44,8 @@ type ApiOrder = {
   color?: string;
   createdAt?: string;
   phoneNumber?: string;
+  carrier?: string;
+  trackingNumber?: string;
   shippingAddress?: {
     street?: string;
     city?: string;
@@ -100,14 +102,18 @@ export default function TrackOrderPage() {
   const currentIdx =
     status === "pending" || status === "cancelled"
       ? 0
-      : status === "shipped"
-        ? 4
-        : status === "delivered"
-          ? 5
-          : 2; // confirmed → In Production
+      : status === "quality_check"
+        ? 3
+        : status === "shipped"
+          ? 4
+          : status === "delivered"
+            ? 5
+            : 2; // confirmed → In Production
   const badgeLabel =
     status === "pending"
       ? "Order Placed"
+      : status === "quality_check"
+        ? "Quality Check"
       : status === "shipped"
         ? "Dispatched"
         : status === "delivered"
@@ -184,6 +190,10 @@ export default function TrackOrderPage() {
       : "Paid via UPI";
   const displayImage =
     apiOrder?.variantId?.media?.images?.[0] || item?.image || null;
+  const displayTracking =
+    apiOrder?.carrier || apiOrder?.trackingNumber
+      ? [apiOrder?.carrier, apiOrder?.trackingNumber].filter(Boolean).join(" · ")
+      : null;
   const displayAddress = apiOrder?.shippingAddress
     ? [
         apiOrder.shippingAddress.street,
@@ -400,6 +410,16 @@ export default function TrackOrderPage() {
                   </div>
                 </div>
 
+                {displayTracking && (
+                  <div className="flex items-center justify-between rounded-[8px] border border-[#c4c7c7] p-4">
+                    <span className="text-[12px] font-semibold uppercase tracking-[0.6px] text-[#444748]">
+                      Courier
+                    </span>
+                    <span className="text-[14px] font-bold text-black">
+                      {displayTracking}
+                    </span>
+                  </div>
+                )}
                 <div className="flex flex-col gap-3 rounded-[8px] bg-[#eeeeee] p-4">
                   <h4 className="text-[12px] font-semibold uppercase leading-3 tracking-[0.6px] text-[#444748]">
                     Shipping Address
