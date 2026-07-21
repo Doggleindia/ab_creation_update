@@ -92,7 +92,7 @@ export type AdminOrder = {
     pincode?: string;
   };
   userId?: { name?: string; email?: string } | null;
-  productId?: { title?: string; name?: string; basePrice?: number } | null;
+  productId?: { _id?: string; title?: string; name?: string; basePrice?: number } | null;
   variantId?: { media?: { images?: string[] }; color?: string } | null;
 };
 

@@ -28,6 +28,40 @@ const FILTERS: { key: string; label: string }[] = [
   { key: "cancelled", label: "Cancelled" },
 ];
 
+const RANGES = [
+  { key: 7, label: "Last 7 days" },
+  { key: 30, label: "Last 30 days" },
+  { key: 90, label: "Last 90 days" },
+  { key: 0, label: "All time" },
+];
+
+// Mock-style status: colored dot + label. Payment failures win over status.
+const STATUS_DOT: Record<string, { label: string; color: string }> = {
+  pending: { label: "New", color: "#2563eb" },
+  confirmed: { label: "In Production", color: "#ea580c" },
+  shipped: { label: "Dispatched", color: "#3b82f6" },
+  delivered: { label: "Delivered", color: "#16a34a" },
+  cancelled: { label: "Cancelled", color: "#6b7280" },
+  failed: { label: "Payment Failed", color: "#dc2626" },
+};
+
+function StatusDot({ order }: { order: AdminOrder }) {
+  const key =
+    order.paymentStatus === "failed" ? "failed" : order.orderStatus;
+  const s = STATUS_DOT[key] ?? STATUS_DOT.pending;
+  return (
+    <span
+      className="flex items-center gap-2 text-[13px] font-semibold"
+      style={{ color: s.color }}
+    >
+      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: s.color }} />
+      {s.label}
+    </span>
+  );
+}
+
+const PAGE_SIZE = 10;
+
 function fullDate(d?: string) {
   return d
     ? new Date(d).toLocaleDateString("en-IN", {
@@ -52,6 +86,11 @@ export default function Orders() {
   const [nextStatus, setNextStatus] = useState<string>("confirmed");
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState("");
+  const [range, setRange] = useState(30);
+  const [page, setPage] = useState(1);
+  const [sellerProductIds, setSellerProductIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   function load() {
     api<{ data: AdminOrder[] }>("/api/orders/admin/all")
@@ -61,6 +100,25 @@ export default function Orders() {
   }
   useEffect(load, []);
 
+  // Orders for seller-published catalog products get the "Seller" type chip
+  useEffect(() => {
+    api<{
+      data: { sellerProducts: { publishedProductId?: { _id?: string } | string | null }[] };
+    }>("/api/seller-products/admin?status=approved")
+      .then((j) => {
+        const ids = new Set<string>();
+        for (const s of j.data?.sellerProducts ?? []) {
+          const p = s.publishedProductId;
+          const id = typeof p === "object" ? p?._id : p;
+          if (id) ids.add(String(id));
+        }
+        setSellerProductIds(ids);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => setPage(1), [filter, search, range]);
+
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: orders.length };
     for (const s of STATUSES) c[s] = orders.filter((o) => o.orderStatus === s).length;
@@ -69,6 +127,10 @@ export default function Orders() {
 
   const rows = orders.filter((o) => {
     if (filter !== "all" && o.orderStatus !== filter) return false;
+    if (range > 0 && o.createdAt) {
+      const age = (Date.now() - new Date(o.createdAt).getTime()) / 86400000;
+      if (age > range) return false;
+    }
     if (search) {
       const q = search.toLowerCase();
       return (
@@ -79,6 +141,17 @@ export default function Orders() {
     }
     return true;
   });
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const typeChip = (o: AdminOrder) =>
+    o.customDesign
+      ? { label: "Custom", cls: "bg-[#eef2ff] text-[#4f46e5]" }
+      : o.productType === "bulk"
+        ? { label: "Bulk", cls: "bg-[#dcfce7] text-[#16a34a]" }
+        : o.productId?._id && sellerProductIds.has(String(o.productId._id))
+          ? { label: "Seller", cls: "bg-[#f5f3ff] text-[#7c3aed]" }
+          : { label: "Catalog", cls: "bg-[#f3f4f6] text-[#374151]" };
 
   async function updateStatus() {
     if (!selected) return;
@@ -128,7 +201,31 @@ export default function Orders() {
     : -1;
 
   return (
-    <Shell title="All Orders" subtitle={`${orders.length} total`}>
+    <Shell
+      title="All Orders"
+      subtitle={`${orders.length} total`}
+      actions={
+        <>
+          <button
+            onClick={exportCsv}
+            className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-4 text-[13px] font-bold text-black hover:border-black"
+          >
+            ⬇ Export CSV
+          </button>
+          <select
+            value={range}
+            onChange={(e) => setRange(Number(e.target.value))}
+            className="h-10 rounded-lg border border-[#e5e7eb] bg-[#f8f9fb] px-3 text-[13px] font-semibold text-[#374151] focus:border-black focus:outline-none"
+          >
+            {RANGES.map((r) => (
+              <option key={r.key} value={r.key}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+        </>
+      }
+    >
       {/* Filter chips + search */}
       <div className="flex flex-wrap items-center gap-3">
         {FILTERS.map((f) => (
@@ -150,12 +247,6 @@ export default function Orders() {
           placeholder="Search by order ID, customer..."
           className="ml-auto h-10 w-[260px] rounded-lg border border-[#e5e7eb] bg-white px-4 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
         />
-        <button
-          onClick={exportCsv}
-          className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-4 text-[13px] font-bold text-black hover:border-black"
-        >
-          ⬇ Export CSV
-        </button>
       </div>
 
       {/* Table */}
@@ -188,7 +279,7 @@ export default function Orders() {
                 </td>
               </tr>
             )}
-            {rows.map((o) => (
+            {pageRows.map((o) => (
               <tr key={o._id} className="border-t border-[#f3f4f6] text-[13.5px]">
                 <td className="px-6 py-4 font-bold text-black">
                   #{o.orderId.slice(-8)}
@@ -212,17 +303,16 @@ export default function Orders() {
                   </span>
                 </td>
                 <td className="px-3 py-4">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                      o.customDesign
-                        ? "bg-[#eef2ff] text-[#4f46e5]"
-                        : o.productType === "bulk"
-                          ? "bg-[#dcfce7] text-[#16a34a]"
-                          : "bg-[#f5f3ff] text-[#7c3aed]"
-                    }`}
-                  >
-                    {o.customDesign ? "Custom" : o.productType === "bulk" ? "Bulk" : "Catalog"}
-                  </span>
+                  {(() => {
+                    const t = typeChip(o);
+                    return (
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${t.cls}`}
+                      >
+                        {t.label}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td className="px-3 py-4 text-[#374151]">
                   {inr(o.totalAmount)}
@@ -233,7 +323,7 @@ export default function Orders() {
                   )}
                 </td>
                 <td className="px-3 py-4">
-                  <StatusChip status={o.orderStatus} />
+                  <StatusDot order={o} />
                 </td>
                 <td className="px-3 py-4 text-[#6b7280]">{fullDate(o.createdAt)}</td>
                 <td className="px-6 py-4">
@@ -253,9 +343,59 @@ export default function Orders() {
             ))}
           </tbody>
         </table>
-        <p className="border-t border-[#f3f4f6] px-6 py-4 text-[12.5px] text-[#6b7280]">
-          Showing {rows.length} of {orders.length}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#f3f4f6] px-6 py-4">
+          <p className="text-[12.5px] text-[#6b7280]">
+            Showing {rows.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
+            {(page - 1) * PAGE_SIZE + pageRows.length} of {rows.length}
+          </p>
+          {pages > 1 && (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[14px] text-[#374151] hover:bg-[#f3f4f6] disabled:opacity-40"
+              >
+                ‹
+              </button>
+              {Array.from({ length: pages }, (_, i) => i + 1)
+                .filter(
+                  (n) => n <= 3 || n === pages || Math.abs(n - page) <= 1,
+                )
+                .reduce<(number | "…")[]>((acc, n) => {
+                  const prev = acc[acc.length - 1];
+                  if (typeof prev === "number" && n - prev > 1) acc.push("…");
+                  acc.push(n);
+                  return acc;
+                }, [])
+                .map((n, i) =>
+                  n === "…" ? (
+                    <span key={`e${i}`} className="px-1 text-[13px] text-[#9ca3af]">
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={n}
+                      onClick={() => setPage(n)}
+                      className={`h-8 w-8 rounded-full text-[13px] font-bold ${
+                        page === n
+                          ? "bg-black text-white"
+                          : "text-[#374151] hover:bg-[#f3f4f6]"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ),
+                )}
+              <button
+                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+                disabled={page === pages}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[14px] text-[#374151] hover:bg-[#f3f4f6] disabled:opacity-40"
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* Detail drawer */}
