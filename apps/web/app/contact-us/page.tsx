@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Phone, MapPin, Clock } from "lucide-react";
+import { ChevronRight, Phone, MapPin, Clock, Mail } from "lucide-react";
 import FeatureStrip from "@/components/common/FeatureStrip";
 import ContactForm from "@/components/contact/ContactForm";
+import { getSiteData } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Contact Us | AB Creation",
@@ -11,25 +12,33 @@ export const metadata: Metadata = {
     "Get in touch with AB Creation for custom apparel, bulk orders, and printing services.",
 };
 
-const INFO = [
-  {
-    icon: MapPin,
-    title: "Address",
-    lines: ["236 5th SE Avenue, New York", "NY10000, United States"],
-  },
-  {
-    icon: Phone,
-    title: "Phone",
-    lines: ["Mobile: +(84) 546-6789", "Hotline: +(84) 456-6789"],
-  },
-  {
-    icon: Clock,
-    title: "Working Time",
-    lines: ["Monday-Friday: 9:00 - 22:00", "Saturday-Sunday: 9:00 - 21:00"],
-  },
-];
+export default async function ContactPage() {
+  // Contact details come from admin Settings → Business Information;
+  // unset cards are hidden rather than showing placeholder data.
+  const { content, settings } = await getSiteData();
+  const business = settings.business ?? {};
+  const addressLines = [
+    business.address,
+    [business.cityState, business.pin].filter(Boolean).join(" — "),
+  ].filter((l): l is string => Boolean(l && l.trim()));
 
-export default function ContactPage() {
+  const INFO = [
+    addressLines.length > 0
+      ? { icon: MapPin, title: "Address", lines: addressLines }
+      : null,
+    business.phone
+      ? { icon: Phone, title: "Phone", lines: [business.phone] }
+      : null,
+    business.email
+      ? { icon: Mail, title: "Email", lines: [business.email] }
+      : null,
+    {
+      icon: Clock,
+      title: "Working Time",
+      lines: [content.announcement?.hours || "Mon–Sat, 9:00 AM – 5:30 PM"],
+    },
+  ].filter((c): c is NonNullable<typeof c> => c !== null);
+
   return (
     <main>
       {/* Hero banner */}

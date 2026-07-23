@@ -4,6 +4,7 @@ import "./globals.css";
 import TopBar from "@/components/layout/TopBar";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { getSiteData } from "@/lib/api";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,24 +19,49 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-export const metadata: Metadata = {
-  title: "AB Creation — Custom Apparel & Printing",
-  description:
-    "Premium custom apparel and printing. Shop ready-made printed tees or bring your own design.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { settings } = await getSiteData();
+  const name = settings.business?.businessName || "AB Creation";
+  return {
+    title: `${name} — Custom Apparel & Printing`,
+    description:
+      "Premium custom apparel and printing. Shop ready-made printed tees or bring your own design.",
+    ...(settings.branding?.faviconUrl
+      ? { icons: { icon: settings.branding.faviconUrl } }
+      : {}),
+  };
+}
 
-export default function RootLayout({
+// "#ff5c00" -> "255 92 0" for the rgb(var()/alpha) Tailwind token
+function hexToRgbChannels(hex: string): string | null {
+  const m = hex.trim().match(/^#?([0-9a-f]{6})$/i);
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { settings } = await getSiteData();
+  const brandRgb =
+    settings.branding?.primaryColor &&
+    settings.branding.primaryColor.toLowerCase() !== "#ff5c00"
+      ? hexToRgbChannels(settings.branding.primaryColor)
+      : null;
+
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${poppins.variable} font-inter antialiased`}
       >
+        {brandRgb && (
+          <style>{`:root{--brand-orange-rgb:${brandRgb};}`}</style>
+        )}
         <TopBar />
-        <Navbar />
+        <Navbar logoUrl={settings.branding?.logoUrl} />
         {children}
         <Footer />
       </body>

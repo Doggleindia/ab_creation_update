@@ -9,6 +9,7 @@ import {
   sendCredentialsEmail,
 } from "../utils/sendCredentials.js";
 import EmailTransporter from "../utils/EmailTransporter.js";
+import { notificationEnabled } from "./siteContentController.js";
 
 // Fields a public applicant is allowed to set. Everything else (status,
 // reviewedBy, linkedUserId, …) is server-controlled.
@@ -190,12 +191,18 @@ export const approveApplication = async (req, res, next) => {
 
   let emailSent = true;
   try {
-    await sendCredentialsEmail({
-      email: user.email,
-      name: user.name,
-      tempPassword,
-      accountType: user.accountType,
-    });
+    // Settings → Notifications toggle; when off, the temp password is
+    // returned in the response for manual sharing instead.
+    if (await notificationEnabled("applicationDecisions")) {
+      await sendCredentialsEmail({
+        email: user.email,
+        name: user.name,
+        tempPassword,
+        accountType: user.accountType,
+      });
+    } else {
+      emailSent = false;
+    }
   } catch (err) {
     emailSent = false;
     console.error("Failed to send credentials email:", err);
@@ -342,6 +349,7 @@ export const sendQuote = async (req, res, next) => {
   const quoteUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/bulk-order/quote/${application._id}`;
   let emailSent = true;
   try {
+    if (!(await notificationEnabled("quoteEmails"))) throw new Error("disabled");
     await EmailTransporter.sendEmail(
       application.email,
       "Your AB Creation bulk order quote is ready",

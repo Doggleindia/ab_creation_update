@@ -146,11 +146,41 @@ export type SiteContent = {
   announcement?: { visible?: boolean; text?: string; hours?: string };
 };
 
+export type SiteSettings = {
+  business?: {
+    businessName?: string;
+    legalName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    cityState?: string;
+    pin?: string;
+    country?: string;
+  };
+  branding?: { logoUrl?: string; faviconUrl?: string; primaryColor?: string };
+  social?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    linkedin?: string;
+  };
+};
+
+export async function getSiteData(): Promise<{
+  content: SiteContent;
+  settings: SiteSettings;
+}> {
+  const json = await apiGet<{
+    data: { content: SiteContent; settings: SiteSettings };
+  }>("/api/site-content");
+  return {
+    content: json?.data?.content ?? {},
+    settings: json?.data?.settings ?? {},
+  };
+}
+
 export async function getSiteContent(): Promise<SiteContent> {
-  const json = await apiGet<{ data: { content: SiteContent } }>(
-    "/api/site-content",
-  );
-  return json?.data?.content ?? {};
+  return (await getSiteData()).content;
 }
 
 // ---- Public API ----

@@ -40,7 +40,9 @@ module.exports = {    darkMode: ["class"],
   				black: '#171717',    // Rich Black — logo, typography, strong elements
   				text: '#374151',     // nav + body text
   				muted: '#6b7280',    // secondary/placeholder text
-  				orange: '#ff5c00',   // primary CTA (Design Now / Customize)
+  				// primary CTA — runtime-themable via Settings → Branding
+  				// (layout injects --brand-orange-rgb when a custom colour is set)
+  				orange: 'rgb(var(--brand-orange-rgb, 255 92 0) / <alpha-value>)',
   				rust: '#a04100',     // secondary button (footer Join)
   				footer: '#30302f',   // footer background
   				cream: '#F5F1EA',    // Luxury Cream — primary background

@@ -8,10 +8,13 @@ import { uploadFileToS3 } from "../config/s3Service.js";
 import { toStr } from "../utils/sanitize.js";
 import EmailTransporter from "../utils/EmailTransporter.js";
 import User from "../models/auth/userModel.js";
+import { notificationEnabled } from "./siteContentController.js";
 
 // Best-effort decision email — review outcomes never fail on SMTP issues.
+// Respects the admin Settings → Notifications toggle.
 const notifySeller = async (submission, subject, text) => {
   try {
+    if (!(await notificationEnabled("productDecisions"))) return;
     const seller = await User.findById(submission.sellerId);
     if (seller?.email) {
       await EmailTransporter.sendEmail(seller.email, subject, text);

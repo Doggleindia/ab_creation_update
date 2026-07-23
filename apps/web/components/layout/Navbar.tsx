@@ -121,7 +121,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ logoUrl }: { logoUrl?: string }) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -148,14 +148,23 @@ export default function Navbar() {
         {/* Left: logo + desktop links */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/ab-creation-logo.png"
-              alt="AB Creation logo"
-              width={44}
-              height={44}
-              priority
-              className="h-11 w-11 object-contain"
-            />
+            {logoUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- CMS logo lives on S3, host not in next.config images */
+              <img
+                src={logoUrl}
+                alt="AB Creation logo"
+                className="h-11 w-11 object-contain"
+              />
+            ) : (
+              <Image
+                src="/ab-creation-logo.png"
+                alt="AB Creation logo"
+                width={44}
+                height={44}
+                priority
+                className="h-11 w-11 object-contain"
+              />
+            )}
             <span className="text-[24px] font-bold tracking-[-1.2px] text-brand-ink">
               AB CREATION
             </span>

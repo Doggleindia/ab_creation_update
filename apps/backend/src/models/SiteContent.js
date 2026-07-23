@@ -11,6 +11,10 @@ const siteContentSchema = new mongoose.Schema(
     draft: { type: mongoose.Schema.Types.Mixed, default: {} },
     published: { type: mongoose.Schema.Types.Mixed, default: {} },
     publishedAt: { type: Date },
+    // Business settings (info, branding, socials, notifications, language) —
+    // saved directly, not draft-gated like homepage content.
+    settings: { type: mongoose.Schema.Types.Mixed, default: {} },
+    settingsSavedAt: { type: Date },
   },
   { timestamps: true },
 );
