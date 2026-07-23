@@ -149,6 +149,7 @@ export type Application = {
     status?: "sent" | "accepted" | "declined" | "in_production" | "completed";
     sentAt?: string;
     respondedAt?: string;
+    changeRequest?: { note?: string; at?: string };
   };
   assignee?: string;
   createdAt?: string;

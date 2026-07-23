@@ -89,6 +89,11 @@ const businessApplicationSchema = new mongoose.Schema(
       },
       sentAt: Date,
       respondedAt: Date,
+      // Buyer asked for revisions while the quote was open
+      changeRequest: {
+        note: { type: String, trim: true },
+        at: Date,
+      },
     },
 
     // Team member handling this request

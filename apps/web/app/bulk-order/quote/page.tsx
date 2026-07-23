@@ -72,7 +72,7 @@ const labelCls =
 const inputCls =
   "h-11 w-full rounded-[8px] border border-[#c4c7c7] bg-white px-4 text-[15px] text-black placeholder:text-[#9ca3af] focus:border-brand-orange focus:outline-none";
 
-type ArtworkFile = { name: string; preview: string | null };
+type ArtworkFile = { name: string; preview: string | null; file: File };
 
 function Stepper({ current }: { current: number }) {
   return (
@@ -116,6 +116,7 @@ export default function BulkQuotePage() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [requestId, setRequestId] = useState("");
+  const [trackId, setTrackId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -169,6 +170,7 @@ export default function BulkQuotePage() {
         preview: file.type.startsWith("image/")
           ? URL.createObjectURL(file)
           : null,
+        file,
       });
     }
     setFiles((f) => [...f, ...next].slice(0, 5));
@@ -193,6 +195,22 @@ export default function BulkQuotePage() {
     ].filter(Boolean);
 
     try {
+      // Upload the artwork files so the design assets reach our team, then
+      // attach the hosted URLs to the request.
+      let portfolioFiles: string[] = [];
+      if (files.length > 0) {
+        const fd = new FormData();
+        for (const f of files) fd.append("designs", f.file);
+        const up = await fetch(`${BACKEND}/api/applications/upload-portfolio`, {
+          method: "POST",
+          body: fd,
+        });
+        if (up.ok) {
+          const uj = await up.json().catch(() => ({}));
+          portfolioFiles = uj?.data?.urls ?? [];
+        }
+      }
+
       const res = await fetch(`${BACKEND}/api/applications/bulk`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -213,17 +231,17 @@ export default function BulkQuotePage() {
           productsToSell: `${totalQty}× ${garment.panel} (${color}) — ${sizesSummary}`,
           categories: [garment.label],
           message: messageParts.join(" | "),
+          portfolioFiles,
         }),
       });
+      const j = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
         throw new Error(j.message || "Could not submit the quote request.");
       }
-      const now = new Date();
-      const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-      setRequestId(
-        `BLK-${ymd}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`,
-      );
+      // The same BLK-#### the admin console shows for this request.
+      const id = String(j?.data?.application?.id ?? "");
+      setTrackId(id);
+      setRequestId(id ? `BLK-${id.slice(-4).toUpperCase()}` : "BLK-PENDING");
       setSubmitted(true);
       window.scrollTo({ top: 0 });
     } catch (err) {
@@ -326,15 +344,17 @@ export default function BulkQuotePage() {
           </section>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link
-              href="/"
-              className="rounded-[8px] bg-brand-orange px-8 py-3.5 text-[15px] font-bold text-white transition-opacity hover:opacity-90"
-            >
-              Back to Home
-            </Link>
+            {trackId && (
+              <Link
+                href={`/bulk-order/quote/${trackId}`}
+                className="rounded-full bg-brand-orange px-8 py-3.5 text-[15px] font-bold text-white transition-opacity hover:opacity-90"
+              >
+                Track Your Request
+              </Link>
+            )}
             <button
               onClick={reset}
-              className="rounded-[8px] border border-[#c4c7c7] bg-white px-8 py-3.5 text-[15px] font-bold text-black transition-colors hover:bg-[#f3f4f6]"
+              className="rounded-full border border-[#c4c7c7] bg-white px-8 py-3.5 text-[15px] font-bold text-black transition-colors hover:bg-[#f3f4f6]"
             >
               Submit Another Request
             </button>

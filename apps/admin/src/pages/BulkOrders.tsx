@@ -87,6 +87,7 @@ export default function BulkOrders() {
   const [assignee, setAssignee] = useState("");
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
+  const [revisingId, setRevisingId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     api<{ data: { applications: Application[] } }>("/api/applications?type=bulk")
@@ -438,9 +439,17 @@ export default function BulkOrders() {
 
             {/* Proposal / status rail */}
             <div className="h-fit rounded-2xl border border-[#e5e7eb] bg-white p-5">
-              {stage === "new" || stage === "declined" ? (
+              {a.quote?.changeRequest?.note && a.quote?.status === "sent" && (
+                <p className="mb-4 rounded-lg bg-[#fef9c3] px-3 py-2.5 text-[12.5px] leading-5 text-[#854d0e]">
+                  <b>Client requested changes:</b> “{a.quote.changeRequest.note}”
+                  — revise below and re-send.
+                </p>
+              )}
+              {stage === "new" || stage === "declined" || (stage === "sent" && revisingId === a._id) ? (
                 <>
-                  <h3 className="text-[16px] font-bold text-black">Create Proposal</h3>
+                  <h3 className="text-[16px] font-bold text-black">
+                    {stage === "sent" ? "Revise Proposal" : "Create Proposal"}
+                  </h3>
                   <div className="flex flex-col gap-2.5 pt-4">
                     {items.map((it, i) => (
                       <div key={i} className="grid grid-cols-[1fr_58px_74px_24px] items-center gap-2">
@@ -612,9 +621,17 @@ export default function BulkOrders() {
                     </p>
                   )}
                   {stage === "sent" && (
-                    <p className="pt-3 text-[12.5px] leading-5 text-[#6b7280]">
-                      Waiting for the client to accept or decline via their quote link.
-                    </p>
+                    <>
+                      <p className="pt-3 text-[12.5px] leading-5 text-[#6b7280]">
+                        Waiting for the client to accept or decline via their quote link.
+                      </p>
+                      <button
+                        onClick={() => setRevisingId(a._id)}
+                        className="mt-3 w-full rounded-xl border border-black py-2.5 text-[13px] font-bold text-black hover:bg-[#f3f4f6]"
+                      >
+                        Revise &amp; Re-send Proposal
+                      </button>
+                    </>
                   )}
                   {stage === "accepted" && (
                     <button

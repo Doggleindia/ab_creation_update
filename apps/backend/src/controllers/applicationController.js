@@ -269,11 +269,18 @@ export const rejectApplication = async (req, res, next) => {
  * Returns hosted URLs the intake form submits as portfolioFiles.
  */
 export const uploadPortfolio = async (req, res, next) => {
-  const files = (req.files || []).filter((f) =>
-    (f.mimetype || "").startsWith("image/"),
-  );
+  const files = (req.files || []).filter((f) => {
+    const mime = f.mimetype || "";
+    // Artwork can be raster images or vector files (.pdf, .ai, .eps)
+    return (
+      mime.startsWith("image/") ||
+      mime === "application/pdf" ||
+      mime === "application/postscript" ||
+      mime === "application/illustrator"
+    );
+  });
   if (!files.length) {
-    return next(new AppError("No image files uploaded", 400));
+    return next(new AppError("No image or vector files uploaded", 400));
   }
   const urls = [];
   for (const file of files.slice(0, 5)) {
@@ -373,21 +380,27 @@ export const sendQuote = async (req, res, next) => {
  */
 export const getPublicQuote = async (req, res, next) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
-    return next(new AppError("Quote not found", 404));
+    return next(new AppError("Request not found", 404));
   }
   const application = await BusinessApplication.findById(req.params.id).select(
-    "businessName contactName type expectedVolume quote createdAt",
+    "businessName contactName type expectedVolume productsToSell portfolioFiles quote status createdAt",
   );
-  if (!application || application.type !== "bulk" || !application.quote?.status) {
-    return next(new AppError("Quote not found", 404));
+  if (!application || application.type !== "bulk") {
+    return next(new AppError("Request not found", 404));
   }
+  // Also serves as the request tracker before a quote exists —
+  // quote is simply null until the team sends a proposal.
   res.status(200).json({
     status: "success",
     data: {
       businessName: application.businessName,
       contactName: application.contactName,
       expectedVolume: application.expectedVolume,
-      quote: application.quote,
+      productsToSell: application.productsToSell,
+      portfolioFiles: application.portfolioFiles ?? [],
+      applicationStatus: application.status,
+      submittedAt: application.createdAt,
+      quote: application.quote?.status ? application.quote : null,
     },
   });
 };
@@ -409,9 +422,29 @@ export const respondToQuote = async (req, res, next) => {
     );
   }
   const decision = toStr(req.body.decision);
-  if (!["accepted", "declined"].includes(decision)) {
-    return next(new AppError("Decision must be 'accepted' or 'declined'", 400));
+  if (!["accepted", "declined", "changes"].includes(decision)) {
+    return next(
+      new AppError("Decision must be 'accepted', 'declined' or 'changes'", 400),
+    );
   }
+
+  if (decision === "changes") {
+    const note = toStr(req.body.note);
+    if (!note) {
+      return next(new AppError("Tell us what you'd like changed", 400));
+    }
+    // Quote stays open ("sent") while the team revises the proposal.
+    application.quote.changeRequest = { note, at: new Date() };
+    application.markModified("quote");
+    await application.save();
+    return res.status(200).json({
+      status: "success",
+      message:
+        "Change request sent — our team will revise the proposal and email you an update.",
+      data: { quote: application.quote },
+    });
+  }
+
   application.quote.status = decision;
   application.quote.respondedAt = new Date();
   await application.save();
@@ -419,7 +452,7 @@ export const respondToQuote = async (req, res, next) => {
     status: "success",
     message:
       decision === "accepted"
-        ? "Quote accepted — our team will reach out to arrange payment and production."
+        ? "Quote accepted — our team will reach out to arrange the advance payment and start production."
         : "Quote declined — thanks for letting us know.",
     data: { quote: application.quote },
   });
