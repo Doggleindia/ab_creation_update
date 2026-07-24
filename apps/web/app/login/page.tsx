@@ -22,8 +22,16 @@ function LoginForm() {
     setError("");
     const fd = new FormData(e.currentTarget);
     try {
-      await login(String(fd.get("email")), String(fd.get("password")));
-      router.push(next);
+      const user = await login(String(fd.get("email")), String(fd.get("password")));
+      if (user.mustChangePassword) {
+        // Temporary credentials must be replaced before doing anything else
+        router.push(`/set-password?next=${encodeURIComponent(next)}`);
+      } else if (user.accountType === "seller" && next === "/") {
+        // Sellers land on their studio unless they were headed somewhere specific
+        router.push("/seller");
+      } else {
+        router.push(next);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
       setBusy(false);

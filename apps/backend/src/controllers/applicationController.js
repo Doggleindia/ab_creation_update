@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 import BusinessApplication from "../models/BusinessApplication.js";
 import User from "../models/auth/userModel.js";
 import AppError from "../utils/AppError.js";
@@ -51,7 +52,30 @@ const submitApplication = (type) => async (req, res, next) => {
     );
   }
 
-  const application = await BusinessApplication.create({ ...input, type });
+  // Seller registration extras: a chosen password (hashed immediately, the
+  // plaintext is never stored) and a masked payout destination.
+  const extra = {};
+  if (type === "seller") {
+    const password =
+      typeof req.body.password === "string" ? req.body.password : "";
+    if (password) {
+      if (password.length < 8) {
+        return next(new AppError("Password must be at least 8 characters", 400));
+      }
+      extra.passwordHash = await bcrypt.hash(password, 12);
+    }
+    const p = req.body.payout || {};
+    const acct = toStr(p.accountNumber).replace(/\D/g, "");
+    if (acct || p.ifsc || p.accountHolder) {
+      extra.payout = {
+        accountLast4: acct ? acct.slice(-4) : undefined,
+        ifsc: toStr(p.ifsc) || undefined,
+        accountHolder: toStr(p.accountHolder) || undefined,
+      };
+    }
+  }
+
+  const application = await BusinessApplication.create({ ...input, ...extra, type });
 
   res.status(201).json({
     status: "success",
@@ -140,7 +164,7 @@ export const approveApplication = async (req, res, next) => {
     return next(new AppError("Invalid application id", 400));
   }
 
-  const application = await BusinessApplication.findById(id);
+  const application = await BusinessApplication.findById(id).select("+passwordHash");
   if (!application) {
     return next(new AppError("Application not found", 404));
   }
@@ -163,14 +187,17 @@ export const approveApplication = async (req, res, next) => {
     );
   }
 
+  // If the applicant chose a password at registration, the account activates
+  // with it directly; otherwise fall back to an emailed temporary password.
+  const hasChosenPassword = Boolean(application.passwordHash);
   const tempPassword = generateTempPassword();
 
   const userData = {
     name: application.contactName,
     email: application.email,
-    password: tempPassword,
+    password: tempPassword, // replaced below when a password was chosen
     accountType: application.type, // "bulk" | "seller"
-    mustChangePassword: true,
+    mustChangePassword: !hasChosenPassword,
   };
 
   // phone is unique+sparse on User; only carry it over if it's free, otherwise
@@ -183,6 +210,15 @@ export const approveApplication = async (req, res, next) => {
 
   const user = await User.create(userData);
 
+  // Swap in the pre-hashed chosen password directly (updateOne skips the
+  // pre-save hook, so the hash is stored as-is — same bcrypt format).
+  if (hasChosenPassword) {
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { password: application.passwordHash, mustChangePassword: false } },
+    );
+  }
+
   application.status = "approved";
   application.reviewedBy = req.admin._id;
   application.reviewedAt = new Date();
@@ -194,25 +230,37 @@ export const approveApplication = async (req, res, next) => {
     // Settings → Notifications toggle; when off, the temp password is
     // returned in the response for manual sharing instead.
     if (await notificationEnabled("applicationDecisions")) {
-      await sendCredentialsEmail({
-        email: user.email,
-        name: user.name,
-        tempPassword,
-        accountType: user.accountType,
-      });
+      if (hasChosenPassword) {
+        await EmailTransporter.sendEmail(
+          user.email,
+          "Your AB Creation seller account is approved",
+          `Hello ${user.name},\n\nGood news — your seller application has been approved and your account is now active.\n\nLog in at ${process.env.FRONTEND_URL || "http://localhost:3000"}/login with your email and the password you chose during registration to open your Seller Studio.\n\nThanks,\nAB Creation Team\n`,
+        );
+      } else {
+        await sendCredentialsEmail({
+          email: user.email,
+          name: user.name,
+          tempPassword,
+          accountType: user.accountType,
+        });
+      }
     } else {
       emailSent = false;
     }
   } catch (err) {
     emailSent = false;
-    console.error("Failed to send credentials email:", err);
+    console.error("Failed to send approval email:", err);
   }
 
   res.status(200).json({
     status: "success",
-    message: emailSent
-      ? "Application approved and credentials emailed to the applicant."
-      : "Application approved, but the credentials email failed to send. Share the temporary password manually.",
+    message: hasChosenPassword
+      ? emailSent
+        ? "Application approved — the applicant can log in with the password they chose at registration."
+        : "Application approved. The notification email didn't go out, but the applicant can already log in with their chosen password."
+      : emailSent
+        ? "Application approved and credentials emailed to the applicant."
+        : "Application approved, but the credentials email failed to send. Share the temporary password manually.",
     data: {
       application: {
         id: application._id,
@@ -221,7 +269,7 @@ export const approveApplication = async (req, res, next) => {
       },
       emailSent,
       // Only exposed as a fallback when the automated email did not go out.
-      tempPassword: emailSent ? undefined : tempPassword,
+      tempPassword: hasChosenPassword || emailSent ? undefined : tempPassword,
     },
   });
 };

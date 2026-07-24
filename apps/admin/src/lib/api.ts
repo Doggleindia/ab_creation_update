@@ -152,6 +152,7 @@ export type Application = {
     changeRequest?: { note?: string; at?: string };
   };
   assignee?: string;
+  payout?: { accountLast4?: string; ifsc?: string; accountHolder?: string };
   createdAt?: string;
   address?: { street?: string; city?: string; state?: string; pincode?: string };
 };

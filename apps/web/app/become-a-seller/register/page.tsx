@@ -10,6 +10,8 @@ import {
   ChevronDown,
   ChevronRight,
   CloudUpload,
+  Eye,
+  EyeOff,
   HelpCircle,
   Plus,
   Truck,
@@ -121,6 +123,8 @@ export default function SellerRegistrationPage() {
     fullName: "",
     email: "",
     phone: "",
+    password: "",
+    confirmPassword: "",
     brandName: "",
     businessType: "",
     gstNumber: "",
@@ -129,8 +133,13 @@ export default function SellerRegistrationPage() {
     city: "",
     state: "",
     pincode: "",
+    accountNumber: "",
+    ifsc: "",
+    accountHolder: "",
     style: "",
   });
+  const [showPw, setShowPw] = useState(false);
+  const [showPw2, setShowPw2] = useState(false);
 
   function set(field: keyof typeof form) {
     return (
@@ -202,6 +211,12 @@ export default function SellerRegistrationPage() {
           portfolioFiles: portfolioFiles.length > 0 ? portfolioFiles : undefined,
           productsToSell: form.style || undefined,
           message: messageParts.join(" | "),
+          password: form.password,
+          payout: {
+            accountNumber: form.accountNumber,
+            ifsc: form.ifsc,
+            accountHolder: form.accountHolder,
+          },
         }),
       });
       if (!res.ok) {
@@ -230,10 +245,10 @@ export default function SellerRegistrationPage() {
           </h1>
           <p className="pt-2 text-[15px] leading-6 text-[#444748]">
             Thanks, {form.fullName.split(" ")[0] || "creator"}! Our curation
-            team reviews applications within 24–48 hours. You&apos;ll receive
-            your seller dashboard credentials at{" "}
+            team reviews applications within 24–48 hours. We&apos;ll email{" "}
             <span className="font-semibold text-black">{form.email}</span> once
-            approved.
+            you&apos;re approved — then log in with the password you just chose
+            to open your Seller Studio.
           </p>
           <div className="mt-8 flex gap-4">
             <Link
@@ -300,6 +315,15 @@ export default function SellerRegistrationPage() {
                   className="flex flex-col gap-5"
                   onSubmit={(e) => {
                     e.preventDefault();
+                    if (form.password.length < 8) {
+                      setError("Password must be at least 8 characters.");
+                      return;
+                    }
+                    if (form.password !== form.confirmPassword) {
+                      setError("Passwords do not match.");
+                      return;
+                    }
+                    setError("");
                     setStep(1);
                   }}
                 >
@@ -340,6 +364,61 @@ export default function SellerRegistrationPage() {
                       />
                     </div>
                   </label>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <label className="flex flex-col gap-2">
+                      <span className={labelCls}>Password</span>
+                      <div className="relative">
+                        <input
+                          required
+                          type={showPw ? "text" : "password"}
+                          minLength={8}
+                          value={form.password}
+                          onChange={set("password")}
+                          placeholder="Min. 8 characters"
+                          className={`${inputCls} pr-11`}
+                        />
+                        <button
+                          type="button"
+                          aria-label={showPw ? "Hide password" : "Show password"}
+                          onClick={() => setShowPw((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-black"
+                        >
+                          {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </label>
+                    <label className="flex flex-col gap-2">
+                      <span className={labelCls}>Confirm Password</span>
+                      <div className="relative">
+                        <input
+                          required
+                          type={showPw2 ? "text" : "password"}
+                          minLength={8}
+                          value={form.confirmPassword}
+                          onChange={set("confirmPassword")}
+                          placeholder="Repeat password"
+                          className={`${inputCls} pr-11`}
+                        />
+                        <button
+                          type="button"
+                          aria-label={showPw2 ? "Hide password" : "Show password"}
+                          onClick={() => setShowPw2((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-black"
+                        >
+                          {showPw2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </label>
+                  </div>
+                  <p className="text-[12.5px] leading-5 text-[#6b7280]">
+                    You&apos;ll use this password to log in to your Seller Studio
+                    once your application is approved.
+                  </p>
+                  {error && (
+                    <p className="rounded-[8px] bg-[#fef2f2] px-4 py-3 text-[13px] text-[#ba1a1a]">
+                      {error}
+                    </p>
+                  )}
                   <button
                     type="submit"
                     className="mt-2 rounded-full bg-brand-orange py-3.5 text-[16px] font-bold text-white transition-opacity hover:opacity-90"
@@ -480,10 +559,50 @@ export default function SellerRegistrationPage() {
                       />
                     </label>
                   </div>
-                  <p className="rounded-[8px] bg-[#f9fafb] px-4 py-3 text-[13px] text-[#6b7280]">
-                    Payout details (bank account &amp; IFSC) are collected
-                    securely after your application is approved.
-                  </p>
+                  <div className="pt-2">
+                    <p className="text-[12px] font-bold uppercase tracking-[0.8px] text-black">
+                      Payout Details
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2">
+                      <label className="flex flex-col gap-2">
+                        <span className={labelCls}>Bank Account Number</span>
+                        <input
+                          required
+                          inputMode="numeric"
+                          minLength={6}
+                          value={form.accountNumber}
+                          onChange={set("accountNumber")}
+                          placeholder="Enter account number"
+                          className={inputCls}
+                        />
+                      </label>
+                      <label className="flex flex-col gap-2">
+                        <span className={labelCls}>IFSC Code</span>
+                        <input
+                          required
+                          value={form.ifsc}
+                          onChange={set("ifsc")}
+                          placeholder="HDFC0001234"
+                          className={`${inputCls} uppercase`}
+                        />
+                      </label>
+                    </div>
+                    <label className="flex flex-col gap-2 pt-4">
+                      <span className={labelCls}>Account Holder Name</span>
+                      <input
+                        required
+                        value={form.accountHolder}
+                        onChange={set("accountHolder")}
+                        placeholder="As it appears on your passbook"
+                        className={inputCls}
+                      />
+                    </label>
+                    <p className="pt-3 text-[12px] leading-5 text-[#6b7280]">
+                      For your security we store only the last 4 digits of the
+                      account number — full details are re-verified before your
+                      first payout.
+                    </p>
+                  </div>
                   <div className="flex items-center justify-between pt-2">
                     <button
                       type="button"
@@ -739,7 +858,7 @@ export default function SellerRegistrationPage() {
                       ],
                       [
                         "Dashboard Access",
-                        "Once approved, you'll receive login credentials to your personalized seller dashboard.",
+                        "Once approved, log in with the password you chose to open your personalized Seller Studio.",
                       ],
                       [
                         "Start Selling",

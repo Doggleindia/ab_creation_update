@@ -394,6 +394,20 @@ export default function Applications({ type }: { type: "seller" | "bulk" }) {
                       </dd>
                     </div>
                   )}
+                  {selected.payout?.accountLast4 && (
+                    <div>
+                      <dt className="text-[10.5px] font-bold uppercase tracking-[0.6px] text-[#9ca3af]">
+                        Payout Account
+                      </dt>
+                      <dd className="pt-0.5 text-[#374151]">
+                        ****{selected.payout.accountLast4}
+                        {selected.payout.ifsc ? ` · ${selected.payout.ifsc}` : ""}
+                        {selected.payout.accountHolder
+                          ? ` · ${selected.payout.accountHolder}`
+                          : ""}
+                      </dd>
+                    </div>
+                  )}
                 </dl>
               </div>
 

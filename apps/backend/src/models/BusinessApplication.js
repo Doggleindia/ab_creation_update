@@ -72,6 +72,17 @@ const businessApplicationSchema = new mongoose.Schema(
       default: [],
     },
 
+    // Password chosen at registration (seller flow) — approval activates the
+    // account with it directly, no temporary password needed.
+    passwordHash: { type: String, select: false },
+
+    // Seller payout destination — only the last 4 digits are ever stored.
+    payout: {
+      accountLast4: { type: String, trim: true, maxlength: 4 },
+      ifsc: { type: String, trim: true, uppercase: true },
+      accountHolder: { type: String, trim: true },
+    },
+
     // Admin review aids
     priority: { type: Boolean, default: false },
     internalNotes: { type: String, trim: true },

@@ -181,6 +181,7 @@ export const resetPassword = async (req, res, next) => {
     user.password = newPassword;
     user.resetOtp = undefined;
     user.resetOtpExpires = undefined;
+    user.mustChangePassword = false;
     await user.save();
 
     res.status(200).json({
