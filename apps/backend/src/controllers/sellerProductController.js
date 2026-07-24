@@ -24,6 +24,23 @@ const notifySeller = async (submission, subject, text) => {
   }
 };
 
+// Placement payload from the wizard's Position & Preview step
+const sanitizePlacement = (p) => {
+  if (!p || typeof p !== "object") return undefined;
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : undefined);
+  const placement = {
+    zone: toStr(p.zone) || undefined,
+    xCm: num(p.xCm),
+    yCm: num(p.yCm),
+    widthCm: num(p.widthCm),
+    heightCm: num(p.heightCm),
+    rotationDeg: num(p.rotationDeg),
+  };
+  return Object.values(placement).some((v) => v !== undefined)
+    ? placement
+    : undefined;
+};
+
 const requireSeller = (req, next) => {
   if (req.user?.accountType !== "seller") {
     next(new AppError("Only seller accounts can submit products", 403));
@@ -72,6 +89,7 @@ export const createSellerProduct = async (req, res, next) => {
   }
 
   const submission = await SellerProduct.create({
+    placement: sanitizePlacement(req.body.placement),
     sellerId: req.user._id,
     title: toStr(title),
     description: toStr(description),
@@ -380,6 +398,8 @@ export const resubmitSellerProduct = async (req, res, next) => {
       )
       .slice(0, 5);
   }
+  const placement = sanitizePlacement(req.body.placement);
+  if (placement) submission.placement = placement;
   submission.status = "pending";
   submission.rejectionReason = undefined;
   await submission.save();

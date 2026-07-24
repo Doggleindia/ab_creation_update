@@ -36,6 +36,17 @@ const sellerProductSchema = new mongoose.Schema(
       index: true,
     },
 
+    // Artwork placement chosen in the wizard's Position & Preview step —
+    // used by production to reproduce the seller's intended layout.
+    placement: {
+      zone: { type: String, trim: true },
+      xCm: Number,
+      yCm: Number,
+      widthCm: Number,
+      heightCm: Number,
+      rotationDeg: Number,
+    },
+
     // Admin review aids
     adminNotes: { type: String, trim: true },
     checklist: { type: [String], default: [] },

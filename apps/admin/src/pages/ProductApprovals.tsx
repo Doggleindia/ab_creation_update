@@ -336,6 +336,22 @@ export default function ProductApprovals() {
               ))}
             </div>
 
+            {selected.placement?.zone && (
+              <p className="pt-3 text-[12.5px] text-[#374151]">
+                <b>Placement:</b> {selected.placement.zone}
+                {selected.placement.widthCm != null &&
+                selected.placement.heightCm != null
+                  ? ` · ${selected.placement.widthCm}×${selected.placement.heightCm}cm`
+                  : ""}
+                {selected.placement.xCm != null && selected.placement.yCm != null
+                  ? ` @ (${selected.placement.xCm}, ${selected.placement.yCm})cm`
+                  : ""}
+                {selected.placement.rotationDeg
+                  ? ` · ${selected.placement.rotationDeg}°`
+                  : ""}
+              </p>
+            )}
+
             <p className="pt-5 text-[11px] font-bold uppercase tracking-[1px] text-[#374151]">
               Admin Notes
             </p>

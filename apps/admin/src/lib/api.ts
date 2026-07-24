@@ -194,7 +194,17 @@ export type AdminProduct = {
   }[];
 };
 
+export type SellerPlacement = {
+  zone?: string;
+  xCm?: number;
+  yCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  rotationDeg?: number;
+};
+
 export type SellerProductSub = {
+  placement?: SellerPlacement;
   _id: string;
   title: string;
   description?: string;
