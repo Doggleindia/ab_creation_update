@@ -3,6 +3,7 @@ import {
   uploadSellerProductImages,
   createSellerProduct,
   getMySellerProducts,
+  deleteMySellerProduct,
   getAdminSellerProducts,
   reviewSellerProduct,
   approveSellerProduct,
@@ -27,6 +28,7 @@ router.post(
 router.post("/", userAuth, asyncHandler(createSellerProduct));
 router.get("/mine", userAuth, asyncHandler(getMySellerProducts));
 router.patch("/:id/resubmit", userAuth, asyncHandler(resubmitSellerProduct));
+router.delete("/:id", userAuth, asyncHandler(deleteMySellerProduct));
 
 // Admin approvals queue
 router.get("/admin", adminAuth, asyncHandler(getAdminSellerProducts));

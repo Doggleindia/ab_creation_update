@@ -32,7 +32,7 @@ export const updateBankAccount = async (req, res, next) => {
   try {
     const bankName = toStr(req.body.bankName);
     const accountHolder = toStr(req.body.accountHolder);
-    const accountNumber = toStr(req.body.accountNumber).replace(/\D/g, '');
+    const accountNumber = (toStr(req.body.accountNumber) || '').replace(/\D/g, '');
     if (!bankName || !accountHolder || accountNumber.length < 6) {
       return next(new AppError('Bank name, account holder and a valid account number are required', 400));
     }
@@ -152,5 +152,95 @@ export const getUsersReport = async (req, res, next) => {
     });
   } catch (error) {
     next(new AppError('Failed to get users report', 500));
+  }
+};
+
+// ---- User payout requests (review queue) ----
+import PayoutRequest from '../models/PayoutRequest.js';
+import UserWallet from '../models/UserWallet.js';
+
+/** GET /api/admin/wallet/payout-requests?status= */
+export const getPayoutRequests = async (req, res, next) => {
+  try {
+    const filter = {};
+    const status = toStr(req.query.status);
+    if (status) filter.status = status;
+    const requests = await PayoutRequest.find(filter)
+      .sort({ createdAt: -1 })
+      .populate('userId', 'name email accountType');
+    res.status(200).json({ status: 'success', data: { requests } });
+  } catch (error) {
+    next(new AppError('Failed to load payout requests', 500));
+  }
+};
+
+/**
+ * PATCH /api/admin/wallet/payout-requests/:id  { action: approve|reject, note }
+ * Approval debits the user's wallet transactionally and writes a withdrawal
+ * ledger entry; the actual bank transfer is done manually.
+ */
+export const resolvePayoutRequest = async (req, res, next) => {
+  const action = toStr(req.body.action);
+  if (!['approve', 'reject'].includes(action)) {
+    return next(new AppError("action must be 'approve' or 'reject'", 400));
+  }
+  const request = await PayoutRequest.findById(req.params.id).populate(
+    'userId',
+    'name email',
+  );
+  if (!request) return next(new AppError('Payout request not found', 404));
+  if (request.status !== 'pending') {
+    return next(new AppError(`Request already ${request.status}`, 409));
+  }
+
+  if (action === 'reject') {
+    request.status = 'rejected';
+    request.adminNote = toStr(req.body.note) || undefined;
+    request.resolvedAt = new Date();
+    request.resolvedBy = req.admin._id;
+    await request.save();
+    return res.status(200).json({
+      status: 'success',
+      message: 'Payout request rejected — the balance stays in the wallet.',
+      data: { request },
+    });
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const wallet = await UserWallet.findOne({ userId: request.userId._id }).session(session);
+      if (!wallet || wallet.balance < request.amount) {
+        throw new AppError('User wallet no longer covers this amount', 400);
+      }
+      wallet.balance -= request.amount;
+      await wallet.save({ session });
+      await WalletTransaction.create(
+        [
+          {
+            type: 'withdrawal',
+            amount: request.amount,
+            userId: request.userId._id,
+            status: 'completed',
+            requestId: `user-payout-${request._id}`,
+          },
+        ],
+        { session },
+      );
+      request.status = 'approved';
+      request.adminNote = toStr(req.body.note) || undefined;
+      request.resolvedAt = new Date();
+      request.resolvedBy = req.admin._id;
+      await request.save({ session });
+    });
+    res.status(200).json({
+      status: 'success',
+      message: `Approved — ₹${request.amount.toLocaleString('en-IN')} debited from ${request.userId.name}'s wallet. Transfer to ****${request.bank?.accountLast4 ?? '????'} manually.`,
+      data: { request },
+    });
+  } catch (error) {
+    next(error instanceof AppError ? error : new AppError('Failed to approve payout', 500));
+  } finally {
+    session.endSession();
   }
 };

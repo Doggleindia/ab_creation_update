@@ -108,3 +108,79 @@ export const getTransactions = async (req, res, next) => {
     next(new AppError('Failed to get transactions', 500));
   }
 };
+
+// ---- User payout requests (wallet → bank, admin-approved) ----
+import PayoutRequest from "../models/PayoutRequest.js";
+import BusinessApplication from "../models/BusinessApplication.js";
+import { toStr } from "../utils/sanitize.js";
+
+const MIN_PAYOUT = 500;
+
+/**
+ * POST /api/wallet/payout-request — ask to withdraw wallet balance to bank.
+ * One open request at a time; bank details fall back to the seller's
+ * application payout details when not supplied.
+ */
+export const createPayoutRequest = async (req, res, next) => {
+  try {
+    const amount = Math.round(Number(req.body.amount));
+    if (!Number.isFinite(amount) || amount < MIN_PAYOUT) {
+      return next(new AppError(`Minimum payout is ₹${MIN_PAYOUT}`, 400));
+    }
+    const balance = await getUserWalletBalance(req.user._id);
+    if (amount > balance) {
+      return next(new AppError(`Insufficient balance: ₹${balance} available`, 400));
+    }
+    const open = await PayoutRequest.exists({ userId: req.user._id, status: "pending" });
+    if (open) {
+      return next(new AppError("You already have a payout request awaiting review", 409));
+    }
+
+    // Bank snapshot: request body wins, else the seller application on file
+    const acct = (toStr(req.body.accountNumber) || "").replace(/\D/g, "");
+    let bank = acct
+      ? {
+          accountLast4: acct.slice(-4),
+          ifsc: toStr(req.body.ifsc) || undefined,
+          accountHolder: toStr(req.body.accountHolder) || undefined,
+        }
+      : null;
+    if (!bank) {
+      const application = await BusinessApplication.findOne({
+        linkedUserId: req.user._id,
+        "payout.accountLast4": { $exists: true, $ne: null },
+      }).select("payout");
+      if (application?.payout?.accountLast4) bank = application.payout;
+    }
+    if (!bank?.accountLast4) {
+      return next(
+        new AppError("Add your bank account details to request a payout", 400),
+      );
+    }
+
+    const request = await PayoutRequest.create({
+      userId: req.user._id,
+      amount,
+      bank,
+    });
+    res.status(201).json({
+      status: "success",
+      message: `Payout request for ₹${amount.toLocaleString("en-IN")} submitted — our team reviews requests within 1-2 business days.`,
+      data: { request },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** GET /api/wallet/payout-requests — the caller's own request history. */
+export const getMyPayoutRequests = async (req, res, next) => {
+  try {
+    const requests = await PayoutRequest.find({ userId: req.user._id }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json({ status: "success", data: { requests } });
+  } catch (err) {
+    next(err);
+  }
+};

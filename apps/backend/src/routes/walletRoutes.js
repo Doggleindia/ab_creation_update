@@ -4,6 +4,8 @@ import {
   createRecharge,
   verifyRecharge,
   getTransactions,
+  createPayoutRequest,
+  getMyPayoutRequests,
 } from '../controllers/walletController.js';
 import { userAuth } from '../middleware/userAuth.js';
 
@@ -23,5 +25,9 @@ router.post('/recharge/verify', verifyRecharge);
 
 // GET /api/wallet/transactions
 router.get('/transactions', getTransactions);
+
+// Wallet → bank payout requests (admin approved)
+router.post('/payout-request', createPayoutRequest);
+router.get('/payout-requests', getMyPayoutRequests);
 
 export default router;

@@ -35,6 +35,15 @@ type PayoutSummary = {
   upcoming: PayoutGroup[];
   products: { productId: string; sellerId: string; name: string; marginPerUnit: number }[];
 };
+
+type UserPayoutRequest = {
+  _id: string;
+  amount: number;
+  status: "pending" | "approved" | "rejected";
+  createdAt?: string;
+  bank?: { accountLast4?: string; ifsc?: string; accountHolder?: string };
+  userId?: { name?: string; email?: string; accountType?: string } | null;
+};
 type Flash = { kind: "ok" | "err"; text: string } | null;
 
 // Platform-ledger view; rows that don't touch the platform wallet are dropped.
@@ -78,7 +87,9 @@ function toLedger(t: WalletTxn, bank: BankAccount | null): LedgerRow | null {
       description: "Seller margin settlement",
     };
   }
-  if (t.type === "withdrawal") {
+  // User payout withdrawals carry a userId and debit the USER's wallet,
+  // not the platform wallet — they don't belong in this ledger.
+  if (t.type === "withdrawal" && !t.userId) {
     return {
       txn: t,
       kind: "withdrawal",
@@ -132,6 +143,8 @@ export default function Financials() {
   const [flash, setFlash] = useState<Flash>(null);
   const [editingBank, setEditingBank] = useState(false);
   const [bankForm, setBankForm] = useState({ bankName: "", accountHolder: "", accountNumber: "" });
+  const [userRequests, setUserRequests] = useState<UserPayoutRequest[]>([]);
+  const [busyRequestId, setBusyRequestId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     api<{ data: { balance: number } }>("/api/admin/wallet/balance")
@@ -145,6 +158,11 @@ export default function Financials() {
       .catch(() => {});
     api<{ data: PayoutSummary }>("/api/orders/admin/payouts/summary")
       .then((j) => setSummary(j.data))
+      .catch(() => {});
+    api<{ data: { requests: UserPayoutRequest[] } }>(
+      "/api/admin/wallet/payout-requests",
+    )
+      .then((j) => setUserRequests(j.data?.requests ?? []))
       .catch(() => {});
     api<{ data: { bankAccount: BankAccount | null; minWithdrawal?: number } }>(
       "/api/admin/wallet/bank",
@@ -310,6 +328,35 @@ export default function Financials() {
     } finally {
       setBusy(false);
       setBusySeller(null);
+    }
+  }
+
+  async function resolveRequest(r: UserPayoutRequest, action: "approve" | "reject") {
+    const note =
+      action === "reject"
+        ? window.prompt("Reason for rejecting (shown to the user)?", "") ?? undefined
+        : undefined;
+    if (action === "reject" && note === undefined) return;
+    if (
+      action === "approve" &&
+      !window.confirm(
+        `Approve ₹${r.amount.toLocaleString("en-IN")} payout to ${r.userId?.name ?? "user"} (****${r.bank?.accountLast4 ?? "????"})? Their wallet is debited now; make the bank transfer manually.`,
+      )
+    )
+      return;
+    setBusyRequestId(r._id);
+    setFlash(null);
+    try {
+      const j = await api<{ message: string }>(
+        `/api/admin/wallet/payout-requests/${r._id}`,
+        { method: "PATCH", body: JSON.stringify({ action, note }) },
+      );
+      setFlash({ kind: "ok", text: j.message });
+      load();
+    } catch (err) {
+      setFlash({ kind: "err", text: err instanceof Error ? err.message : "Could not update request" });
+    } finally {
+      setBusyRequestId(null);
     }
   }
 
@@ -645,7 +692,73 @@ export default function Financials() {
           </div>
         </Card>
 
-        {/* Refunds & returns */}
+        {/* Refunds & returns + user payout requests */}
+        <div className="flex h-fit flex-col gap-6">
+        <Card className="p-6">
+          <h2 className="text-[16px] font-bold text-black">
+            Wallet Payout Requests
+            {userRequests.filter((r) => r.status === "pending").length > 0 && (
+              <span className="ml-2 rounded-full bg-[#fdf3dd] px-2.5 py-0.5 text-[11.5px] font-bold text-[#b45309]">
+                {userRequests.filter((r) => r.status === "pending").length} pending
+              </span>
+            )}
+          </h2>
+          <div className="flex flex-col gap-3 pt-4">
+            {userRequests.length === 0 && (
+              <p className="rounded-lg border border-[#f3f4f6] p-5 text-center text-[12.5px] text-[#9ca3af]">
+                No withdrawal requests from users yet.
+              </p>
+            )}
+            {userRequests.slice(0, 6).map((r) => (
+              <div key={r._id} className="rounded-xl border border-[#f3f4f6] p-4">
+                <div className="flex items-center justify-between">
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13.5px] font-bold text-black">
+                      {r.userId?.name ?? "User"}
+                      {r.userId?.accountType === "seller" && (
+                        <span className="pl-1.5 text-[10.5px] font-bold uppercase text-[#7c3aed]">
+                          Seller
+                        </span>
+                      )}
+                    </span>
+                    <span className="block truncate text-[11.5px] text-[#9ca3af]">
+                      ****{r.bank?.accountLast4 ?? "????"}
+                      {r.bank?.ifsc ? ` · ${r.bank.ifsc}` : ""} · {dt(r.createdAt)}
+                    </span>
+                  </span>
+                  <span className="text-[15px] font-bold text-black">{inr(r.amount)}</span>
+                </div>
+                {r.status === "pending" ? (
+                  <div className="flex gap-2 pt-3">
+                    <button
+                      onClick={() => void resolveRequest(r, "approve")}
+                      disabled={busyRequestId === r._id}
+                      className="flex-1 rounded-lg bg-[#22c55e] py-1.5 text-[12px] font-bold text-white hover:opacity-90 disabled:opacity-40"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => void resolveRequest(r, "reject")}
+                      disabled={busyRequestId === r._id}
+                      className="flex-1 rounded-lg border border-[#fca5a5] py-1.5 text-[12px] font-bold text-[#dc2626] hover:bg-[#fef2f2] disabled:opacity-40"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                ) : (
+                  <p
+                    className={`pt-2 text-[11.5px] font-bold uppercase tracking-[0.5px] ${
+                      r.status === "approved" ? "text-[#16a34a]" : "text-[#ba1a1a]"
+                    }`}
+                  >
+                    {r.status}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+
         <Card className="h-fit p-6">
           <h2 className="text-[16px] font-bold text-black">Refunds &amp; Returns</h2>
           <div className="grid grid-cols-3 divide-x divide-[#f3f4f6] pt-5 text-center">
@@ -704,6 +817,7 @@ export default function Financials() {
             ))}
           </div>
         </Card>
+        </div>
       </div>
 
       {/* Transaction log */}

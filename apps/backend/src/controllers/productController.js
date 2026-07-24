@@ -602,6 +602,9 @@ export const getSingleProduct = async(req, res, next) => {
 
         if (!product) return next(new AppError("Product not found", 404));
 
+        // Count the view — fire-and-forget, never blocks the response
+        Product.updateOne({ _id: product._id }, { $inc: { views: 1 } }).catch(() => {});
+
         // Seller attribution for marketplace products published from a
         // seller submission (null for AB Creation's own catalog).
         const sellerSub = await SellerProduct.findOne({

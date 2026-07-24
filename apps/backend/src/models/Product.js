@@ -107,6 +107,12 @@ const productSchema = new mongoose.Schema({
         default: "draft",
     },
 
+    // Storefront PDP view counter (incremented on public product fetch)
+    views: {
+        type: Number,
+        default: 0,
+    },
+
     // ✅ PRODUCT DETAILS
     productDetails: [{
         type: String,

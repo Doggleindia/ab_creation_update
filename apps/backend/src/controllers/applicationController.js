@@ -65,7 +65,7 @@ const submitApplication = (type) => async (req, res, next) => {
       extra.passwordHash = await bcrypt.hash(password, 12);
     }
     const p = req.body.payout || {};
-    const acct = toStr(p.accountNumber).replace(/\D/g, "");
+    const acct = (toStr(p.accountNumber) || "").replace(/\D/g, "");
     if (acct || p.ifsc || p.accountHolder) {
       extra.payout = {
         accountLast4: acct ? acct.slice(-4) : undefined,

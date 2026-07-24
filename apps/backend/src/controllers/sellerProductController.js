@@ -105,10 +105,31 @@ export const createSellerProduct = async (req, res, next) => {
 /** SELLER — own submissions. */
 export const getMySellerProducts = async (req, res, next) => {
   if (!requireSeller(req, next)) return;
-  const products = await SellerProduct.find({ sellerId: req.user._id }).sort({
-    createdAt: -1,
-  });
+  const products = await SellerProduct.find({ sellerId: req.user._id })
+    .sort({ createdAt: -1 })
+    .populate("baseProductId", "title basePrice")
+    .populate("publishedProductId", "slug views status");
   res.status(200).json({ status: "success", data: { sellerProducts: products } });
+};
+
+/** SELLER — delete an own submission that isn't live on the storefront. */
+export const deleteMySellerProduct = async (req, res, next) => {
+  if (!requireSeller(req, next)) return;
+  const submission = await findSubmission(req.params.id, next);
+  if (!submission) return;
+  if (String(submission.sellerId) !== String(req.user._id)) {
+    return next(new AppError("Not your submission", 403));
+  }
+  if (submission.status === "approved") {
+    return next(
+      new AppError(
+        "This design is live on the storefront — contact support to take it down.",
+        409,
+      ),
+    );
+  }
+  await SellerProduct.deleteOne({ _id: submission._id });
+  res.status(200).json({ status: "success", message: "Submission deleted." });
 };
 
 /** ADMIN — approvals queue. */

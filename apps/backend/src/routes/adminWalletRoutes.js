@@ -6,6 +6,8 @@ import {
   getBankAccount,
   updateBankAccount,
   requestWithdrawal,
+  getPayoutRequests,
+  resolvePayoutRequest,
 } from '../controllers/adminWalletController.js';
 import { adminAuth } from '../middleware/adminAuth.js';
 
@@ -27,5 +29,7 @@ router.get('/users-report', getUsersReport);
 router.get('/bank', getBankAccount);
 router.patch('/bank', updateBankAccount);
 router.post('/withdraw', requestWithdrawal);
+router.get('/payout-requests', getPayoutRequests);
+router.patch('/payout-requests/:id', resolvePayoutRequest);
 
 export default router;
