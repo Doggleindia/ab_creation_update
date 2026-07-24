@@ -35,8 +35,9 @@ export const getSellerOrders = async (req, res, next) => {
     const orders = await Order.find({ productId: { $in: ids } })
       .sort({ createdAt: -1 })
       .populate("productId", "title slug")
+      // productModel must be selected — productId populates via refPath on it
       .select(
-        "orderId quantity totalAmount orderStatus paymentStatus createdAt productId size color",
+        "orderId quantity totalAmount orderStatus paymentStatus createdAt productId productModel size color",
       );
     res.status(200).json({
       status: "success",
