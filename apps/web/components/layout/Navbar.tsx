@@ -147,27 +147,24 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
       <nav className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-4 sm:px-8">
         {/* Left: logo + desktop links */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" aria-label="AB Creation — home" className="flex items-center">
             {logoUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element -- CMS logo lives on S3, host not in next.config images */
               <img
                 src={logoUrl}
                 alt="AB Creation logo"
-                className="h-11 w-11 object-contain"
+                className="h-16 w-auto max-w-[220px] object-contain"
               />
             ) : (
               <Image
                 src="/ab-creation-logo.png"
                 alt="AB Creation logo"
-                width={44}
-                height={44}
+                width={160}
+                height={64}
                 priority
-                className="h-11 w-11 object-contain"
+                className="h-16 w-auto object-contain"
               />
             )}
-            <span className="text-[24px] font-bold tracking-[-1.2px] text-brand-ink">
-              AB CREATION
-            </span>
           </Link>
 
           <ul className="hidden items-center gap-5 lg:flex">
