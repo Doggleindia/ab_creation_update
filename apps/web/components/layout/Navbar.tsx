@@ -45,9 +45,14 @@ function AccountMenu({ user }: { user: AuthUser }) {
       <button
         aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-ink text-[14px] font-bold text-white"
+        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-ink text-[14px] font-bold text-white"
       >
-        {initial}
+        {user.avatar ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- user avatar on S3 */
+          <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+        ) : (
+          initial
+        )}
       </button>
       {open && (
         <>
