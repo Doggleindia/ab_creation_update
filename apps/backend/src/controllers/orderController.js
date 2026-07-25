@@ -17,6 +17,7 @@ import WalletTransaction from "../models/WalletTransaction.js";
 import { toStr } from "../utils/sanitize.js";
 import { uploadFileToS3 } from "../config/s3Service.js";
 import SellerProduct from "../models/SellerProduct.js";
+import EmailTransporter from "../utils/EmailTransporter.js";
 
 /**
  * SELLER — orders placed against this seller's published catalog products.
@@ -781,9 +782,40 @@ export const updateAdminOrderStatus = async (req, res) => {
     }
 
     const populated = await Order.findById(order._id)
-      .populate("userId", "name email")
+      .populate("userId", "name email notificationPrefs")
       .populate("productId")
       .populate("variantId");
+
+    // Buyer order-update email on the milestones that matter, respecting the
+    // user's Order Updates notification preference. Best-effort — a mail
+    // failure never fails the status change.
+    if (["shipped", "delivered"].includes(orderStatus)) {
+      try {
+        const buyer = populated?.userId;
+        if (buyer?.email && buyer.notificationPrefs?.orderUpdates !== false) {
+          const site = process.env.FRONTEND_URL || "http://localhost:3000";
+          const subject =
+            orderStatus === "shipped"
+              ? `Your AB Creation order ${order.orderId} has shipped`
+              : `Your AB Creation order ${order.orderId} was delivered`;
+          const shippingLine =
+            orderStatus === "shipped" && (order.carrier || order.trackingNumber)
+              ? `\nCarrier: ${order.carrier || "-"}  Tracking: ${order.trackingNumber || "-"}`
+              : "";
+          await EmailTransporter.sendEmail(
+            buyer.email,
+            subject,
+            `Hi ${buyer.name || ""},\n\n${
+              orderStatus === "shipped"
+                ? "Good news — your order is on its way!"
+                : "Your order has been delivered. We hope you love it!"
+            }${shippingLine}\n\nTrack it any time: ${site}/track-order/${encodeURIComponent(order.orderId)}\n\nThe AB Creation Team`,
+          );
+        }
+      } catch (mailErr) {
+        console.error("buyer order-update email failed:", mailErr.message);
+      }
+    }
 
     res.status(200).json({
       success: true,

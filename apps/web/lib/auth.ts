@@ -16,6 +16,7 @@ export type AuthUser = {
   email: string;
   accountType?: string;
   mustChangePassword?: boolean;
+  avatar?: string | null;
 };
 
 type Session = { token: string; user: AuthUser };

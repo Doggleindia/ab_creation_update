@@ -18,8 +18,10 @@ import {
   deleteAddress,
   setDefaultAddress,
 } from '../../controllers/auth/addressController.js';
+import { uploadAvatar, deleteAccount } from '../../controllers/auth/userController.js';
 import { userAuth } from '../../middleware/userAuth.js';
-import { authLimiter, otpLimiter } from '../../middleware/rateLimiters.js';
+import { authLimiter, otpLimiter, uploadLimiter } from '../../middleware/rateLimiters.js';
+import { upload } from '../../middleware/uploadMiddleware.js';
 import asyncHandler from "../../utils/asyncHandler.js";
 
 const router = express.Router();
@@ -40,6 +42,14 @@ router.post("/logout", userAuth, asyncHandler(logoutUser));
 router.get("/profile", userAuth, asyncHandler(getUserProfile));
 router.put("/profile", userAuth, asyncHandler(updateUserProfile));
 router.post("/change-password", userAuth, asyncHandler(changePassword));
+router.post(
+  "/avatar",
+  uploadLimiter,
+  userAuth,
+  upload.single("avatar"),
+  asyncHandler(uploadAvatar),
+);
+router.delete("/account", authLimiter, userAuth, asyncHandler(deleteAccount));
 
 // Address book (labeled, one default; default mirrors to user.address)
 router.get("/addresses", userAuth, asyncHandler(listAddresses));

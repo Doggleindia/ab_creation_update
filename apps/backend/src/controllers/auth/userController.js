@@ -95,6 +95,7 @@ export const loginUser = async (req, res, next) => {
           email: user.email,
           accountType: user.accountType,
           mustChangePassword: user.mustChangePassword,
+          avatar: user.avatar || null,
         },
       },
     });
@@ -275,6 +276,15 @@ export const getUserProfile = async (req, res, next) => {
       phone: user.phone || null,
       accountType: user.accountType,
       mustChangePassword: user.mustChangePassword,
+      avatar: user.avatar || null,
+      gender: user.gender || "",
+      dateOfBirth: user.dateOfBirth || null,
+      notificationPrefs: {
+        orderUpdates: user.notificationPrefs?.orderUpdates ?? true,
+        promotionalEmails: user.notificationPrefs?.promotionalEmails ?? false,
+        designReminders: user.notificationPrefs?.designReminders ?? true,
+        smsUpdates: user.notificationPrefs?.smsUpdates ?? true,
+      },
       address: {
         street: user.address?.street || null,
         city: user.address?.city || null,
@@ -315,13 +325,37 @@ export const updateUserProfile = async (req, res, next) => {
 
     // Explicit allowlist — never trust the raw body. This blocks mass-assignment
     // of sensitive/internal fields (password, role, email, otp, etc.).
-    const { name, phone, address } = req.body;
+    const { name, phone, address, gender, dateOfBirth, notificationPrefs } = req.body;
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (phone !== undefined) updates.phone = phone;
     if (address !== undefined) {
       const { street, city, state, pincode, country } = address || {};
       updates.address = { street, city, state, pincode, country };
+    }
+    if (gender !== undefined) {
+      if (!["", "male", "female", "other"].includes(gender)) {
+        return next(new AppError("Invalid gender value", 400));
+      }
+      updates.gender = gender;
+    }
+    if (dateOfBirth !== undefined) {
+      if (dateOfBirth === "" || dateOfBirth === null) {
+        updates.dateOfBirth = null;
+      } else {
+        const dob = new Date(dateOfBirth);
+        if (Number.isNaN(dob.getTime()) || dob > new Date()) {
+          return next(new AppError("Date of birth must be a valid past date", 400));
+        }
+        updates.dateOfBirth = dob;
+      }
+    }
+    if (notificationPrefs !== undefined && typeof notificationPrefs === "object") {
+      for (const key of ["orderUpdates", "promotionalEmails", "designReminders", "smsUpdates"]) {
+        if (typeof notificationPrefs[key] === "boolean") {
+          updates[`notificationPrefs.${key}`] = notificationPrefs[key];
+        }
+      }
     }
 
     const user = await User.findByIdAndUpdate(userId, updates, {
@@ -341,6 +375,15 @@ export const updateUserProfile = async (req, res, next) => {
       phone: user.phone || null,
       accountType: user.accountType,
       mustChangePassword: user.mustChangePassword,
+      avatar: user.avatar || null,
+      gender: user.gender || "",
+      dateOfBirth: user.dateOfBirth || null,
+      notificationPrefs: {
+        orderUpdates: user.notificationPrefs?.orderUpdates ?? true,
+        promotionalEmails: user.notificationPrefs?.promotionalEmails ?? false,
+        designReminders: user.notificationPrefs?.designReminders ?? true,
+        smsUpdates: user.notificationPrefs?.smsUpdates ?? true,
+      },
       address: {
         street: user.address?.street || null,
         city: user.address?.city || null,
@@ -412,6 +455,84 @@ export const changePassword = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       message: "Password changed successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ======================
+ * AVATAR UPLOAD
+ * POST /api/users/avatar (multipart, field "avatar")
+ * ======================
+ */
+export const uploadAvatar = async (req, res, next) => {
+  try {
+    const file = req.file;
+    if (!file || !(file.mimetype || "").startsWith("image/")) {
+      return next(new AppError("Upload a profile image file", 400));
+    }
+    const { uploadFileToS3 } = await import("../../config/s3Service.js");
+    const result = await uploadFileToS3(file);
+    if (!result?.Location) {
+      return next(new AppError("Could not store the image — try again", 502));
+    }
+    await User.updateOne({ _id: req.user._id }, { $set: { avatar: result.Location } });
+    res.status(200).json({
+      status: "success",
+      message: "Profile photo updated.",
+      data: { avatar: result.Location },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ======================
+ * DELETE ACCOUNT (self-serve)
+ * DELETE /api/users/account — requires the current password.
+ * Orders and wallet transactions stay as business records; the login,
+ * profile and wallet are removed. Sellers and funded wallets are blocked.
+ * ======================
+ */
+export const deleteAccount = async (req, res, next) => {
+  try {
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+    if (!password) {
+      return next(new AppError("Enter your password to delete the account", 400));
+    }
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+    const ok = await user.correctPassword(password, user.password);
+    if (!ok) {
+      return next(new AppError("Password is incorrect", 401));
+    }
+    if (user.accountType === "seller") {
+      return next(
+        new AppError(
+          "Seller accounts can't self-delete — contact support so we can settle payouts and take down your products first.",
+          409,
+        ),
+      );
+    }
+    const wallet = await UserWallet.findOne({ userId: user._id }).select("balance");
+    if ((wallet?.balance ?? 0) > 0) {
+      return next(
+        new AppError(
+          `Your wallet still holds ₹${wallet.balance} — withdraw or spend it before deleting the account.`,
+          409,
+        ),
+      );
+    }
+    await UserWallet.deleteOne({ userId: user._id });
+    await User.deleteOne({ _id: user._id });
+    res.status(200).json({
+      status: "success",
+      message: "Your account has been deleted. Order records are retained for compliance.",
     });
   } catch (err) {
     next(err);

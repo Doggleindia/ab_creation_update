@@ -56,6 +56,29 @@ const userSchema = new mongoose.Schema(
       default: "active",
     },
 
+    avatar: {
+      type: String,
+      trim: true,
+    },
+
+    gender: {
+      type: String,
+      enum: ["", "male", "female", "other"],
+      default: "",
+    },
+
+    dateOfBirth: {
+      type: Date,
+    },
+
+    // Consent flags — every outbound channel must respect these.
+    notificationPrefs: {
+      orderUpdates: { type: Boolean, default: true },
+      promotionalEmails: { type: Boolean, default: false },
+      designReminders: { type: Boolean, default: true },
+      smsUpdates: { type: Boolean, default: true },
+    },
+
     // Default shipping address (mirror of the default entry in `addresses`,
     // kept in sync so checkout pre-fill keeps working unchanged)
     address: {

@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Heart,
   LayoutGrid,
+  LogOut,
   MapPin,
   Package,
   Palette,
@@ -15,7 +16,7 @@ import {
   Settings,
   Wallet,
 } from "lucide-react";
-import { type AuthUser, getToken, getUser, subscribeAuth } from "@/lib/auth";
+import { type AuthUser, getToken, getUser, logout, subscribeAuth } from "@/lib/auth";
 
 const NAV = [
   { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
@@ -71,9 +72,18 @@ export default function AccountShell({
         {/* Sidebar */}
         <aside className="hidden w-[260px] shrink-0 flex-col border-r border-[#e5e7eb] bg-white lg:flex">
           <div className="flex items-center gap-3 px-6 pt-8">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-ink text-[18px] font-bold text-white">
-              {initial}
-            </span>
+            {user?.avatar ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- user avatar on S3 */
+              <img
+                src={user.avatar}
+                alt=""
+                className="h-12 w-12 shrink-0 rounded-full border border-[#e5e7eb] object-cover"
+              />
+            ) : (
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-ink text-[18px] font-bold text-white">
+                {initial}
+              </span>
+            )}
             <span className="min-w-0">
               <span className="block truncate text-[15px] font-bold text-black">
                 {user?.name}
@@ -106,7 +116,17 @@ export default function AccountShell({
             })}
           </nav>
 
-          <div className="px-5 pb-8 pt-6">
+          <div className="px-5 pb-8 pt-2">
+            <button
+              onClick={() => {
+                if (window.confirm("Sign out of your account?")) {
+                  void logout().then(() => router.push("/"));
+                }
+              }}
+              className="mb-4 flex w-full items-center gap-3 rounded-[8px] px-4 py-2.5 text-[13.5px] font-bold text-[#444748] hover:bg-[#f9fafb] hover:text-black"
+            >
+              <LogOut className="h-4 w-4" /> Sign Out
+            </button>
             <Link
               href="/design-studio"
               className="block rounded-[8px] bg-black py-3.5 text-center text-[13px] font-bold tracking-[0.5px] text-white hover:opacity-85"
