@@ -171,7 +171,13 @@ export default function CheckoutPage() {
           size: i.size || undefined,
           quantity: i.quantity,
           customDesign: i.customDesign || undefined,
-          designFiles: i.artwork ? await uploadArtwork(i.artwork) : undefined,
+          // Reorders carry already-hosted files; fresh studio items upload now
+          designFiles:
+            i.designFiles?.length
+              ? i.designFiles
+              : i.artwork
+                ? await uploadArtwork(i.artwork)
+                : undefined,
         })),
       );
 

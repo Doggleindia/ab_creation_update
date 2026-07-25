@@ -12,7 +12,7 @@ const syncDefault = (user) => {
   const def = user.addresses.find((a) => a.isDefault);
   user.address = def
     ? {
-        street: def.street,
+        street: [def.street, def.line2].filter(Boolean).join(", "),
         city: def.city,
         state: def.state,
         pincode: def.pincode,
@@ -35,6 +35,7 @@ const sanitize = (body) => {
     name: toStr(body.name),
     phone,
     street: toStr(body.street),
+    line2: toStr(body.line2),
     city: toStr(body.city),
     state: toStr(body.state),
     pincode,
@@ -109,6 +110,9 @@ export const updateAddress = async (req, res) => {
   const user = await loadUser(req);
   const entry = findEntry(user, req.params.id);
   Object.assign(entry, sanitize(req.body));
+  if (req.body.isDefault === true) {
+    for (const a of user.addresses) a.isDefault = a._id.equals(entry._id);
+  }
   syncDefault(user);
   await user.save();
   res.status(200).json({

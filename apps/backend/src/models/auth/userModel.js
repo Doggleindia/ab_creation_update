@@ -89,6 +89,7 @@ const userSchema = new mongoose.Schema(
         name: { type: String, trim: true },
         phone: { type: String, trim: true },
         street: { type: String, trim: true, required: true },
+        line2: { type: String, trim: true },
         city: { type: String, trim: true, required: true },
         state: { type: String, trim: true },
         pincode: { type: String, trim: true, required: true },

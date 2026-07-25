@@ -20,6 +20,7 @@ export type CartItem = {
   size?: string;
   customDesign?: string; // serialized design-studio state for custom items
   artwork?: string; // data URL of the uploaded design (uploaded at checkout)
+  designFiles?: string[]; // already-hosted artwork URLs (reorders skip re-upload)
 };
 
 const KEY = "ab-cart";

@@ -169,7 +169,7 @@ export default function DashboardPage() {
                   <StatusChip status={o.orderStatus} />
                   <div className="flex items-center gap-2.5">
                     <Link
-                      href={`/track-order/${encodeURIComponent(o.orderId ?? o._id)}`}
+                      href={`/dashboard/orders?track=${encodeURIComponent(o.orderId ?? o._id)}`}
                       className={`rounded-[6px] border px-3.5 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.5px] ${
                         delivered
                           ? "border-[#e5e7eb] text-[#9ca3af] hover:text-[#6b7280]"
@@ -179,9 +179,7 @@ export default function DashboardPage() {
                       Track
                     </Link>
                     <Link
-                      href={
-                        o.productId?.slug ? `/product/${o.productId.slug}` : "/collection"
-                      }
+                      href={`/dashboard/orders?reorder=${encodeURIComponent(o.orderId ?? o._id)}`}
                       className="text-[11.5px] font-bold uppercase tracking-[0.5px] text-black underline underline-offset-4 hover:text-brand-orange"
                     >
                       Reorder
