@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Heart, X } from "lucide-react";
+import { Heart, X } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
 import {
   type WishlistItem,
@@ -25,18 +25,6 @@ export default function WishlistPage() {
 
   return (
     <AccountShell>
-      <nav className="flex items-center gap-2 pb-8 text-[13px]">
-        <Link href="/" className="text-[#6b7280] hover:text-brand-orange">
-          Home
-        </Link>
-        <ChevronRight className="h-3 w-3 text-[#9ca3af]" />
-        <Link href="/dashboard" className="text-[#6b7280] hover:text-brand-orange">
-          My Account
-        </Link>
-        <ChevronRight className="h-3 w-3 text-[#9ca3af]" />
-        <span className="font-semibold text-black">Wishlist</span>
-      </nav>
-
       <h1 className="pb-6 text-[28px] font-bold tracking-[-0.5px] text-black">
         Wishlist{mounted && items.length > 0 ? ` (${items.length})` : ""}
       </h1>

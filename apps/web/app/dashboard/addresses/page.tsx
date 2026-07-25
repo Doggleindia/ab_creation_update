@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
 import { apiFetch } from "@/lib/auth";
 
@@ -83,18 +83,6 @@ export default function AddressesPage() {
 
   return (
     <AccountShell>
-      <nav className="flex items-center gap-2 pb-8 text-[13px]">
-        <Link href="/" className="text-[#6b7280] hover:text-brand-orange">
-          Home
-        </Link>
-        <ChevronRight className="h-3 w-3 text-[#9ca3af]" />
-        <Link href="/dashboard" className="text-[#6b7280] hover:text-brand-orange">
-          My Account
-        </Link>
-        <ChevronRight className="h-3 w-3 text-[#9ca3af]" />
-        <span className="font-semibold text-black">Addresses</span>
-      </nav>
-
       <h1 className="pb-2 text-[28px] font-bold tracking-[-0.5px] text-black">
         Addresses
       </h1>
