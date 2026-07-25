@@ -21,7 +21,7 @@ const NAV = [
   { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
   { icon: Package, label: "My Orders", href: "/dashboard/orders" },
   { icon: Wallet, label: "Wallet", href: "/dashboard/wallet" },
-  { icon: Palette, label: "Saved Designs", href: "/design-studio" },
+  { icon: Palette, label: "Saved Designs", href: "/dashboard/designs" },
   { icon: Heart, label: "Wishlist", href: "/dashboard/wishlist" },
   { icon: MapPin, label: "Addresses", href: "/dashboard/addresses" },
   { icon: Settings, label: "Account Settings", href: "/dashboard/settings" },
@@ -30,6 +30,7 @@ const NAV = [
 const CRUMBS: Record<string, string> = {
   "/dashboard": "My account",
   "/dashboard/orders": "My Orders",
+  "/dashboard/designs": "Saved Designs",
   "/dashboard/wallet": "Wallet",
   "/dashboard/wishlist": "Wishlist",
   "/dashboard/addresses": "Addresses",

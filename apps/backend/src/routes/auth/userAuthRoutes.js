@@ -11,6 +11,13 @@ import {
   changePassword,
 } from '../../controllers/auth/userController.js';
 
+import {
+  listAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+} from '../../controllers/auth/addressController.js';
 import { userAuth } from '../../middleware/userAuth.js';
 import { authLimiter, otpLimiter } from '../../middleware/rateLimiters.js';
 import asyncHandler from "../../utils/asyncHandler.js";
@@ -33,5 +40,12 @@ router.post("/logout", userAuth, asyncHandler(logoutUser));
 router.get("/profile", userAuth, asyncHandler(getUserProfile));
 router.put("/profile", userAuth, asyncHandler(updateUserProfile));
 router.post("/change-password", userAuth, asyncHandler(changePassword));
+
+// Address book (labeled, one default; default mirrors to user.address)
+router.get("/addresses", userAuth, asyncHandler(listAddresses));
+router.post("/addresses", userAuth, asyncHandler(addAddress));
+router.put("/addresses/:id", userAuth, asyncHandler(updateAddress));
+router.delete("/addresses/:id", userAuth, asyncHandler(deleteAddress));
+router.patch("/addresses/:id/default", userAuth, asyncHandler(setDefaultAddress));
 
 export default router;

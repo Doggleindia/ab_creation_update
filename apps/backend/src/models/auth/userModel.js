@@ -56,6 +56,8 @@ const userSchema = new mongoose.Schema(
       default: "active",
     },
 
+    // Default shipping address (mirror of the default entry in `addresses`,
+    // kept in sync so checkout pre-fill keeps working unchanged)
     address: {
       street: {
         type: String,
@@ -79,6 +81,21 @@ const userSchema = new mongoose.Schema(
         default: "India",
       },
     },
+
+    // Labeled address book (Home / Office / …). Exactly one entry is default.
+    addresses: [
+      {
+        label: { type: String, trim: true, default: "Home" },
+        name: { type: String, trim: true },
+        phone: { type: String, trim: true },
+        street: { type: String, trim: true, required: true },
+        city: { type: String, trim: true, required: true },
+        state: { type: String, trim: true },
+        pincode: { type: String, trim: true, required: true },
+        country: { type: String, trim: true, default: "India" },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
 
     resetOtp: {
       type: String,

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getDesign, upsertDesign } from "@/lib/designs";
 import {
   Upload,
   Type,
@@ -128,20 +129,34 @@ function DesignStudio() {
   const areaRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
-  // Restore a previously saved draft so Save Draft actually persists
+  // Restore a draft: ?draft=<id> loads that saved design, otherwise the
+  // legacy "current" draft. draftId keeps saves updating the same entry.
+  const draftId = useRef<string | null>(null);
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("ab:design");
-      if (!raw) return;
-      const d = JSON.parse(raw);
-      if (d.image) setImage(d.image);
+      const wanted = searchParams.get("draft");
+      let d: Record<string, unknown> | null = null;
+      if (wanted) {
+        const saved = getDesign(wanted);
+        if (saved) {
+          draftId.current = saved.id;
+          d = saved.state as Record<string, unknown>;
+        }
+      }
+      if (!d) {
+        const raw = localStorage.getItem("ab:design");
+        if (!raw) return;
+        d = JSON.parse(raw);
+      }
+      if (!d) return;
+      if (d.image) setImage(d.image as string);
       if (d.colorName) {
         const c = SHIRT_COLORS.find((x) => x.name === d.colorName);
         if (c) setColor(c);
       }
-      if (d.printMethod) setPrintMethod(d.printMethod);
-      if (d.zone) setZone(d.zone);
-      if (d.placement) setPlacement(d.placement);
+      if (d.printMethod) setPrintMethod(d.printMethod as (typeof PRINT_METHODS)[number]);
+      if (d.zone) setZone(d.zone as Zone);
+      if (d.placement) setPlacement(d.placement as Placement);
       if (typeof d.opacity === "number") setOpacity(d.opacity);
     } catch {
       // corrupted draft — start fresh
@@ -197,6 +212,8 @@ function DesignStudio() {
   function saveDraft() {
     try {
       localStorage.setItem("ab:design", JSON.stringify(designState()));
+      const saved = upsertDesign(draftId.current, designState());
+      draftId.current = saved.id;
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 1500);
     } catch {
@@ -207,6 +224,8 @@ function DesignStudio() {
   function goToPreview() {
     try {
       localStorage.setItem("ab:design", JSON.stringify(designState()));
+      const saved = upsertDesign(draftId.current, designState());
+      draftId.current = saved.id;
     } catch {
       // storage full — preview falls back to defaults
     }

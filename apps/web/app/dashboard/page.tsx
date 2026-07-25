@@ -6,6 +6,12 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import AccountShell, { StatusChip } from "@/components/account/AccountShell";
 import { apiFetch, getToken } from "@/lib/auth";
+import {
+  type DesignDraft,
+  activateDesign,
+  getDesigns,
+  subscribeDesigns,
+} from "@/lib/designs";
 import { getWishlist, subscribeWishlist } from "@/lib/wishlist";
 
 type ApiOrder = {
@@ -18,13 +24,6 @@ type ApiOrder = {
   variantId?: { media?: { images?: string[] } } | null;
 };
 
-type SavedDesign = {
-  image: string | null;
-  colorName?: string;
-  savedAt?: string;
-  product?: { title?: string } | null;
-};
-
 const shortId = (o: ApiOrder) => (o.orderId ?? o._id).slice(-8);
 
 const dt = (d?: string) =>
@@ -33,7 +32,7 @@ const dt = (d?: string) =>
 export default function DashboardPage() {
   const [orders, setOrders] = useState<ApiOrder[]>([]);
   const [wallet, setWallet] = useState<number | null>(null);
-  const [design, setDesign] = useState<SavedDesign | null>(null);
+  const [drafts, setDrafts] = useState<DesignDraft[]>([]);
   const [wishCount, setWishCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
 
@@ -46,16 +45,16 @@ export default function DashboardPage() {
     apiFetch<{ data: { balance: number } }>("/api/wallet/balance")
       .then((j) => setWallet(j.data?.balance ?? null))
       .catch(() => {});
-    try {
-      const raw =
-        localStorage.getItem("ab:design") ?? sessionStorage.getItem("ab:design");
-      if (raw) setDesign(JSON.parse(raw));
-    } catch {
-      // no saved design
-    }
+    const syncDesigns = () => setDrafts(getDesigns());
+    syncDesigns();
+    const unsubDesigns = subscribeDesigns(syncDesigns);
     const syncWish = () => setWishCount(getWishlist().length);
     syncWish();
-    return subscribeWishlist(syncWish);
+    const unsubWish = subscribeWishlist(syncWish);
+    return () => {
+      unsubDesigns();
+      unsubWish();
+    };
   }, []);
 
   const active = orders.filter(
@@ -72,7 +71,7 @@ export default function DashboardPage() {
     },
     {
       label: "Saved Designs",
-      value: String(design ? 1 : 0).padStart(2, "0"),
+      value: String(drafts.length).padStart(2, "0"),
       cta: "Open Studio",
       href: "/design-studio",
     },
@@ -206,50 +205,60 @@ export default function DashboardPage() {
         <h2 className="text-[24px] font-bold tracking-[-0.4px] text-black">
           Saved Designs
         </h2>
-        {design ? (
+        {drafts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 gap-5 pt-6 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-[10px] border border-[#e5e7eb] p-3">
-                <div className="relative flex h-[190px] items-center justify-center overflow-hidden rounded-[8px] bg-[#f6f5f2]">
-                  {design.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={design.image}
-                      alt="Saved design"
-                      className="max-h-[85%] max-w-[85%] object-contain"
-                    />
-                  ) : (
-                    <span className="text-[12px] text-[#9ca3af]">No artwork</span>
-                  )}
-                </div>
-                <p className="pt-3 text-[14.5px] font-bold text-black">
-                  {design.product?.title
-                    ? `${design.product.title} design`
-                    : "My custom design"}
-                </p>
-                <p className="text-[12.5px] text-[#6b7280]">
-                  {design.colorName ? `${design.colorName} garment · ` : ""}Studio draft
-                </p>
-                <div className="flex gap-2 pt-3">
-                  <Link
-                    href="/design-studio"
-                    className="flex-1 rounded-[6px] border border-[#c4c7c7] py-2 text-center text-[11.5px] font-bold uppercase tracking-[0.5px] text-black hover:bg-[#f3f4f6]"
+              {drafts.slice(0, 4).map((d) => (
+                <div key={d.id} className="rounded-[10px] border border-[#e5e7eb] p-3">
+                  <div
+                    className="relative flex h-[190px] items-center justify-center overflow-hidden rounded-[8px]"
+                    style={{ background: d.state.colorHex ?? "#f6f5f2" }}
                   >
-                    Edit
-                  </Link>
-                  <Link
-                    href="/design-studio/preview"
-                    className="flex-1 rounded-[6px] bg-black py-2 text-center text-[11.5px] font-bold uppercase tracking-[0.5px] text-white hover:opacity-85"
-                  >
-                    Order
-                  </Link>
+                    {d.state.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={d.state.image}
+                        alt={d.name}
+                        className="max-h-[85%] max-w-[85%] object-contain"
+                      />
+                    ) : (
+                      <span className="text-[12px] text-[#9ca3af]">No artwork</span>
+                    )}
+                  </div>
+                  <p className="truncate pt-3 text-[14.5px] font-bold text-black">{d.name}</p>
+                  <p className="text-[12.5px] text-[#6b7280]">
+                    Saved{" "}
+                    {new Date(d.savedAt).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                    })}
+                  </p>
+                  <div className="flex gap-2 pt-3">
+                    <Link
+                      href={`/design-studio?draft=${d.id}`}
+                      className="flex-1 rounded-[6px] border border-[#c4c7c7] py-2 text-center text-[11.5px] font-bold uppercase tracking-[0.5px] text-black hover:bg-[#f3f4f6]"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => {
+                        activateDesign(d);
+                        window.location.href = "/design-studio/preview";
+                      }}
+                      className="flex-1 rounded-[6px] bg-black py-2 text-center text-[11.5px] font-bold uppercase tracking-[0.5px] text-white hover:opacity-85"
+                    >
+                      Order
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-            <p className="pt-5 text-[12.5px] text-[#9ca3af]">
-              Drafts are saved on this device from the Design Studio — one draft at
-              a time for now.
-            </p>
+            <Link
+              href="/dashboard/designs"
+              className="mt-5 flex w-fit items-center gap-1.5 text-[14px] font-bold text-black hover:text-brand-orange"
+            >
+              View All <ArrowRight className="h-4 w-4" />
+            </Link>
           </>
         ) : (
           <p className="pt-6 text-[14px] text-[#6b7280]">
