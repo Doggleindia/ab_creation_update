@@ -125,20 +125,38 @@ export default function BulkOrders() {
   // Hydrate the proposal builder when a request is opened
   useEffect(() => {
     if (!selected) return;
-    const prod = parseProducts(selected);
-    setItems([
-      {
-        label: prod?.name?.trim() || selected.categories?.[0] || "Garments",
-        qty: prod?.qty ?? String(parseInt(selected.expectedVolume ?? "", 10) || ""),
-        price: "",
-        sizes: (prod?.sizes ?? []).map(([s, n]) => `${s}:${n}`).join(" "),
-      },
-    ]);
-    setPrinting("");
-    setShipping("");
-    setValidUntil(dateInput(7));
-    setEstDelivery(dateInput(14));
-    setNotes("");
+    // Revising a structured quote starts from what was actually sent;
+    // fresh requests seed from the applicant's own product description.
+    if (selected.quote?.items?.length) {
+      setItems(
+        selected.quote.items.map((it) => ({
+          label: it.name ?? "",
+          qty: String(it.qty ?? ""),
+          price: String(it.unitPrice ?? ""),
+          sizes: it.sizeBreakdown ?? "",
+        })),
+      );
+      setPrinting(String(selected.quote.printingCost || ""));
+      setShipping(String(selected.quote.shippingCost || ""));
+      setValidUntil(selected.quote.validUntil?.slice(0, 10) ?? dateInput(7));
+      setEstDelivery(selected.quote.estimatedDelivery?.slice(0, 10) ?? dateInput(14));
+      setNotes((selected.quote.notes ?? "").replace(/\nProduction timeline: .*$/, ""));
+    } else {
+      const prod = parseProducts(selected);
+      setItems([
+        {
+          label: prod?.name?.trim() || selected.categories?.[0] || "Garments",
+          qty: prod?.qty ?? String(parseInt(selected.expectedVolume ?? "", 10) || ""),
+          price: "",
+          sizes: (prod?.sizes ?? []).map(([s, n]) => `${s}:${n}`).join(" "),
+        },
+      ]);
+      setPrinting("");
+      setShipping("");
+      setValidUntil(dateInput(7));
+      setEstDelivery(dateInput(14));
+      setNotes("");
+    }
     setAssignee(selected.assignee ?? "");
     setFlash(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps

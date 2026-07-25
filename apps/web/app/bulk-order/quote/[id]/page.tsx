@@ -170,7 +170,32 @@ export default function BulkQuotePage() {
       64,
     );
     doc.setFontSize(10);
-    const lines = (data.quote.notes ?? "").split(" · ");
+    // Structured proposals print the itemized table; legacy quotes fall back
+    // to the dot-separated note lines.
+    const lines = data.quote.items?.length
+      ? [
+          ...data.quote.items.map(
+            (it) =>
+              `${it.qty} x ${it.name}${it.sizeBreakdown ? ` (${it.sizeBreakdown})` : ""} @ Rs ${(it.unitPrice ?? 0).toLocaleString("en-IN")} = Rs ${(it.total ?? 0).toLocaleString("en-IN")}`,
+          ),
+          ...((data.quote.printingCost ?? 0) > 0
+            ? [`Custom Printing: Rs ${data.quote.printingCost!.toLocaleString("en-IN")}`]
+            : []),
+          `Shipping: ${(data.quote.shippingCost ?? 0) > 0 ? `Rs ${data.quote.shippingCost!.toLocaleString("en-IN")}` : "FREE"}`,
+          ...((data.quote.advancePct ?? 0) > 0
+            ? [
+                `Payment: ${data.quote.advancePct}% advance (Rs ${Math.round(((data.quote.amount ?? 0) * (data.quote.advancePct ?? 0)) / 100).toLocaleString("en-IN")}), balance before dispatch`,
+              ]
+            : []),
+          ...(data.quote.estimatedDelivery
+            ? [`Estimated delivery: ${fullDate(data.quote.estimatedDelivery)}`]
+            : []),
+          ...(data.quote.validUntil
+            ? [`Quote valid until: ${fullDate(data.quote.validUntil)}`]
+            : []),
+          ...(data.quote.notes ? data.quote.notes.split("\n") : []),
+        ]
+      : (data.quote.notes ?? "").split(" · ");
     lines.forEach((l, i) => doc.text(`• ${l}`, 20, 74 + i * 7));
     const y = 74 + lines.length * 7 + 8;
     doc.line(20, y, 190, y);
