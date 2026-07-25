@@ -62,6 +62,7 @@ export default function TrackOrderPage() {
   const [order, setOrder] = useState<LastOrder | null>(null);
   const [apiOrder, setApiOrder] = useState<ApiOrder | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -72,7 +73,7 @@ export default function TrackOrderPage() {
         if (!orderId || parsed.orderId === orderId) setOrder(parsed);
       }
     } catch {
-      // fall through to mock data
+      // corrupted snapshot — the live fetch below may still find the order
     }
 
     // Fetch the live order when logged in; keep the snapshot as fallback.
@@ -82,8 +83,11 @@ export default function TrackOrderPage() {
       )
         .then((j) => setApiOrder(j.data ?? null))
         .catch(() => {
-          // not this user's order / offline — snapshot or mock stays
-        });
+          // not this user's order / offline — the snapshot (if any) stays
+        })
+        .finally(() => setChecking(false));
+    } else {
+      setChecking(false);
     }
   }, [orderId]);
 
@@ -143,7 +147,9 @@ export default function TrackOrderPage() {
     { label: "Dispatched", detail: "Awaiting shipping partner" },
     {
       label: "Delivered",
-      detail: `Estimated delivery by ${order?.etaLabel ?? "15 July"}`,
+      detail: order?.etaLabel
+        ? `Estimated delivery by ${order.etaLabel}`
+        : "Estimated 5–7 days after dispatch",
     },
   ];
 
@@ -166,7 +172,7 @@ export default function TrackOrderPage() {
     apiOrder?.productId?.title ||
     apiOrder?.productId?.name ||
     item?.title ||
-    "Round Neck T-Shirt — Custom Design";
+    "Your order";
   const displayVariant = apiOrder
     ? [
         apiOrder.color,
@@ -177,23 +183,23 @@ export default function TrackOrderPage() {
         .join(" · ")
     : item
       ? `${item.variant} · Qty: ${item.quantity}`
-      : "White · Size L · DTF Print · Qty: 1";
-  const displaySubtotal = apiOrder?.totalAmount ?? order?.subtotal ?? 449;
+      : "—";
+  const displaySubtotal = apiOrder?.totalAmount ?? order?.subtotal ?? 0;
   const displayShipping = apiOrder
     ? "Included"
     : order
       ? order.shipping.price === 0
         ? "Free"
         : `₹${order.shipping.price}`
-      : "₹48";
-  const displayTotal = apiOrder?.totalAmount ?? order?.total ?? 497;
+      : "Included";
+  const displayTotal = apiOrder?.totalAmount ?? order?.total ?? 0;
   const displayPaid = apiOrder
     ? apiOrder.paymentStatus === "paid"
       ? "Paid via Wallet"
       : "Payment pending"
     : order?.payment === "cod"
       ? "Cash on Delivery"
-      : "Paid via UPI";
+      : "Paid from Wallet";
   const displayImage =
     apiOrder?.variantId?.media?.images?.[0] || item?.image || null;
   const displayTracking =
@@ -209,12 +215,7 @@ export default function TrackOrderPage() {
       ].filter((l): l is string => Boolean(l))
     : order?.address?.length
       ? order.address
-      : [
-          "Rahul Sharma",
-          "Flat 402, Green Meadows, 12th Main Road",
-          "Indiranagar, Bengaluru",
-          "Karnataka, 560038",
-        ];
+      : ["Address unavailable on this device"];
 
   async function downloadInvoice() {
     const { jsPDF } = await import("jspdf");
@@ -243,7 +244,39 @@ export default function TrackOrderPage() {
     doc.save(`invoice-${orderId}.pdf`);
   }
 
-  if (!mounted) return <div className="min-h-[60vh] bg-white" />;
+  if (!mounted || checking) return <div className="min-h-[60vh] bg-white" />;
+
+  // No live order and no checkout snapshot — never invent one.
+  if (!apiOrder && !order) {
+    return (
+      <main className="flex min-h-[60vh] w-full items-center justify-center bg-white px-4 py-16">
+        <div className="w-full max-w-[480px] text-center">
+          <h1 className="text-[28px] font-bold tracking-[-0.5px] text-black">
+            We can&apos;t show this order here
+          </h1>
+          <p className="pt-3 text-[15px] leading-6 text-[#444748]">
+            Order <span className="font-semibold text-black">#{orderId}</span>{" "}
+            isn&apos;t linked to this browser session. Log in with the account
+            that placed it to see live tracking.
+          </p>
+          <div className="mt-8 flex flex-col gap-3">
+            <Link
+              href={`/login?next=${encodeURIComponent(`/track-order/${orderId}`)}`}
+              className="rounded-full bg-brand-orange py-3 text-[15px] font-bold text-white hover:opacity-90"
+            >
+              Log in to track
+            </Link>
+            <Link
+              href="/dashboard/orders"
+              className="rounded-full border border-[#c4c7c7] py-3 text-[15px] font-bold text-black hover:bg-[#f3f4f6]"
+            >
+              Open My Orders
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-[60vh] w-full bg-white px-4 py-8 sm:px-8 lg:px-16">
