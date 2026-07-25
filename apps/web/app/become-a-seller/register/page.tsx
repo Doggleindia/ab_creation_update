@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getUser } from "@/lib/auth";
 import {
   BadgeCheck,
   Banknote,
@@ -110,6 +112,7 @@ function BenefitRow({
 }
 
 export default function SellerRegistrationPage() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -140,6 +143,11 @@ export default function SellerRegistrationPage() {
   });
   const [showPw, setShowPw] = useState(false);
   const [showPw2, setShowPw2] = useState(false);
+
+  // Approved sellers don't need to apply again — send them to their studio.
+  useEffect(() => {
+    if (getUser()?.accountType === "seller") router.replace("/seller");
+  }, [router]);
 
   function set(field: keyof typeof form) {
     return (

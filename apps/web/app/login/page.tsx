@@ -26,8 +26,12 @@ function LoginForm() {
       if (user.mustChangePassword) {
         // Temporary credentials must be replaced before doing anything else
         router.push(`/set-password?next=${encodeURIComponent(next)}`);
-      } else if (user.accountType === "seller" && next === "/") {
-        // Sellers land on their studio unless they were headed somewhere specific
+      } else if (
+        user.accountType === "seller" &&
+        (next === "/" || next.startsWith("/become-a-seller"))
+      ) {
+        // Sellers land on their studio — never back on the apply pages
+        // (the registration page links here with next=/become-a-seller/register)
         router.push("/seller");
       } else {
         router.push(next);
