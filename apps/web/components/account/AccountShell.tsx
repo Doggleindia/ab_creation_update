@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Boxes,
   ChevronRight,
   HelpCircle,
   Heart,
@@ -28,9 +29,13 @@ const NAV = [
   { icon: Settings, label: "Account Settings", href: "/dashboard/settings" },
 ];
 
+// Bulk-order accounts get the quotes pipeline as a first-class page
+const BULK_NAV_ITEM = { icon: Boxes, label: "Bulk Quotes", href: "/dashboard/quotes" };
+
 const CRUMBS: Record<string, string> = {
   "/dashboard": "My account",
   "/dashboard/orders": "My Orders",
+  "/dashboard/quotes": "Bulk Quotes",
   "/dashboard/designs": "Saved Designs",
   "/dashboard/wallet": "Wallet",
   "/dashboard/wishlist": "Wishlist",
@@ -65,6 +70,9 @@ export default function AccountShell({
   const initial = (user?.name || user?.email || "?").charAt(0).toUpperCase();
   const crumb = CRUMBS[pathname] ?? "My account";
   const onSubPage = pathname !== "/dashboard";
+  const isBulk = user?.accountType === "bulk";
+  // Bulk Quotes slots in right after My Orders for bulk accounts
+  const nav = isBulk ? [...NAV.slice(0, 2), BULK_NAV_ITEM, ...NAV.slice(2)] : NAV;
 
   return (
     <main className="w-full bg-[#f8f9fb]">
@@ -91,11 +99,16 @@ export default function AccountShell({
               <span className="block truncate text-[12.5px] text-[#6b7280]">
                 {user?.email}
               </span>
+              {isBulk && (
+                <span className="mt-1 inline-block rounded-[5px] bg-black px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.8px] text-white">
+                  Bulk Account
+                </span>
+              )}
             </span>
           </div>
 
           <nav className="flex flex-1 flex-col gap-1 px-3 pt-8">
-            {NAV.map(({ icon: Icon, label, href }) => {
+            {nav.map(({ icon: Icon, label, href }) => {
               const active =
                 href === "/dashboard"
                   ? pathname === "/dashboard"
@@ -191,7 +204,7 @@ export default function AccountShell({
 
           {/* Mobile nav */}
           <nav className="flex gap-2 overflow-x-auto border-b border-[#e5e7eb] bg-white px-4 py-2.5 lg:hidden">
-            {NAV.map(({ label, href }) => (
+            {nav.map(({ label, href }) => (
               <Link
                 key={href}
                 href={href}

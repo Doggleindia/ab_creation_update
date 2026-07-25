@@ -4,6 +4,7 @@ import {
   submitSellerApplication,
   getApplications,
   getApplication,
+  getMyApplications,
   approveApplication,
   rejectApplication,
   uploadPortfolio,
@@ -14,6 +15,7 @@ import {
   advanceQuoteStage,
 } from "../controllers/applicationController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
+import { userAuth } from "../middleware/userAuth.js";
 import { upload } from "../middleware/uploadMiddleware.js";
 import { intakeLimiter, uploadLimiter } from "../middleware/rateLimiters.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -33,6 +35,9 @@ router.post(
   upload.array("designs", 5),
   asyncHandler(uploadPortfolio),
 );
+// Logged-in bulk buyers: their own applications for the dashboard.
+// Registered before /:id/quote so "mine" never matches as an id.
+router.get("/mine", userAuth, asyncHandler(getMyApplications));
 router.get("/:id/quote", asyncHandler(getPublicQuote));
 router.post("/:id/quote/respond", intakeLimiter, asyncHandler(respondToQuote));
 

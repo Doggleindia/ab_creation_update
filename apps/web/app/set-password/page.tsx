@@ -41,7 +41,11 @@ function SetPasswordForm() {
       updateCachedUser({ mustChangePassword: false });
       const user = getUser();
       router.push(
-        user?.accountType === "seller" && next === "/" ? "/seller" : next,
+        user?.accountType === "seller" && next === "/"
+          ? "/seller"
+          : user?.accountType === "bulk" && next === "/"
+            ? "/dashboard"
+            : next,
       );
     } catch (err) {
       setError(

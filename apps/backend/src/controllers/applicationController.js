@@ -536,3 +536,21 @@ export const advanceQuoteStage = async (req, res, next) => {
     data: { quote: application.quote },
   });
 };
+
+/**
+ * USER — the caller's own bulk applications and their quote states, so the
+ * buyer dashboard can show the bulk pipeline. Matched by the account link
+ * set at approval, falling back to the login email for pre-approval
+ * applications submitted with the same address.
+ */
+export const getMyApplications = async (req, res) => {
+  const applications = await BusinessApplication.find({
+    type: "bulk",
+    $or: [{ linkedUserId: req.user._id }, { email: req.user.email }],
+  })
+    .sort({ createdAt: -1 })
+    .select(
+      "businessName contactName status createdAt expectedVolume productsToSell quote.amount quote.status quote.sentAt quote.respondedAt quote.notes",
+    );
+  res.status(200).json({ status: "success", data: { applications } });
+};

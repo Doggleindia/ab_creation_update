@@ -33,6 +33,9 @@ function LoginForm() {
         // Sellers land on their studio — never back on the apply pages
         // (the registration page links here with next=/become-a-seller/register)
         router.push("/seller");
+      } else if (user.accountType === "bulk" && next === "/") {
+        // Bulk-order accounts live in the buyer dashboard
+        router.push("/dashboard");
       } else {
         router.push(next);
       }

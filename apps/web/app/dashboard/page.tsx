@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import AccountShell, { StatusChip } from "@/components/account/AccountShell";
-import { apiFetch, getToken } from "@/lib/auth";
+import { apiFetch, getToken, getUser } from "@/lib/auth";
 import {
   type DesignDraft,
   activateDesign,
@@ -35,9 +35,18 @@ export default function DashboardPage() {
   const [drafts, setDrafts] = useState<DesignDraft[]>([]);
   const [wishCount, setWishCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const [quotes, setQuotes] = useState<
+    { _id: string; businessName?: string; status: string; quote?: { amount?: number; status?: string } }[]
+  >([]);
 
   useEffect(() => {
     if (!getToken()) return;
+    // Bulk accounts see their quote pipeline front and center
+    if (getUser()?.accountType === "bulk") {
+      apiFetch<{ data: { applications: typeof quotes } }>("/api/applications/mine")
+        .then((j) => setQuotes(j.data?.applications ?? []))
+        .catch(() => {});
+    }
     apiFetch<{ data: ApiOrder[] }>("/api/orders/history")
       .then((j) => setOrders(j.data ?? []))
       .catch(() => {})
@@ -116,6 +125,45 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Bulk pipeline (bulk accounts) */}
+      {quotes.length > 0 && (
+        <section className="mt-6 rounded-[12px] border border-[#e5e7eb] bg-white p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[24px] font-bold tracking-[-0.4px] text-black">
+              Bulk Quotes
+            </h2>
+            <Link
+              href="/dashboard/quotes"
+              className="text-[14px] font-bold text-black hover:text-brand-orange"
+            >
+              View All ›
+            </Link>
+          </div>
+          <div className="flex flex-col divide-y divide-[#f3f4f6] pt-2">
+            {quotes.slice(0, 3).map((a) => (
+              <Link
+                key={a._id}
+                href={`/bulk-order/quote/${a._id}`}
+                className="flex flex-wrap items-center justify-between gap-3 py-3.5 hover:bg-[#fafafa]"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-[15px] font-bold text-black">
+                    {a.businessName || "Bulk request"}
+                  </span>
+                  <span className="block text-[12.5px] capitalize text-[#6b7280]">
+                    {(a.quote?.status ?? a.status).replace(/_/g, " ")}
+                    {typeof a.quote?.amount === "number"
+                      ? ` · ₹${a.quote.amount.toLocaleString("en-IN")}`
+                      : ""}
+                  </span>
+                </span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-[#9ca3af]" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Recent orders */}
       <section className="mt-6 overflow-hidden rounded-[12px] border border-[#e5e7eb] bg-white">
