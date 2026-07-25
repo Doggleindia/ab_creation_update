@@ -153,7 +153,7 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
               <img
                 src={logoUrl}
                 alt="AB Creation logo"
-                className="h-16 w-auto max-w-[220px] object-contain"
+                className="-my-2.5 h-16 w-auto max-w-[220px] object-contain"
               />
             ) : (
               <Image
@@ -162,7 +162,7 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
                 width={160}
                 height={64}
                 priority
-                className="h-16 w-auto object-contain"
+                className="-my-2.5 h-16 w-auto object-contain"
               />
             )}
           </Link>
