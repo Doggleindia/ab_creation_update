@@ -55,6 +55,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 connectDB();
 
+// One reverse proxy (load balancer / CDN) in front in production — needed so
+// req.ip is the real client address, which the per-IP rate limiters key on.
+app.set("trust proxy", 1);
+
 // Middleware
 app.use(helmet());
 app.use(cors(corsOptions));

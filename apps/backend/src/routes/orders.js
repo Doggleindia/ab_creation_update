@@ -17,11 +17,12 @@ import {
 import { userAuth } from "../middleware/userAuth.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { upload } from "../middleware/uploadMiddleware.js";
+import { uploadLimiter } from "../middleware/rateLimiters.js";
 
 const router = express.Router();
 
 // User Routes — purchases require login (wallet payment), no guest checkout
-router.post("/upload-designs", userAuth, upload.array("designs", 10), uploadDesigns);
+router.post("/upload-designs", uploadLimiter, userAuth, upload.array("designs", 10), uploadDesigns);
 router.post("/buynow", userAuth, buyNow);
 router.post("/checkout", userAuth, checkoutCart); // atomic multi-item cart checkout
 router.get("/history", userAuth, getUserOrderHistory);

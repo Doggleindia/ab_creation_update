@@ -14,6 +14,7 @@ import {
 import { userAuth } from "../middleware/userAuth.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { upload } from "../middleware/uploadMiddleware.js";
+import { uploadLimiter } from "../middleware/rateLimiters.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 const router = express.Router();
@@ -21,6 +22,7 @@ const router = express.Router();
 // Seller (requires a seller account)
 router.post(
   "/upload",
+  uploadLimiter,
   userAuth,
   upload.array("images", 5),
   asyncHandler(uploadSellerProductImages),

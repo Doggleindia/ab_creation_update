@@ -15,6 +15,7 @@ import {
 } from "../controllers/applicationController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { upload } from "../middleware/uploadMiddleware.js";
+import { intakeLimiter, uploadLimiter } from "../middleware/rateLimiters.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 const router = express.Router();
@@ -23,15 +24,17 @@ const router = express.Router();
  * PUBLIC — application intake. The type is fixed by the endpoint so a form can
  * only ever create its own kind of application.
  */
-router.post("/bulk", asyncHandler(submitBulkApplication));
-router.post("/seller", asyncHandler(submitSellerApplication));
+router.post("/bulk", intakeLimiter, asyncHandler(submitBulkApplication));
+router.post("/seller", intakeLimiter, asyncHandler(submitSellerApplication));
+// Rate limit BEFORE multer — unauthenticated S3 uploads must be bounded
 router.post(
   "/upload-portfolio",
+  uploadLimiter,
   upload.array("designs", 5),
   asyncHandler(uploadPortfolio),
 );
 router.get("/:id/quote", asyncHandler(getPublicQuote));
-router.post("/:id/quote/respond", asyncHandler(respondToQuote));
+router.post("/:id/quote/respond", intakeLimiter, asyncHandler(respondToQuote));
 
 /**
  * ADMIN — review queues and decisions.

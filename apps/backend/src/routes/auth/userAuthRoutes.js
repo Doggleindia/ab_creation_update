@@ -12,6 +12,7 @@ import {
 } from '../../controllers/auth/userController.js';
 
 import { userAuth } from '../../middleware/userAuth.js';
+import { authLimiter, otpLimiter } from '../../middleware/rateLimiters.js';
 import asyncHandler from "../../utils/asyncHandler.js";
 
 const router = express.Router();
@@ -19,11 +20,11 @@ const router = express.Router();
 /**
  * PUBLIC
  */
-router.post("/signup", asyncHandler(signupUser));
-router.post("/login", asyncHandler(loginUser));
-router.post("/forgot-password", asyncHandler(forgotPassword));
-router.post("/validate-reset-code", asyncHandler(validateResetCode));
-router.post("/reset-password", asyncHandler(resetPassword));
+router.post("/signup", authLimiter, asyncHandler(signupUser));
+router.post("/login", authLimiter, asyncHandler(loginUser));
+router.post("/forgot-password", otpLimiter, asyncHandler(forgotPassword));
+router.post("/validate-reset-code", authLimiter, asyncHandler(validateResetCode));
+router.post("/reset-password", authLimiter, asyncHandler(resetPassword));
 
 /**
  * PROTECTED

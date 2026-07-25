@@ -13,6 +13,7 @@ import {
 } from "../../controllers/auth/adminController.js";
 
 import { adminAuth, optionalAdminAuth } from '../../middleware/adminAuth.js';
+import { authLimiter, otpLimiter } from '../../middleware/rateLimiters.js';
 
 const router = express.Router();
 
@@ -21,11 +22,11 @@ const router = express.Router();
  */
 // Signup is gated in the controller: only the first admin can bootstrap without
 // auth; afterwards a valid admin token is required to create another admin.
-router.post('/signup', optionalAdminAuth, signupAdmin);
-router.post('/login', loginAdmin);
-router.post('/forgot-password', forgotPassword);
-router.post('/validate-reset-code', validateResetCode);
-router.post('/reset-password', resetPassword);
+router.post('/signup', authLimiter, optionalAdminAuth, signupAdmin);
+router.post('/login', authLimiter, loginAdmin);
+router.post('/forgot-password', otpLimiter, forgotPassword);
+router.post('/validate-reset-code', authLimiter, validateResetCode);
+router.post('/reset-password', authLimiter, resetPassword);
 
 /**
  * PROTECTED
