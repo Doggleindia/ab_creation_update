@@ -82,10 +82,37 @@ export const createSellerProduct = async (req, res, next) => {
   if (!title || !retailPrice) {
     return next(new AppError("title and retailPrice are required", 400));
   }
+  const price = Number(retailPrice);
+  if (!Number.isFinite(price) || price < 1) {
+    return next(new AppError("retailPrice must be a positive number", 400));
+  }
 
   let baseProduct = null;
   if (baseProductId && mongoose.isValidObjectId(baseProductId)) {
     baseProduct = await Product.findById(baseProductId);
+  }
+  // Pricing below base cost would zero the seller's margin and confuse the
+  // storefront — the wizard blocks it, so must the API.
+  if (baseProduct && price <= baseProduct.basePrice) {
+    return next(
+      new AppError(
+        `Retail price must be above the base cost of ₹${baseProduct.basePrice}`,
+        400,
+      ),
+    );
+  }
+
+  const cleanImages = Array.isArray(images)
+    ? images
+        .filter(
+          (u) =>
+            typeof u === "string" &&
+            (u.startsWith("http://") || u.startsWith("https://")),
+        )
+        .slice(0, 5)
+    : [];
+  if (cleanImages.length === 0) {
+    return next(new AppError("At least one design image is required", 400));
   }
 
   const submission = await SellerProduct.create({
@@ -99,18 +126,10 @@ export const createSellerProduct = async (req, res, next) => {
       ? method
       : "DTF",
     color: toStr(color) || "White",
-    retailPrice: Number(retailPrice),
+    retailPrice: price,
     sizes: Array.isArray(sizes) ? sizes.filter((s) => typeof s === "string").slice(0, 10) : [],
     tags: Array.isArray(tags) ? tags.filter((t) => typeof t === "string").slice(0, 10) : [],
-    images: Array.isArray(images)
-      ? images
-          .filter(
-            (u) =>
-              typeof u === "string" &&
-              (u.startsWith("http://") || u.startsWith("https://")),
-          )
-          .slice(0, 5)
-      : [],
+    images: cleanImages,
   });
 
   res.status(201).json({
@@ -378,7 +397,24 @@ export const resubmitSellerProduct = async (req, res, next) => {
   const b = req.body;
   if (b.title) submission.title = toStr(b.title);
   if (typeof b.description === "string") submission.description = toStr(b.description);
-  if (b.retailPrice) submission.retailPrice = Number(b.retailPrice);
+  if (b.retailPrice) {
+    const price = Number(b.retailPrice);
+    if (!Number.isFinite(price) || price < 1) {
+      return next(new AppError("retailPrice must be a positive number", 400));
+    }
+    const base = submission.baseProductId
+      ? await Product.findById(submission.baseProductId).select("basePrice")
+      : null;
+    if (base && price <= base.basePrice) {
+      return next(
+        new AppError(
+          `Retail price must be above the base cost of ₹${base.basePrice}`,
+          400,
+        ),
+      );
+    }
+    submission.retailPrice = price;
+  }
   if (["DTF", "Screen", "Embroidery", "Heat Transfer"].includes(b.method)) {
     submission.method = b.method;
   }

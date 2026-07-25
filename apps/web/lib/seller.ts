@@ -2,10 +2,20 @@
 
 import { apiFetch } from "@/lib/auth";
 
+export type SellerPlacement = {
+  zone?: string;
+  xCm?: number;
+  yCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  rotationDeg?: number;
+};
+
 export type SellerSubmission = {
   _id: string;
   title: string;
   description?: string;
+  placement?: SellerPlacement;
   status: "pending" | "approved" | "rejected" | "changes";
   method: string;
   color?: string;

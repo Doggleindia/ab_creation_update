@@ -69,6 +69,7 @@ export default function SellerProductsPage() {
           sizes: s.sizes,
           tags: s.tags,
           images: s.images,
+          placement: s.placement,
         }),
       });
       setFlash({ kind: "ok", text: `"${s.title} (Copy)" submitted for review.` });
