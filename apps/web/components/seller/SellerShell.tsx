@@ -190,19 +190,21 @@ export default function SellerShell({
 
           {/* Mobile nav */}
           <nav className="flex gap-2 overflow-x-auto border-b border-[#e5e7eb] bg-white px-4 py-2.5 lg:hidden">
-            {NAV.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold ${
-                  (href === "/seller" ? pathname === "/seller" : pathname.startsWith(href))
-                    ? "bg-black text-white"
-                    : "text-[#374151] hover:bg-[#f3f4f6]"
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
+            {[...NAV, { label: "Settings", href: "/seller/settings" }, { label: "Support", href: "/contact-us" }].map(
+              ({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold ${
+                    (href === "/seller" ? pathname === "/seller" : pathname.startsWith(href))
+                      ? "bg-black text-white"
+                      : "text-[#374151] hover:bg-[#f3f4f6]"
+                  }`}
+                >
+                  {label}
+                </Link>
+              ),
+            )}
           </nav>
 
           <div className="p-5 sm:p-8">{children}</div>
