@@ -11,6 +11,7 @@ import Shell, { Card } from "../components/Shell";
 import {
   api,
   inr,
+  shortOrderId,
   type AdminOrder,
   type Application,
   type AdminProduct,
@@ -270,7 +271,7 @@ export default function Dashboard() {
                 return (
                   <tr key={o._id} className="border-t border-[#f3f4f6] text-[13.5px]">
                     <td className="px-6 py-4 font-bold text-black">
-                      #{o.orderId.slice(-8)}
+                      #{shortOrderId(o)}
                     </td>
                     <td className="px-3 py-4">
                       <span className="block h-10 w-10 overflow-hidden rounded border border-[#e5e7eb] bg-[#f3f4f6]">

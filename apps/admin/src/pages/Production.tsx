@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiCheckCircle, FiPrinter, FiUser, FiXCircle, FiPackage } from "react-icons/fi";
 import Shell, { Card } from "../components/Shell";
-import { api, inr, type AdminOrder } from "../lib/api";
+import { api, inr, shortOrderId, type AdminOrder } from "../lib/api";
 
 const LANES: {
   key: string;
@@ -152,7 +152,7 @@ export default function Production() {
   ) {
     setBusyId(o._id);
     try {
-      await api(`/api/orders/admin/${encodeURIComponent(o.orderId)}/status`, {
+      await api(`/api/orders/admin/${encodeURIComponent(o.orderId ?? o._id)}/status`, {
         method: "PATCH",
         body: JSON.stringify({ orderStatus, ...extra }),
       });
@@ -167,7 +167,7 @@ export default function Production() {
   async function assign(o: AdminOrder, assignee: string) {
     setBusyId(o._id);
     try {
-      await api(`/api/orders/admin/${encodeURIComponent(o.orderId)}/meta`, {
+      await api(`/api/orders/admin/${encodeURIComponent(o.orderId ?? o._id)}/meta`, {
         method: "PATCH",
         body: JSON.stringify({ assignee }),
       });
@@ -188,12 +188,12 @@ export default function Production() {
       ]
         .filter(Boolean)
         .join(", ");
-      w.document.write(`<html><head><title>Label ${o.orderId}</title>
+      w.document.write(`<html><head><title>Label ${o.orderId ?? o._id}</title>
         <style>body{font-family:system-ui;padding:24px;color:#111}h2{margin:0 0 4px;font-size:16px}
         .box{border:2px solid #111;border-radius:8px;padding:20px;margin-top:12px}
         p{margin:4px 0;font-size:14px}.small{font-size:11px;color:#555}</style></head><body>
         <h2>AB Creation — Shipping Label</h2>
-        <p class="small">Order #${o.orderId}</p>
+        <p class="small">Order #${o.orderId ?? o._id}</p>
         <div class="box">
           <p><b>SHIP TO</b></p>
           <p>${o.userId?.name ?? ""}</p>
@@ -218,7 +218,7 @@ export default function Production() {
     const lines = allProduction
       .map(
         (o) =>
-          `<tr><td>#${o.orderId.slice(-8)}</td><td>${o.productId?.title ?? "Custom order"}</td><td>${o.quantity}</td><td>${(PRIORITY_CHIP[o.shippingMethod ?? "standard"] ?? PRIORITY_CHIP.standard).label}</td><td>${o.assignee ?? "—"}</td><td>${o.orderStatus.replace(/_/g, " ")}</td></tr>`,
+          `<tr><td>#${shortOrderId(o)}</td><td>${o.productId?.title ?? "Custom order"}</td><td>${o.quantity}</td><td>${(PRIORITY_CHIP[o.shippingMethod ?? "standard"] ?? PRIORITY_CHIP.standard).label}</td><td>${o.assignee ?? "—"}</td><td>${o.orderStatus.replace(/_/g, " ")}</td></tr>`,
       )
       .join("");
     w.document.write(`<html><head><title>Production Report ${new Date().toLocaleDateString("en-IN")}</title>
@@ -317,7 +317,7 @@ export default function Production() {
                     <Card key={o._id} className="p-4">
                       <div className="flex items-center justify-between">
                         <span className="text-[13.5px] font-bold text-black">
-                          #{o.orderId.slice(-8)}
+                          #{shortOrderId(o)}
                         </span>
                         {lane.key === "pack" ? (
                           <FiCheckCircle className="h-4 w-4 text-[#16a34a]" />

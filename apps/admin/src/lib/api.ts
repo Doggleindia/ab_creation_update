@@ -84,6 +84,10 @@ export async function adminLogin(email: string, password: string) {
 
 export const inr = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 
+// Legacy orders can predate the orderId field — never let a render crash on it.
+export const shortOrderId = (o: { orderId?: string; _id: string }) =>
+  (o.orderId || o._id).slice(-8);
+
 export const shortDate = (d?: string) =>
   d
     ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })
@@ -92,7 +96,7 @@ export const shortDate = (d?: string) =>
 // ---- Shared backend shapes (fields we render) ----
 export type AdminOrder = {
   _id: string;
-  orderId: string;
+  orderId?: string; // legacy pre-rebuild orders may lack it — use shortOrderId()
   orderStatus: "pending" | "confirmed" | "in_production" | "quality_check" | "ready_to_pack" | "shipped" | "delivered" | "cancelled";
   paymentStatus: string;
   totalAmount: number;

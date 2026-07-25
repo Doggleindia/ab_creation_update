@@ -22,6 +22,7 @@ import {
   inr,
   marginOf,
   publishedId,
+  shortOrderId,
 } from "@/lib/seller";
 
 const TABS = [
@@ -127,7 +128,7 @@ function SellerOrdersView() {
     if (!q) return true;
     const s = q.toLowerCase();
     return (
-      o.orderId.toLowerCase().includes(s) ||
+      (o.orderId ?? "").toLowerCase().includes(s) ||
       (o.productId?.title ?? "").toLowerCase().includes(s)
     );
   });
@@ -137,7 +138,7 @@ function SellerOrdersView() {
     const lines = rows.map((o) => {
       const m = marginFor(o);
       return [
-        o.orderId,
+        o.orderId ?? o._id,
         `"${(o.productId?.title ?? "Product").replace(/"/g, '""')}"`,
         o.quantity,
         o.size ?? "",
@@ -175,7 +176,7 @@ function SellerOrdersView() {
                 Order
               </p>
               <p className="pt-1 text-[#374151]">
-                Full ID: <span className="font-semibold text-black">{o.orderId}</span>
+                Full ID: <span className="font-semibold text-black">{o.orderId ?? o._id}</span>
               </p>
               <p className="text-[#374151]">
                 Payment:{" "}
@@ -341,7 +342,7 @@ function SellerOrdersView() {
                       <ChevronDown
                         className={`h-3.5 w-3.5 text-[#9ca3af] transition-transform ${expanded ? "rotate-180" : ""}`}
                       />
-                      #{o.orderId.slice(-8)}
+                      #{shortOrderId(o)}
                     </span>
                   </td>
                   <td className="px-3 py-3.5">

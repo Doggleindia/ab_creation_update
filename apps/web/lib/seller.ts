@@ -36,7 +36,7 @@ export type SellerSubmission = {
 
 export type SellerOrder = {
   _id: string;
-  orderId: string;
+  orderId?: string; // legacy pre-rebuild orders may lack it — use shortOrderId()
   quantity: number;
   totalAmount: number;
   orderStatus: string;
@@ -48,6 +48,10 @@ export type SellerOrder = {
 };
 
 export const inr = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+
+// Legacy orders can predate the orderId field — never let a render crash on it.
+export const shortOrderId = (o: { orderId?: string; _id: string }) =>
+  (o.orderId || o._id).slice(-8);
 
 export const STATUS_CHIP: Record<string, { label: string; cls: string }> = {
   approved: { label: "Live", cls: "bg-[#dcfce7] text-[#16a34a]" },

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FiX, FiDownload, FiUser, FiBox, FiCreditCard, FiActivity, FiTruck, FiPrinter } from "react-icons/fi";
 import Shell, { Card, StatusChip } from "../components/Shell";
-import { api, inr, type AdminOrder } from "../lib/api";
+import { api, inr, shortOrderId, type AdminOrder } from "../lib/api";
 
 const STATUSES = [
   "pending",
@@ -177,7 +177,7 @@ export default function Orders() {
     if (search) {
       const q = search.toLowerCase();
       return (
-        o.orderId.toLowerCase().includes(q) ||
+        (o.orderId ?? "").toLowerCase().includes(q) ||
         (o.userId?.name ?? "").toLowerCase().includes(q) ||
         (o.productId?.title ?? "").toLowerCase().includes(q)
       );
@@ -202,7 +202,7 @@ export default function Orders() {
     setError("");
     try {
       const j = await api<{ data: AdminOrder }>(
-        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/status`,
+        `/api/orders/admin/${encodeURIComponent(selected.orderId ?? selected._id)}/status`,
         { method: "PATCH", body: JSON.stringify({ orderStatus: nextStatus }) },
       );
       setSelected(j.data);
@@ -218,7 +218,7 @@ export default function Orders() {
     const header = ["Order ID","Customer","Email","Product","Type","Qty","Amount","Status","Date"];
     const lines = rows.map((o) =>
       [
-        o.orderId,
+        o.orderId ?? o._id,
         o.userId?.name ?? "",
         o.userId?.email ?? "",
         o.productId?.title ?? "Custom order",
@@ -263,7 +263,7 @@ export default function Orders() {
     setError("");
     try {
       const j = await api<{ data: AdminOrder }>(
-        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/meta`,
+        `/api/orders/admin/${encodeURIComponent(selected.orderId ?? selected._id)}/meta`,
         { method: "PATCH", body: JSON.stringify(meta) },
       );
       setSelected(j.data);
@@ -277,11 +277,11 @@ export default function Orders() {
 
   async function cancelOrder() {
     if (!selected) return;
-    if (!window.confirm(`Cancel order #${selected.orderId.slice(-8)}? The customer keeps their payment unless you also issue a refund.`)) return;
+    if (!window.confirm(`Cancel order #${shortOrderId(selected)}? The customer keeps their payment unless you also issue a refund.`)) return;
     setUpdating(true);
     try {
       const j = await api<{ data: AdminOrder }>(
-        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/status`,
+        `/api/orders/admin/${encodeURIComponent(selected.orderId ?? selected._id)}/status`,
         { method: "PATCH", body: JSON.stringify({ orderStatus: "cancelled" }) },
       );
       setSelected(j.data);
@@ -300,7 +300,7 @@ export default function Orders() {
     setError("");
     try {
       const j = await api<{ message: string; data: AdminOrder }>(
-        `/api/orders/admin/${encodeURIComponent(selected.orderId)}/refund`,
+        `/api/orders/admin/${encodeURIComponent(selected.orderId ?? selected._id)}/refund`,
         { method: "POST", body: JSON.stringify({}) },
       );
       setSelected(j.data);
@@ -324,10 +324,10 @@ export default function Orders() {
     ]
       .filter(Boolean)
       .join(", ");
-    w.document.write(`<html><head><title>Order ${selected.orderId}</title>
+    w.document.write(`<html><head><title>Order ${selected.orderId ?? selected._id}</title>
       <style>body{font-family:system-ui;padding:32px;color:#111}h1{font-size:20px}table{border-collapse:collapse;margin-top:16px}td{padding:6px 16px 6px 0;font-size:14px}td:first-child{color:#666}</style>
       </head><body>
-      <h1>AB Creation — Order #${selected.orderId}</h1>
+      <h1>AB Creation — Order #${selected.orderId ?? selected._id}</h1>
       <table>
         <tr><td>Customer</td><td>${selected.userId?.name ?? "—"} (${selected.userId?.email ?? ""})</td></tr>
         <tr><td>Phone</td><td>${selected.phoneNumber ?? "—"}</td></tr>
@@ -425,7 +425,7 @@ export default function Orders() {
             {pageRows.map((o) => (
               <tr key={o._id} className="border-t border-[#f3f4f6] text-[13.5px]">
                 <td className="px-6 py-4 font-bold text-black">
-                  #{o.orderId.slice(-8)}
+                  #{shortOrderId(o)}
                 </td>
                 <td className="px-3 py-4 text-[#374151]">{o.userId?.name ?? "—"}</td>
                 <td className="px-3 py-4">
@@ -552,7 +552,7 @@ export default function Orders() {
             <div className="sticky top-0 flex items-start justify-between border-b border-[#e5e7eb] bg-white px-6 py-5">
               <div>
                 <p className="flex items-center gap-3 text-[18px] font-bold text-black">
-                  Order #{selected.orderId.slice(-8)}{" "}
+                  Order #{shortOrderId(selected)}{" "}
                   <StatusChip status={selected.orderStatus} />
                 </p>
                 <p className="pt-1 text-[12.5px] text-[#6b7280]">

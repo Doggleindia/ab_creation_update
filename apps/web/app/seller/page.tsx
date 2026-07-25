@@ -22,6 +22,7 @@ import {
   getSubmissions,
   inr,
   publishedId,
+  shortOrderId,
 } from "@/lib/seller";
 
 const greeting = () => {
@@ -214,7 +215,7 @@ export default function SellerOverviewPage() {
                   return (
                     <tr key={o._id} className="border-t border-[#f3f4f6] text-[13px]">
                       <td className="px-5 py-3 font-bold text-black">
-                        #{o.orderId.slice(-8)}
+                        #{shortOrderId(o)}
                       </td>
                       <td className="px-3 py-3">
                         <span className="flex items-center gap-2.5">

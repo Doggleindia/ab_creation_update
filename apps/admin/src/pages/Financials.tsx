@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import { BsBank } from "react-icons/bs";
 import Shell, { Card } from "../components/Shell";
-import { api, inr, type AdminOrder, type WalletTxn } from "../lib/api";
+import { api, inr, shortOrderId, type AdminOrder, type WalletTxn } from "../lib/api";
 
 const CHART_RANGES = [
   { key: 7, label: "7D" },
@@ -788,7 +788,7 @@ export default function Financials() {
               <div key={o._id} className="rounded-xl border border-[#f3f4f6] p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[13.5px] font-bold text-black">
-                    Order #{o.orderId.slice(-8)}
+                    Order #{shortOrderId(o)}
                   </span>
                   <span
                     className={`text-[14px] font-bold ${
