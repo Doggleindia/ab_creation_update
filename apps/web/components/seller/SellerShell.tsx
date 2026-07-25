@@ -131,8 +131,12 @@ export default function SellerShell({
           </nav>
           <div className="flex flex-col gap-1 border-t border-[#f3f4f6] px-3 py-4">
             <Link
-              href="/dashboard/settings"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-semibold text-[#374151] hover:bg-[#f3f4f6]"
+              href="/seller/settings"
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-semibold ${
+                pathname.startsWith("/seller/settings")
+                  ? "bg-black text-white"
+                  : "text-[#374151] hover:bg-[#f3f4f6]"
+              }`}
             >
               <Settings className="h-4 w-4" /> Settings
             </Link>
