@@ -470,7 +470,7 @@ function NewProductWizard() {
     <main className="min-h-[80vh] w-full bg-[#f8f9fb] pb-28">
       {/* Wizard header + stepper */}
       <div className="sticky top-0 z-30 border-b border-[#e5e7eb] bg-white">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-3.5 sm:px-8">
+        <div className="flex w-full items-center justify-between gap-4 px-4 py-3.5 sm:px-8">
           <div className="flex min-w-0 items-center gap-6">
             <span className="hidden shrink-0 text-[17px] font-extrabold tracking-tight text-black lg:block">
               {editId ? "Edit Product" : "Create New Product"}
@@ -527,7 +527,7 @@ function NewProductWizard() {
         </p>
       )}
 
-      <div className="mx-auto max-w-[1440px] px-4 pt-8 sm:px-8">
+      <div className="w-full px-4 pt-8 sm:px-8">
         {/* STEP 1: Select garment */}
         {step === 0 && (
           <>
@@ -1091,7 +1091,7 @@ function NewProductWizard() {
       {/* Footer nav (steps 1–3) */}
       {step < 3 && (
         <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#e5e7eb] bg-white">
-          <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-3.5 sm:px-8">
+          <div className="flex w-full items-center justify-between px-4 py-3.5 sm:px-8">
             {step > 0 ? (
               <button
                 onClick={() => setStep((s) => s - 1)}

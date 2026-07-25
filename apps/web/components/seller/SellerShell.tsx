@@ -87,7 +87,7 @@ export default function SellerShell({
 
   return (
     <main className="w-full bg-[#f8f9fb]">
-      <div className="mx-auto flex min-h-[80vh] max-w-[1440px]">
+      <div className="flex min-h-[80vh] w-full">
         {/* Sidebar */}
         <aside className="hidden w-[230px] shrink-0 flex-col border-r border-[#e5e7eb] bg-white lg:flex">
           <div className="px-5 pt-7">

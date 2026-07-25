@@ -143,7 +143,7 @@ export default function SellerProductsPage() {
       )}
 
       {/* Cards */}
-      <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {pageRows.map((s) => {
           const chip = STATUS_CHIP[s.status] ?? STATUS_CHIP.pending;
           const base = typeof s.baseProductId === "object" ? s.baseProductId : null;
