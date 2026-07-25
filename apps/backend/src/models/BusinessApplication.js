@@ -100,6 +100,28 @@ const businessApplicationSchema = new mongoose.Schema(
       },
       sentAt: Date,
       respondedAt: Date,
+      // Structured proposal (mock: Products & Pricing + terms). amount is
+      // always the server-computed total of items + printing + shipping.
+      items: [
+        {
+          name: { type: String, trim: true },
+          qty: { type: Number, min: 1 },
+          sizeBreakdown: { type: String, trim: true },
+          unitPrice: { type: Number, min: 0 },
+          total: { type: Number, min: 0 },
+        },
+      ],
+      printingCost: { type: Number, min: 0, default: 0 },
+      shippingCost: { type: Number, min: 0, default: 0 },
+      advancePct: { type: Number, min: 0, max: 100, default: 50 },
+      validUntil: Date,
+      estimatedDelivery: Date,
+      // Wallet payment of the advance on acceptance (bulk accounts)
+      advancePaid: {
+        amount: { type: Number, min: 0 },
+        at: Date,
+        requestId: { type: String, trim: true },
+      },
       // Buyer asked for revisions while the quote was open
       changeRequest: {
         note: { type: String, trim: true },

@@ -14,7 +14,7 @@ import {
   Phone,
   XCircle,
 } from "lucide-react";
-import { BACKEND } from "@/lib/auth";
+import { BACKEND, getToken } from "@/lib/auth";
 
 type Quote = {
   amount?: number;
@@ -22,6 +22,19 @@ type Quote = {
   status?: "sent" | "accepted" | "declined" | "in_production" | "completed";
   sentAt?: string;
   changeRequest?: { note?: string; at?: string };
+  items?: {
+    name?: string;
+    qty?: number;
+    sizeBreakdown?: string;
+    unitPrice?: number;
+    total?: number;
+  }[];
+  printingCost?: number;
+  shippingCost?: number;
+  advancePct?: number;
+  validUntil?: string;
+  estimatedDelivery?: string;
+  advancePaid?: { amount?: number; at?: string };
 };
 
 type QuoteData = {
@@ -109,6 +122,29 @@ export default function BulkQuotePage() {
             }
           : d,
       );
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Accept + pay the advance from the wallet (logged-in linked account)
+  async function payAdvance() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const r = await fetch(
+        `${BACKEND}/api/applications/${encodeURIComponent(id)}/quote/pay-advance`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${getToken()}` },
+        },
+      );
+      const j = await r.json();
+      if (!r.ok) throw new Error(j?.message || "Payment failed");
+      setMessage(j.message);
+      setData((d) => (d ? { ...d, quote: j.data.quote } : d));
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -262,7 +298,100 @@ export default function BulkQuotePage() {
                 <p className="pt-3 text-[14.5px] font-semibold text-black">
                   {data.productsToSell || data.expectedVolume || "Bulk order enquiry"}
                 </p>
-                {quote ? (
+                {quote && (quote.items?.length ?? 0) > 0 ? (
+                  <>
+                    <div className="mt-4 overflow-x-auto rounded-[10px] border border-[#f3f4f6]">
+                      <table className="w-full min-w-[480px] text-left text-[13.5px]">
+                        <thead>
+                          <tr className="bg-[#f8f9fb] text-[11px] font-bold uppercase tracking-[0.6px] text-[#6b7280]">
+                            <th className="px-4 py-3">Product</th>
+                            <th className="px-3 py-3">Qty</th>
+                            <th className="px-3 py-3">Size Breakdown</th>
+                            <th className="px-3 py-3">Unit Price</th>
+                            <th className="px-4 py-3 text-right">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {quote.items!.map((it, i) => (
+                            <tr key={i} className="border-t border-[#f3f4f6]">
+                              <td className="px-4 py-3 font-semibold text-black">{it.name}</td>
+                              <td className="px-3 py-3 text-[#374151]">{it.qty}</td>
+                              <td className="px-3 py-3 text-[#374151]">
+                                {it.sizeBreakdown?.replaceAll(" ", ", ") || "—"}
+                              </td>
+                              <td className="px-3 py-3 text-[#374151]">
+                                ₹{(it.unitPrice ?? 0).toLocaleString("en-IN")}
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-black">
+                                ₹{(it.total ?? 0).toLocaleString("en-IN")}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="ml-auto mt-4 max-w-[320px] text-[13.5px]">
+                      <div className="flex justify-between py-1 text-[#374151]">
+                        <span>Subtotal</span>
+                        <span>
+                          ₹
+                          {quote
+                            .items!.reduce((s, it) => s + (it.total ?? 0), 0)
+                            .toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      {(quote.printingCost ?? 0) > 0 && (
+                        <div className="flex justify-between py-1 text-[#374151]">
+                          <span>Custom Printing (DTF)</span>
+                          <span>₹{quote.printingCost!.toLocaleString("en-IN")}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between py-1 text-[#374151]">
+                        <span>Shipping</span>
+                        {(quote.shippingCost ?? 0) > 0 ? (
+                          <span>₹{quote.shippingCost!.toLocaleString("en-IN")}</span>
+                        ) : (
+                          <span className="font-bold text-[#16a34a]">FREE</span>
+                        )}
+                      </div>
+                      <div className="mt-2 flex justify-between border-t border-[#e5e7eb] pt-2.5">
+                        <span className="text-[16px] font-bold text-black">Total</span>
+                        <span className="text-[22px] font-bold text-black">
+                          ₹{(quote.amount ?? 0).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </div>
+                    {(quote.advancePct ?? 0) > 0 && (
+                      <div className="mt-4 rounded-[10px] bg-[#f8f9fb] p-4 text-[13.5px] leading-6 text-[#374151]">
+                        <p className="font-bold text-black">Payment Terms</p>
+                        <p>
+                          ✓ {quote.advancePct}% Advance (₹
+                          {Math.round(((quote.amount ?? 0) * (quote.advancePct ?? 0)) / 100).toLocaleString("en-IN")}
+                          ) to start production
+                        </p>
+                        <p>
+                          ✓ {100 - (quote.advancePct ?? 0)}% Balance (₹
+                          {((quote.amount ?? 0) -
+                            Math.round(((quote.amount ?? 0) * (quote.advancePct ?? 0)) / 100)).toLocaleString("en-IN")}
+                          ) before final dispatch
+                        </p>
+                      </div>
+                    )}
+                    {quote.estimatedDelivery && (
+                      <p className="mt-4 rounded-[10px] bg-[#f0fdf4] px-4 py-3 text-[13.5px] font-semibold text-[#166534]">
+                        ✦ Estimated delivery: {fullDate(quote.estimatedDelivery)}
+                      </p>
+                    )}
+                    {quote.notes && (
+                      <div className="mt-4 rounded-[10px] bg-[#f8f9fb] p-4">
+                        <p className="text-[14px] font-bold text-black">Notes from AB Creation</p>
+                        <p className="whitespace-pre-line pt-1.5 text-[13px] italic leading-6 text-[#374151]">
+                          “{quote.notes}”
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : quote ? (
                   <div className="mt-4 rounded-[10px] bg-[#f8f9fb] p-5 text-[13.5px]">
                     {itemLines.map((l) => (
                       <p key={l} className="py-0.5 text-[#374151]">
@@ -392,13 +521,34 @@ export default function BulkQuotePage() {
 
                 {quote && quote.status === "sent" && (
                   <div className="flex flex-col gap-3 pt-4">
-                    <button
-                      onClick={() => void respond("accepted")}
-                      disabled={busy}
-                      className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand-orange text-[15px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-                    >
-                      <BadgeCheck className="h-4 w-4" /> Accept Quote
-                    </button>
+                    {getToken() && (quote.advancePct ?? 0) > 0 ? (
+                      <>
+                        <button
+                          onClick={() => void payAdvance()}
+                          disabled={busy}
+                          className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand-orange text-[15px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                        >
+                          <BadgeCheck className="h-4 w-4" /> Accept &amp; Pay Advance (₹
+                          {Math.round(((quote.amount ?? 0) * (quote.advancePct ?? 0)) / 100).toLocaleString("en-IN")}
+                          )
+                        </button>
+                        <p className="-mt-1 text-center text-[11.5px] text-[#9ca3af]">
+                          Paid from your wallet ·{" "}
+                          <Link href="/dashboard/wallet" className="underline">
+                            top up
+                          </Link>{" "}
+                          if the balance is short
+                        </p>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => void respond("accepted")}
+                        disabled={busy}
+                        className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand-orange text-[15px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                      >
+                        <BadgeCheck className="h-4 w-4" /> Accept Quote
+                      </button>
+                    )}
                     <button
                       onClick={() => setChangesOpen((v) => !v)}
                       disabled={busy}
@@ -431,9 +581,16 @@ export default function BulkQuotePage() {
                     >
                       Decline Quote
                     </button>
+                    {quote.validUntil && (
+                      <p className="flex items-center justify-between border-t border-[#f3f4f6] pt-3 text-[13px]">
+                        <span className="font-semibold text-[#b45309]">⏱ Quote valid until:</span>
+                        <span className="font-bold text-black">{fullDate(quote.validUntil)}</span>
+                      </p>
+                    )}
                     <p className="pt-1 text-center text-[12px] text-[#9ca3af]">
-                      Accepting confirms the proposal — our team then arranges the
-                      advance payment and starts production.
+                      {getToken() && (quote.advancePct ?? 0) > 0
+                        ? "Accepting pays the advance from your wallet and moves your order into production scheduling."
+                        : "Accepting confirms the proposal — our team then arranges the advance payment and starts production."}
                     </p>
                   </div>
                 )}
@@ -450,8 +607,10 @@ export default function BulkQuotePage() {
                       </>
                     ) : quote.status === "accepted" ? (
                       <>
-                        <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" /> Accepted — our team
-                        will contact you to arrange payment.
+                        <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" />{" "}
+                        {quote.advancePaid?.amount
+                          ? `Accepted — advance of ₹${quote.advancePaid.amount.toLocaleString("en-IN")} paid from your wallet.`
+                          : "Accepted — our team will contact you to arrange payment."}
                       </>
                     ) : quote.status === "in_production" ? (
                       <>

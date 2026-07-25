@@ -12,6 +12,7 @@ import {
   sendQuote,
   getPublicQuote,
   respondToQuote,
+  payQuoteAdvance,
   advanceQuoteStage,
 } from "../controllers/applicationController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
@@ -40,6 +41,8 @@ router.post(
 router.get("/mine", userAuth, asyncHandler(getMyApplications));
 router.get("/:id/quote", asyncHandler(getPublicQuote));
 router.post("/:id/quote/respond", intakeLimiter, asyncHandler(respondToQuote));
+// Accept + pay the advance from the wallet (linked bulk account only)
+router.post("/:id/quote/pay-advance", userAuth, asyncHandler(payQuoteAdvance));
 
 /**
  * ADMIN — review queues and decisions.

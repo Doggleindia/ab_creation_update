@@ -388,16 +388,56 @@ export const sendQuote = async (req, res, next) => {
   if (application.type !== "bulk") {
     return next(new AppError("Quotes can only be sent for bulk applications", 400));
   }
-  const amount = Math.round(Number(req.body.amount));
+  // Structured proposal lines (optional — a plain amount still works).
+  // The total is ALWAYS computed server-side from items + costs when items
+  // are given, so an inconsistent client total can never be stored.
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  const items = Array.isArray(req.body.items)
+    ? req.body.items
+        .map((it) => {
+          const qty = Math.round(num(it.qty));
+          const unitPrice = Math.round(num(it.unitPrice));
+          return {
+            name: toStr(it.name),
+            qty,
+            sizeBreakdown: toStr(it.sizeBreakdown),
+            unitPrice,
+            total: qty * unitPrice,
+          };
+        })
+        .filter((it) => it.name && it.qty > 0 && it.unitPrice > 0)
+        .slice(0, 20)
+    : [];
+  const printingCost = Math.max(0, Math.round(num(req.body.printingCost)));
+  const shippingCost = Math.max(0, Math.round(num(req.body.shippingCost)));
+  const advancePct = Math.min(100, Math.max(0, Math.round(num(req.body.advancePct) || 50)));
+
+  const amount =
+    items.length > 0
+      ? items.reduce((s, it) => s + it.total, 0) + printingCost + shippingCost
+      : Math.round(Number(req.body.amount));
   if (!Number.isFinite(amount) || amount <= 0) {
     return next(new AppError("A positive quote amount is required", 400));
   }
+
+  const asDate = (v) => {
+    if (!v) return undefined;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? undefined : d;
+  };
+
   application.quote = {
     amount,
     notes: toStr(req.body.notes),
     status: "sent",
     sentAt: new Date(),
     respondedAt: undefined,
+    items,
+    printingCost,
+    shippingCost,
+    advancePct,
+    validUntil: asDate(req.body.validUntil),
+    estimatedDelivery: asDate(req.body.estimatedDelivery),
   };
   await application.save();
 
@@ -553,4 +593,77 @@ export const getMyApplications = async (req, res) => {
       "businessName contactName status createdAt expectedVolume productsToSell quote.amount quote.status quote.sentAt quote.respondedAt quote.notes",
     );
   res.status(200).json({ status: "success", data: { applications } });
+};
+
+// Wallet legs of the bulk advance payment (imports hoist in ESM)
+import {
+  deductFromUserWallet,
+  creditToAdminWallet,
+} from "../services/walletService.js";
+
+/**
+ * USER — accept a sent quote and pay the advance from the wallet in one
+ * transactional step. Only the account linked to the application may pay.
+ * POST /api/applications/:id/quote/pay-advance
+ */
+export const payQuoteAdvance = async (req, res, next) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new AppError("Invalid application id", 400));
+  }
+  const application = await BusinessApplication.findById(id);
+  if (!application || application.type !== "bulk" || !application.quote?.status) {
+    return next(new AppError("Quote not found", 404));
+  }
+  const isOwner =
+    (application.linkedUserId && String(application.linkedUserId) === String(req.user._id)) ||
+    application.email === req.user.email;
+  if (!isOwner) {
+    return next(new AppError("This quote belongs to a different account", 403));
+  }
+  if (application.quote.status !== "sent") {
+    return next(new AppError(`This quote has already been ${application.quote.status}`, 409));
+  }
+  if (application.quote.validUntil && application.quote.validUntil < new Date()) {
+    return next(new AppError("This quote has expired — ask us for a fresh one", 409));
+  }
+
+  const pct = application.quote.advancePct ?? 50;
+  const advance = Math.round((application.quote.amount * pct) / 100);
+
+  if (advance > 0) {
+    const requestId = `BULK-ADV-${application._id}`;
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await deductFromUserWallet(req.user._id, advance, requestId, session);
+        await creditToAdminWallet(advance, `BULK-ADV-ADMIN-${application._id}`, session);
+        application.quote.status = "accepted";
+        application.quote.respondedAt = new Date();
+        application.quote.advancePaid = { amount: advance, at: new Date(), requestId };
+        application.markModified("quote");
+        await application.save({ session });
+      });
+    } catch (txErr) {
+      if (txErr instanceof AppError) return next(txErr);
+      // walletService throws plain Errors for insufficient balance
+      return next(new AppError(txErr.message || "Payment failed", 402));
+    } finally {
+      session.endSession();
+    }
+  } else {
+    application.quote.status = "accepted";
+    application.quote.respondedAt = new Date();
+    application.markModified("quote");
+    await application.save();
+  }
+
+  res.status(200).json({
+    status: "success",
+    message:
+      advance > 0
+        ? `Quote accepted — advance of Rs ${advance.toLocaleString("en-IN")} paid from your wallet.`
+        : "Quote accepted.",
+    data: { quote: application.quote },
+  });
 };

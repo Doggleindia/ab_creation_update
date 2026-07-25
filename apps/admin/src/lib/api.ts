@@ -154,6 +154,19 @@ export type Application = {
     sentAt?: string;
     respondedAt?: string;
     changeRequest?: { note?: string; at?: string };
+    items?: {
+      name?: string;
+      qty?: number;
+      sizeBreakdown?: string;
+      unitPrice?: number;
+      total?: number;
+    }[];
+    printingCost?: number;
+    shippingCost?: number;
+    advancePct?: number;
+    validUntil?: string;
+    estimatedDelivery?: string;
+    advancePaid?: { amount?: number; at?: string; requestId?: string };
   };
   assignee?: string;
   payout?: { accountLast4?: string; ifsc?: string; accountHolder?: string };

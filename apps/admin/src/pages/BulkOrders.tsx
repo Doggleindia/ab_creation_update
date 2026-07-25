@@ -67,11 +67,20 @@ function parseProducts(a: Application) {
   return { qty: m[1], name: m[2], color: m[3] ?? null, sizes };
 }
 
-type LineItem = { label: string; qty: string; price: string };
+type LineItem = { label: string; qty: string; price: string; sizes: string };
 type Flash = { kind: "ok" | "err"; text: string } | null;
 
 const TIMELINES = ["7 days", "10 days", "14 days", "21 days", "30 days"];
 const TERMS = ["50/50 Advance", "100% Advance", "On Delivery"];
+// Advance share of the total the client pays from their wallet on acceptance
+const ADVANCE_PCT: Record<string, number> = {
+  "50/50 Advance": 50,
+  "100% Advance": 100,
+  "On Delivery": 0,
+};
+
+const dateInput = (daysFromNow: number) =>
+  new Date(Date.now() + daysFromNow * 86400000).toISOString().slice(0, 10);
 
 export default function BulkOrders() {
   const [apps, setApps] = useState<Application[]>([]);
@@ -84,6 +93,11 @@ export default function BulkOrders() {
   const [items, setItems] = useState<LineItem[]>([]);
   const [timeline, setTimeline] = useState(TIMELINES[1]);
   const [terms, setTerms] = useState(TERMS[0]);
+  const [printing, setPrinting] = useState("");
+  const [shipping, setShipping] = useState("");
+  const [validUntil, setValidUntil] = useState(dateInput(7));
+  const [estDelivery, setEstDelivery] = useState(dateInput(14));
+  const [notes, setNotes] = useState("");
   const [assignee, setAssignee] = useState("");
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
@@ -117,8 +131,14 @@ export default function BulkOrders() {
         label: prod?.name?.trim() || selected.categories?.[0] || "Garments",
         qty: prod?.qty ?? String(parseInt(selected.expectedVolume ?? "", 10) || ""),
         price: "",
+        sizes: (prod?.sizes ?? []).map(([s, n]) => `${s}:${n}`).join(" "),
       },
     ]);
+    setPrinting("");
+    setShipping("");
+    setValidUntil(dateInput(7));
+    setEstDelivery(dateInput(14));
+    setNotes("");
     setAssignee(selected.assignee ?? "");
     setFlash(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,30 +157,22 @@ export default function BulkOrders() {
   const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const total = items.reduce(
+  const itemsSubtotal = items.reduce(
     (s, it) => s + (Number(it.qty) || 0) * (Number(it.price) || 0),
     0,
   );
+  const total = itemsSubtotal + (Number(printing) || 0) + (Number(shipping) || 0);
+  const advancePct = ADVANCE_PCT[terms] ?? 50;
+  const advanceDue = Math.round((total * advancePct) / 100);
 
   async function sendProposal() {
     if (!selected) return;
-    if (total <= 0) {
+    if (itemsSubtotal <= 0) {
       setFlash({ kind: "err", text: "Add at least one line with quantity and price." });
       return;
     }
     setBusy(true);
     setFlash(null);
-    const lines = items
-      .filter((it) => Number(it.qty) > 0 && Number(it.price) > 0)
-      .map(
-        (it) =>
-          `${it.qty} × ${it.label} @ ₹${Number(it.price).toLocaleString("en-IN")} = ₹${(
-            Number(it.qty) * Number(it.price)
-          ).toLocaleString("en-IN")}`,
-      );
-    const notes = [...lines, "Shipping: Free", `Timeline: ${timeline}`, `Payment: ${terms}`].join(
-      " · ",
-    );
     try {
       if (assignee !== (selected.assignee ?? "")) {
         await api(`/api/applications/${selected._id}/review`, {
@@ -170,7 +182,22 @@ export default function BulkOrders() {
       }
       const j = await api<{ message: string }>(`/api/applications/${selected._id}/quote`, {
         method: "PATCH",
-        body: JSON.stringify({ amount: total, notes }),
+        body: JSON.stringify({
+          items: items
+            .filter((it) => Number(it.qty) > 0 && Number(it.price) > 0)
+            .map((it) => ({
+              name: it.label || "Item",
+              qty: Number(it.qty),
+              unitPrice: Number(it.price),
+              sizeBreakdown: it.sizes,
+            })),
+          printingCost: Number(printing) || 0,
+          shippingCost: Number(shipping) || 0,
+          advancePct,
+          validUntil,
+          estimatedDelivery: estDelivery,
+          notes: [notes, `Production timeline: ${timeline}`].filter(Boolean).join("\n"),
+        }),
       });
       setFlash({ kind: "ok", text: j.message });
       load();
@@ -452,53 +479,87 @@ export default function BulkOrders() {
                   </h3>
                   <div className="flex flex-col gap-2.5 pt-4">
                     {items.map((it, i) => (
-                      <div key={i} className="grid grid-cols-[1fr_58px_74px_24px] items-center gap-2">
+                      <div key={i} className="rounded-lg border border-[#f3f4f6] p-2">
+                        <div className="grid grid-cols-[1fr_58px_74px_24px] items-center gap-2">
+                          <input
+                            value={it.label}
+                            onChange={(e) =>
+                              setItems((r) => r.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
+                            }
+                            placeholder="Item"
+                            className="h-9 rounded-lg border border-[#e5e7eb] px-2.5 text-[12.5px] text-black focus:border-black focus:outline-none"
+                          />
+                          <input
+                            type="number"
+                            min={1}
+                            value={it.qty}
+                            onChange={(e) =>
+                              setItems((r) => r.map((x, j) => (j === i ? { ...x, qty: e.target.value } : x)))
+                            }
+                            placeholder="Qty"
+                            className="h-9 rounded-lg border border-[#e5e7eb] px-2 text-[12.5px] text-black focus:border-black focus:outline-none"
+                          />
+                          <input
+                            type="number"
+                            min={1}
+                            value={it.price}
+                            onChange={(e) =>
+                              setItems((r) => r.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))
+                            }
+                            placeholder="₹/pc"
+                            className="h-9 rounded-lg border border-[#e5e7eb] px-2 text-[12.5px] text-black focus:border-black focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            aria-label="Remove line"
+                            onClick={() => setItems((r) => r.filter((_, j) => j !== i))}
+                            disabled={items.length === 1}
+                            className="text-[#dc2626] hover:opacity-70 disabled:opacity-30"
+                          >
+                            <FiTrash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                         <input
-                          value={it.label}
+                          value={it.sizes}
                           onChange={(e) =>
-                            setItems((r) => r.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
+                            setItems((r) => r.map((x, j) => (j === i ? { ...x, sizes: e.target.value } : x)))
                           }
-                          placeholder="Item"
-                          className="h-9 rounded-lg border border-[#e5e7eb] px-2.5 text-[12.5px] text-black focus:border-black focus:outline-none"
+                          placeholder="Size breakdown, e.g. S:50 M:80 L:70"
+                          className="mt-2 h-8 w-full rounded-lg border border-[#e5e7eb] px-2.5 text-[12px] text-black focus:border-black focus:outline-none"
                         />
-                        <input
-                          type="number"
-                          min={1}
-                          value={it.qty}
-                          onChange={(e) =>
-                            setItems((r) => r.map((x, j) => (j === i ? { ...x, qty: e.target.value } : x)))
-                          }
-                          placeholder="Qty"
-                          className="h-9 rounded-lg border border-[#e5e7eb] px-2 text-[12.5px] text-black focus:border-black focus:outline-none"
-                        />
-                        <input
-                          type="number"
-                          min={1}
-                          value={it.price}
-                          onChange={(e) =>
-                            setItems((r) => r.map((x, j) => (j === i ? { ...x, price: e.target.value } : x)))
-                          }
-                          placeholder="₹/pc"
-                          className="h-9 rounded-lg border border-[#e5e7eb] px-2 text-[12.5px] text-black focus:border-black focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          aria-label="Remove line"
-                          onClick={() => setItems((r) => r.filter((_, j) => j !== i))}
-                          disabled={items.length === 1}
-                          className="text-[#dc2626] hover:opacity-70 disabled:opacity-30"
-                        >
-                          <FiTrash2 className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                     ))}
                     <button
                       type="button"
-                      onClick={() => setItems((r) => [...r, { label: "", qty: "", price: "" }])}
+                      onClick={() => setItems((r) => [...r, { label: "", qty: "", price: "", sizes: "" }])}
                       className="flex w-fit items-center gap-1 text-[12.5px] font-bold text-black hover:underline"
                     >
                       <FiPlus className="h-3.5 w-3.5" /> Add line
                     </button>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <label className="flex flex-col gap-1">
+                        <span className="text-[11px] font-semibold text-[#374151]">Custom Printing (₹)</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={printing}
+                          onChange={(e) => setPrinting(e.target.value)}
+                          placeholder="0"
+                          className="h-9 rounded-lg border border-[#e5e7eb] px-2.5 text-[12.5px] text-black focus:border-black focus:outline-none"
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-[11px] font-semibold text-[#374151]">Shipping (₹, 0 = free)</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={shipping}
+                          onChange={(e) => setShipping(e.target.value)}
+                          placeholder="0"
+                          className="h-9 rounded-lg border border-[#e5e7eb] px-2.5 text-[12.5px] text-black focus:border-black focus:outline-none"
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   <div className="mt-4 rounded-xl bg-[#f8f9fb] p-4 text-[13px]">
@@ -514,15 +575,62 @@ export default function BulkOrders() {
                           </span>
                         </div>
                       ))}
+                    {Number(printing) > 0 && (
+                      <div className="flex justify-between py-0.5 text-[#374151]">
+                        <span>Custom Printing</span>
+                        <span className="font-semibold text-black">{inr(Number(printing))}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between py-0.5 text-[#374151]">
                       <span>Shipping</span>
-                      <span className="font-bold text-[#16a34a]">FREE</span>
+                      {Number(shipping) > 0 ? (
+                        <span className="font-semibold text-black">{inr(Number(shipping))}</span>
+                      ) : (
+                        <span className="font-bold text-[#16a34a]">FREE</span>
+                      )}
                     </div>
                     <div className="mt-2 flex justify-between border-t border-[#e5e7eb] pt-2.5 text-[15px] font-bold text-black">
-                      <span>Total Estimate</span>
+                      <span>Total</span>
                       <span>{inr(total)}</span>
                     </div>
+                    {advancePct > 0 && (
+                      <div className="flex justify-between pt-1 text-[12px] text-[#6b7280]">
+                        <span>Advance on acceptance ({advancePct}%)</span>
+                        <span className="font-semibold">{inr(advanceDue)}</span>
+                      </div>
+                    )}
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-4">
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[11px] font-semibold text-[#374151]">Quote Valid Until</span>
+                      <input
+                        type="date"
+                        value={validUntil}
+                        onChange={(e) => setValidUntil(e.target.value)}
+                        className={inputCls}
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[11px] font-semibold text-[#374151]">Estimated Delivery</span>
+                      <input
+                        type="date"
+                        value={estDelivery}
+                        onChange={(e) => setEstDelivery(e.target.value)}
+                        className={inputCls}
+                      />
+                    </label>
+                  </div>
+                  <label className="flex flex-col gap-1.5 pt-3">
+                    <span className="text-[11px] font-semibold text-[#374151]">Notes to Client</span>
+                    <textarea
+                      rows={3}
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Printing method, sizing advice, sample instructions…"
+                      className="rounded-lg border border-[#e5e7eb] p-2.5 text-[12.5px] text-black focus:border-black focus:outline-none"
+                    />
+                  </label>
 
                   <div className="grid grid-cols-2 gap-3 pt-4">
                     <label className="flex flex-col gap-1.5">
@@ -600,8 +708,26 @@ export default function BulkOrders() {
                     >
                       {STAGE_CHIP[stage].label}
                     </span>
+                    {(a.quote?.items?.length ?? 0) > 0 && (
+                      <div className="mt-3 border-t border-[#e5e7eb] pt-3">
+                        {a.quote!.items!.map((it, i) => (
+                          <div key={i} className="flex justify-between py-0.5 text-[12.5px] text-[#374151]">
+                            <span>
+                              {it.name} × {it.qty}
+                              {it.sizeBreakdown ? ` (${it.sizeBreakdown})` : ""}
+                            </span>
+                            <span className="font-semibold text-black">{inr(it.total ?? 0)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {a.quote?.advancePaid?.amount ? (
+                      <p className="mt-3 rounded-lg bg-[#dcfce7] px-3 py-2 text-[12px] font-semibold text-[#166534]">
+                        Advance {inr(a.quote.advancePaid.amount)} paid from wallet
+                      </p>
+                    ) : null}
                     {a.quote?.notes && (
-                      <p className="mt-3 border-t border-[#e5e7eb] pt-3 text-[12.5px] leading-5 text-[#374151]">
+                      <p className="mt-3 whitespace-pre-line border-t border-[#e5e7eb] pt-3 text-[12.5px] leading-5 text-[#374151]">
                         {a.quote.notes}
                       </p>
                     )}

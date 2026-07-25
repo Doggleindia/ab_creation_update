@@ -76,7 +76,7 @@ export default function BulkQuotesPage() {
           )}
         </h1>
         <Link
-          href="/bulk-order"
+          href="/dashboard/quotes/new"
           className="flex items-center gap-2 rounded-[10px] bg-black px-5 py-3 text-[14px] font-bold text-white hover:opacity-85"
         >
           <Plus className="h-4 w-4" /> Request New Quote
@@ -92,7 +92,7 @@ export default function BulkQuotesPage() {
             will send a tailored proposal.
           </p>
           <Link
-            href="/bulk-order"
+            href="/dashboard/quotes/new"
             className="mt-6 inline-block rounded-[8px] bg-black px-7 py-3 text-[13.5px] font-bold text-white hover:opacity-85"
           >
             Start a Bulk Request
