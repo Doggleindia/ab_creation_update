@@ -15,6 +15,16 @@ const NAV_LINKS = [
   { label: "Contact Us", href: "/contact-us" },
 ];
 
+// Approved sellers get a partner-focused nav — no "Join as Seller" pitch,
+// direct access to their studio instead.
+const SELLER_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Collection", href: "/collection", hasDropdown: true },
+  { label: "Contact", href: "/contact-us" },
+  { label: "Dashboard", href: "/seller" },
+  { label: "Settings", href: "/seller/settings" },
+];
+
 function AccountMenu({ user }: { user: AuthUser }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -142,6 +152,8 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
     return subscribeAuth(sync);
   }, []);
 
+  const links = user?.accountType === "seller" ? SELLER_LINKS : NAV_LINKS;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#f3f4f6] bg-white">
       <nav className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-4 sm:px-8">
@@ -168,7 +180,7 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
           </Link>
 
           <ul className="hidden items-center gap-5 lg:flex">
-            {NAV_LINKS.map((link) => (
+            {links.map((link) => (
               <li key={link.label}>
                 <Link
                   href={link.href}
@@ -242,7 +254,7 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
       {mobileOpen && (
         <div className="border-t border-[#f3f4f6] bg-white lg:hidden">
           <ul className="mx-auto flex max-w-[1280px] flex-col px-4 py-2 sm:px-8">
-            {NAV_LINKS.map((link) => (
+            {links.map((link) => (
               <li key={link.label}>
                 <Link
                   href={link.href}
