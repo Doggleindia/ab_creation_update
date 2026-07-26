@@ -2123,7 +2123,7 @@ export default function TShirtDesigner({
             <div className="flex flex-1 overflow-hidden">
 
               {/* 2. LEFT SIDEBAR (TOOLS) */}
-              <aside className="w-[84px] md:w-[240px] flex flex-col md:flex-row border-r border-[#e5e7eb] bg-[#eef0f2]">
+              <aside className="w-[84px] md:w-[300px] flex flex-col md:flex-row border-r border-[#e5e7eb] bg-[#eef0f2]">
                 {/* Mini icon navigation */}
                 <div className="flex flex-col gap-4 border-b md:border-b-0 md:border-r border-[#e5e7eb] p-3 items-center w-full md:w-[72px]">
                   <button
@@ -2320,9 +2320,9 @@ export default function TShirtDesigner({
                                 key={key}
                                 onClick={() => handleAddShape(`glyph:${key}`)}
                                 title={def.label}
-                                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] px-2 pt-3 pb-2 transition-all group"
+                                className="flex min-w-0 flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] px-1.5 pt-3 pb-2 transition-all group"
                               >
-                                <svg viewBox="0 0 100 100" className="h-11 w-11">
+                                <svg viewBox="0 0 100 100" className="h-9 w-9 shrink-0">
                                   <path d={def.path} fill="#6b7280" fillRule="evenodd" className="group-hover:fill-[#ff5c00]" />
                                 </svg>
                                 <span className="text-[10px] leading-tight text-[#6b7280] group-hover:text-[#1a1c1c] truncate w-full text-center">{def.label}</span>
@@ -2334,7 +2334,7 @@ export default function TShirtDesigner({
                       {/* STICKERS */}
                       <div className="mt-2">
                         <h4 className="text-sm font-bold text-[#1a1c1c] mb-2">Stickers</h4>
-                        <div className="grid grid-cols-5 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                           {STICKERS.map((emoji) => (
                             <button
                               key={emoji}
