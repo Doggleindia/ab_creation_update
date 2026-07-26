@@ -33,6 +33,54 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    // Distinguishes the kind of account. "normal" self-registers via /signup;
+    // "bulk" and "seller" are provisioned by an admin approving a
+    // BusinessApplication, which is why they can never be set from /signup.
+    accountType: {
+      type: String,
+      enum: ["normal", "bulk", "seller"],
+      default: "normal",
+    },
+
+    // Set to true when an account is created with a system-generated temporary
+    // password (approved bulk/seller applications). The user is forced to set a
+    // new password on first login before reaching the dashboard.
+    mustChangePassword: {
+      type: Boolean,
+      default: false,
+    },
+
+    status: {
+      type: String,
+      enum: ["active", "suspended"],
+      default: "active",
+    },
+
+    avatar: {
+      type: String,
+      trim: true,
+    },
+
+    gender: {
+      type: String,
+      enum: ["", "male", "female", "other"],
+      default: "",
+    },
+
+    dateOfBirth: {
+      type: Date,
+    },
+
+    // Consent flags — every outbound channel must respect these.
+    notificationPrefs: {
+      orderUpdates: { type: Boolean, default: true },
+      promotionalEmails: { type: Boolean, default: false },
+      designReminders: { type: Boolean, default: true },
+      smsUpdates: { type: Boolean, default: true },
+    },
+
+    // Default shipping address (mirror of the default entry in `addresses`,
+    // kept in sync so checkout pre-fill keeps working unchanged)
     address: {
       street: {
         type: String,
@@ -56,6 +104,22 @@ const userSchema = new mongoose.Schema(
         default: "India",
       },
     },
+
+    // Labeled address book (Home / Office / …). Exactly one entry is default.
+    addresses: [
+      {
+        label: { type: String, trim: true, default: "Home" },
+        name: { type: String, trim: true },
+        phone: { type: String, trim: true },
+        street: { type: String, trim: true, required: true },
+        line2: { type: String, trim: true },
+        city: { type: String, trim: true, required: true },
+        state: { type: String, trim: true },
+        pincode: { type: String, trim: true, required: true },
+        country: { type: String, trim: true, default: "India" },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
 
     resetOtp: {
       type: String,

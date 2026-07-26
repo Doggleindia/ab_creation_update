@@ -1,52 +1,56 @@
-// ========== WISHLIST TYPES ==========
+"use client";
+
+// Client-side wishlist (localStorage), same pattern as lib/cart.
 export type WishlistItem = {
   slug: string;
   title: string;
+  price: number;
   image: string;
-  price: string;
-  description?: string;
 };
 
-const WISHLIST_CACHE_KEY = "kt-adhesives-wishlist-cache";
+const KEY = "ab-wishlist";
+const EVENT = "ab-wishlist-updated";
 
-export function getLocalWishlist(): WishlistItem[] {
+export function getWishlist(): WishlistItem[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(WISHLIST_CACHE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return JSON.parse(localStorage.getItem(KEY) || "[]");
   } catch {
     return [];
   }
 }
 
-export function setLocalWishlist(items: WishlistItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(WISHLIST_CACHE_KEY, JSON.stringify(items));
-    window.dispatchEvent(new CustomEvent("wishlist-updated"));
-  } catch (e) {
-    console.error("Failed to save wishlist cache", e);
+function save(items: WishlistItem[]) {
+  localStorage.setItem(KEY, JSON.stringify(items));
+  window.dispatchEvent(new Event(EVENT));
+}
+
+export function inWishlist(slug: string): boolean {
+  return getWishlist().some((i) => i.slug === slug);
+}
+
+export function toggleWishlist(item: WishlistItem): boolean {
+  const items = getWishlist();
+  const idx = items.findIndex((i) => i.slug === item.slug);
+  if (idx >= 0) {
+    items.splice(idx, 1);
+    save(items);
+    return false;
   }
+  items.push(item);
+  save(items);
+  return true;
 }
 
-export function toggleWishlistItem(item: WishlistItem): void {
-  const current = getLocalWishlist();
-  const exists = current.some((i) => i.slug === item.slug);
-  let updated: WishlistItem[];
-  
-  if (exists) {
-    updated = current.filter((i) => i.slug !== item.slug);
-  } else {
-    updated = [...current, item];
-  }
-  
-  setLocalWishlist(updated);
+export function removeFromWishlist(slug: string) {
+  save(getWishlist().filter((i) => i.slug !== slug));
 }
 
-export function isInWishlist(slug: string): boolean {
-  return getLocalWishlist().some((i) => i.slug === slug);
-}
-
-export function getWishlistCount(): number {
-  return getLocalWishlist().length;
+export function subscribeWishlist(cb: () => void): () => void {
+  window.addEventListener(EVENT, cb);
+  window.addEventListener("storage", cb);
+  return () => {
+    window.removeEventListener(EVENT, cb);
+    window.removeEventListener("storage", cb);
+  };
 }

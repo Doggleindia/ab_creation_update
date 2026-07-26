@@ -1,164 +1,74 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { adminLogin } from "../lib/api";
 
-const Login: React.FC = () => {
+export default function Login() {
   const navigate = useNavigate();
-  const login = useAuthStore((state: any) => state.login);
-  const isLoading = useAuthStore((state: any) => state.isLoading);
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    
-    if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
+    setBusy(true);
+    setError("");
+    const fd = new FormData(e.currentTarget);
     try {
-      await login(formData);
-      navigate('/dashboard');
+      await adminLogin(String(fd.get("email")), String(fd.get("password")));
+      navigate("/", { replace: true });
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError(err instanceof Error ? err.message : "Login failed");
+      setBusy(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-[#171717] to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-[#B87D4C] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-[#B87D4C] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-2000"></div>
-        </div>
-
-        {/* Card */}
-        <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="w-40 h-40 bg-white rounded-2xl flex items-center justify-center mb-4 mx-auto p-3 shadow-lg">
-              <img src="/ab-creation-logo.png" alt="AB Creation" className="w-full h-full object-contain" />
-            </div>
-            <h1 className="text-3xl font-bold text-white text-center mb-2">Welcome Back</h1>
-            <p className="text-gray-300 text-center">Sign in to your account</p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Email Field */}
-            <div>
-              <label className="block text-gray-200 text-sm font-medium mb-2">Email Address</label>
-              <div className="relative">
-                <span className="absolute left-3 top-3.5 text-gray-400">{React.createElement(FiMail as any, { size: 20 })}</span>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#B87D4C] focus:bg-white/20 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-gray-200 text-sm font-medium">Password</label>
-                <Link to="/forgot-password" className="text-[#B87D4C] hover:text-[#B87D4C] text-sm font-medium">
-                  Forgot?
-                </Link>
-              </div>
-              <div className="relative">
-                <span className="absolute left-3 top-3.5 text-gray-400">{React.createElement(FiLock as any, { size: 20 })}</span>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#B87D4C] focus:bg-white/20 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-300"
-                >
-                  {showPassword ? React.createElement(FiEyeOff as any, { size: 20 }) : React.createElement(FiEye as any, { size: 20 })}
-                </button>
-              </div>
-            </div>
-
-            {/* Remember Me */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                className="w-4 h-4 rounded border-white/30 bg-white/10 cursor-pointer"
-              />
-              <label htmlFor="remember" className="ml-2 text-gray-300 text-sm cursor-pointer">
-                Remember me
-              </label>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full mt-6 py-3 px-4 bg-gradient-to-r from-[#CBAA75] to-[#B87D4C] text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  Sign In
-                  {React.createElement(FiArrowRight as any, { size: 20 })}
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-white/10"></div>
-            <span className="text-gray-400 text-sm">or</span>
-            <div className="flex-1 h-px bg-white/10"></div>
-          </div>
-
-          {/* Footer */}
-          <p className="text-center text-gray-300">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-[#B87D4C] hover:text-[#B87D4C] font-semibold">
-              Sign Up
-            </Link>
-          </p>
-        </div>
+    <main className="flex min-h-screen items-center justify-center bg-[#f8f9fb] px-4">
+      <div className="w-full max-w-[400px] rounded-xl border border-[#e5e7eb] bg-white p-10 shadow-sm">
+        <p className="text-[22px] font-extrabold tracking-tight text-black">
+          AB Creation
+        </p>
+        <p className="pt-1 text-[10px] font-bold uppercase tracking-[1.5px] text-[#9ca3af]">
+          Admin Console
+        </p>
+        <form onSubmit={onSubmit} className="flex flex-col gap-4 pt-8">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[12px] font-bold uppercase tracking-[0.5px] text-[#6b7280]">
+              Email
+            </span>
+            <input
+              name="email"
+              type="email"
+              required
+              placeholder="admin@abcreation.com"
+              className="h-11 rounded-lg border border-[#e5e7eb] px-4 text-[14px] text-black focus:border-black focus:outline-none"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[12px] font-bold uppercase tracking-[0.5px] text-[#6b7280]">
+              Password
+            </span>
+            <input
+              name="password"
+              type="password"
+              required
+              placeholder="••••••••"
+              className="h-11 rounded-lg border border-[#e5e7eb] px-4 text-[14px] text-black focus:border-black focus:outline-none"
+            />
+          </label>
+          {error && (
+            <p className="rounded-lg bg-[#fef2f2] px-4 py-3 text-[13px] text-[#ba1a1a]">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={busy}
+            className="mt-2 h-11 rounded-lg bg-black text-[14px] font-bold text-white transition-opacity hover:opacity-85 disabled:opacity-50"
+          >
+            {busy ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
       </div>
-    </div>
+    </main>
   );
-};
-
-export default Login;
+}

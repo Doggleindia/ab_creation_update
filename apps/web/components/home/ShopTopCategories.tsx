@@ -1,163 +1,112 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
-interface Category {
-  _id: string;
-  id: string;
-  name: string;
-  slug: string;
-  images?: string[];
-  collectionId?: {
-    _id?: string;
-    id?: string;
-    name?: string;
-    slug?: string;
-  };
-}
+const CATEGORY_CARDS = [
+  { label: "Hoodie", img: "/images/home/cat-hoodie.png", slug: "hoodies" },
+  { label: "Polo Tshirt", img: "/images/home/cat-polo.png", slug: "polo-shirts" },
+  { label: "Tshirt", img: "/images/home/cat-tshirt.png", slug: "t-shirts" },
+  { label: "Cap", img: "/images/home/cat-cap.png", slug: "caps" },
+  {
+    label: "Sweatshirt",
+    img: "/images/home/cat-sweatshirt.png",
+    slug: "sweatshirts",
+  },
+];
 
 export default function ShopTopCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        // Hit the cached Next.js proxy route (served from the edge cache) rather
-        // than the backend directly, so the homepage stays fast.
-        const res = await fetch("/api/categories");
-
-        if (!res.ok) {
-          throw new Error(`Failed to load categories: ${res.status}`);
-        }
-
-        const json = await res.json();
-        const items: Category[] = json?.data?.categories || [];
-
-        const uniqueCategories: Category[] = [];
-        const seenNames = new Set<string>();
-
-        for (const item of items) {
-          const name = item.name?.trim();
-          if (!name) continue;
-          if (!seenNames.has(name)) {
-            seenNames.add(name);
-            uniqueCategories.push(item);
-          }
-          if (uniqueCategories.length >= 5) break;
-        }
-
-        setCategories(uniqueCategories);
-      } catch (err) {
-        console.error("[ShopTopCategories] fetchCategories error", err);
-        setError("Unable to load categories");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
   return (
-    <section className="bg-[#F5F1EA] py-16 md:py-24">
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6">
-        {/* HEADING */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-[42px] font-bold mb-3 text-[#171717] tracking-tight">
+    <section className="w-full bg-[#f9fafb] px-4 py-20 sm:px-8 lg:px-[86.5px]">
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-6">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h2 className="font-poppins text-3xl font-bold text-[#111827] sm:text-[48px]">
             Shop Our Top Categories
           </h2>
-          <p className="text-gray-500 text-[17px]">
+          <p className="text-[18px] text-[#6b7280] sm:text-[24px]">
             Select a Product to Start Ordering
           </p>
         </div>
 
-        {/* CATEGORY BANNERS ROW */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Unisex/Men Collection */}
-          <div className="relative bg-[#1dc167] overflow-hidden rounded-[24px] h-[280px] md:h-[320px] flex items-center p-8 md:p-12">
-            <div className="relative z-10 max-w-[65%]">
-              <h3 className="text-white text-3xl md:text-[34px] font-bold mb-3 leading-tight">
+        {/* Two banner cards */}
+        <div className="grid grid-cols-1 gap-8 pt-6 md:grid-cols-2">
+          {/* Men */}
+          <div className="relative flex items-center overflow-hidden rounded-3xl bg-[#10b981]">
+            <div className="flex flex-1 flex-col items-start gap-2 p-8">
+              <h3 className="font-poppins text-[28px] font-bold text-white sm:text-[32px]">
                 Unisex / Men collection
               </h3>
-              <p className="text-white/90 text-[15px] mb-8 leading-relaxed">
-                You can choose to design products for <br className="hidden md:block"/> men of all ages
+              <p className="max-w-[323px] text-[16px] leading-5 text-white/90">
+                You can choose to design products for men of all ages
               </p>
-              <Link href="/product-collection?collectionSlug=mens-collections">
-                <button className="bg-white text-[#1dc167] px-6 py-2.5 rounded-full font-bold text-[15px] flex items-center gap-2 hover:bg-gray-50 transition-colors">
-                  Explore products <span className="text-lg leading-none">&rarr;</span>
-                </button>
+              <Link
+                href="/collection?collectionSlug=mens-collections"
+                className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-6 py-2 text-[16px] font-bold text-[#059669]"
+              >
+                Explore products
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <img
-              src="/images/home/unisex-men-collection.png"
-              alt="Unisex/Men collection"
-              loading="lazy"
-              decoding="async"
-              className="absolute right-0 bottom-0 h-[85%] md:h-[85%] object-cover object-bottom"
-            />
+            <div className="relative h-[254px] w-[150px] shrink-0 self-end sm:w-[190px]">
+              <Image
+                src="/images/home/cat-men.png"
+                alt="Men collection"
+                fill
+                className="object-contain object-bottom"
+                sizes="190px"
+              />
+            </div>
           </div>
 
-          {/* Woman Collection */}
-          <div className="relative bg-[#F5F1EA] overflow-hidden rounded-[24px] h-[280px] md:h-[320px] flex items-center p-8 md:p-12">
-            <div className="relative z-10 max-w-[65%]">
-              <h3 className="text-[#171717] text-3xl md:text-[34px] font-bold mb-3 leading-tight">
+          {/* Woman */}
+          <div className="relative flex items-center overflow-hidden rounded-3xl bg-[#ffedd5]">
+            <div className="flex flex-1 flex-col items-start gap-2 p-8">
+              <h3 className="font-poppins text-[28px] font-bold text-[#1f2937] sm:text-[32px]">
                 Woman collection
               </h3>
-              <p className="text-gray-600 text-[15px] mb-8 leading-relaxed">
-                You can choose to design products for <br className="hidden md:block"/> women of all ages
+              <p className="max-w-[323px] text-[16px] leading-5 text-[#1f2937]/80">
+                You can choose to design products for women of all ages
               </p>
-              <Link href="/product-collection?collectionSlug=womens-collections">
-                <button className="bg-white text-[#B87D4C] px-6 py-2.5 rounded-full font-bold text-[15px] flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm">
-                  Explore products <span className="text-lg leading-none">&rarr;</span>
-                </button>
+              <Link
+                href="/collection?collectionSlug=womens-collections"
+                className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-6 py-2 text-[16px] font-bold text-[#ea580c] shadow-sm"
+              >
+                Explore products
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <img
-              src="/images/home/woman-collection.png"
-              alt="Woman collection"
-              loading="lazy"
-              decoding="async"
-              className="absolute right-0 bottom-0 h-[85%] md:h-[85%] object-cover object-bottom"
-            />
+            <div className="relative h-[256px] w-[140px] shrink-0 self-end sm:w-[167px]">
+              <Image
+                src="/images/home/cat-woman.png"
+                alt="Woman collection"
+                fill
+                className="object-contain object-bottom"
+                sizes="167px"
+              />
+            </div>
           </div>
         </div>
 
-        {/* PRODUCT GRID */}
-        {loading ? (
-          <div className="text-center text-gray-500">Loading categories...</div>
-        ) : error ? (
-          <div className="text-center text-red-600">{error}</div>
-        ) : categories.length === 0 ? (
-          <div className="text-center text-gray-500">No categories available yet.</div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
-            {categories.map((category) => (
-              <div
-                key={category._id}
-                className="group relative bg-white border border-gray-200 rounded-[24px] h-[220px] md:h-[260px] flex flex-col items-center justify-center overflow-hidden hover:shadow-lg transition-shadow duration-300"
-              >
-                {category.images && category.images.length > 0 ? (
-                  <img loading="lazy" decoding="async"
-                    src={category.images[0]}
-                    alt={category.name}
-                    className="w-[75%] h-auto object-contain group-hover:scale-105 transition-transform duration-300 pb-8"
-                  />
-                ) : (
-                  <div className="w-[75%] h-[120px] bg-gray-100 rounded-xl mb-4 flex items-center justify-center text-sm text-gray-400">
-                    Image not available
-                  </div>
-                )}
-                <div className="absolute bottom-5">
-                  <span className="bg-white border border-gray-300 text-gray-700 text-[13px] font-medium px-6 py-1.5 rounded-full shadow-sm">
-                    {category.name}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Category cards row */}
+        <div className="grid grid-cols-2 gap-5 pt-2 sm:grid-cols-3 lg:grid-cols-5">
+          {CATEGORY_CARDS.map((c) => (
+            <Link
+              key={c.label}
+              href={`/collection?category=${c.slug}`}
+              className="group relative block h-[264px] overflow-hidden rounded-3xl border border-[#bfd6e4] bg-white"
+            >
+              <Image
+                src={c.img}
+                alt={c.label}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 234px"
+              />
+              <span className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full border border-[#3d3d3d] bg-white px-6 py-2 text-[14px] text-[#3d3d3d]">
+                {c.label}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

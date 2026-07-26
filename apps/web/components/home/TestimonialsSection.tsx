@@ -1,138 +1,105 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Quote } from "lucide-react";
+import type { SiteTestimonial } from "@/lib/api";
 
-const testimonials = [
+// Neutral, on-brand testimonials. (The Figma mock used competitor placeholder
+// copy — swapped here so we don't ship another brand's name on the site.)
+const TESTIMONIALS = [
   {
-    title: "Printful has been there since day one",
-    text: `My partner and I started Gay Pride Apparel in 2019 as a side business. After a year and a half, we quit our day jobs and decided to focus on our store full time. Printful has been there since day one. They have been our best partner by far.`,
-    name: "Sergio",
-    company: "Gay Pride Apparel",
-    avatar: "/images/home/client1.png",
+    title: "Exactly what our team wanted",
+    body: "We ordered custom tees for our startup and the print quality blew us away. The design studio made it so easy to get everything just right.",
+    name: "Aarav M.",
+    role: "Founder, Northline Labs",
+    initials: "AM",
   },
   {
-    title: "Cut down the time spent working on my store",
-    text: `I really love Printful, it's been useful to cut down the time spent working on my store as I have a full-time job alongside this.`,
-    name: "Naomi",
-    company: "Nemki",
-    avatar: "/images/home/client2.png",
+    title: "Perfect for our bulk order",
+    body: "Needed 200 hoodies for a college fest on a tight deadline. AB Creation delivered on time with consistent quality across every single piece.",
+    name: "Sneha R.",
+    role: "Event Lead",
+    initials: "SR",
   },
   {
-    title: "Cut down the time spent working on my store",
-    text: `I really love Printful, it's been useful to cut down the time spent working on my store as I have a full-time job alongside this.`,
-    name: "Naomi",
-    company: "Nemki",
-    avatar: "/images/home/client2.png",
+    title: "Our go-to printing partner",
+    body: "From design help to doorstep delivery, the whole process was smooth. We keep coming back for every new drop we launch.",
+    name: "Rohan K.",
+    role: "Store Owner",
+    initials: "RK",
   },
 ];
 
-export default function TestimonialsSection() {
+const initialsOf = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((w) => w.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+export default function TestimonialsSection({
+  items,
+}: {
+  items?: SiteTestimonial[];
+}) {
+  const cards =
+    items?.filter((t) => t.name && t.body).length
+      ? items!
+          .filter((t) => t.name && t.body)
+          .map((t) => ({
+            title: t.title || `${t.name.split(" ")[0]}'s experience`,
+            body: t.body,
+            name: t.name,
+            role: t.role ?? "",
+            initials: initialsOf(t.name),
+          }))
+      : TESTIMONIALS;
   return (
-    <section className="bg-[#F5F1EA] py-24 lg:py-32">
-      <div className="max-w-[1240px] mx-auto px-4">
-        {/* HEADING */}
-        <div className="text-center">
-          <h2 className="text-[#171717] text-[38px] md:text-[58px] font-bold leading-[110%] tracking-[-2px]">
+    <section className="w-full bg-[#faf3ea] px-4 py-20 sm:px-8 lg:px-[86.5px]">
+      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <h2 className="font-poppins text-3xl font-bold text-[#111827] sm:text-[40px]">
             What Our Clients think
           </h2>
-
-          <p className="mt-6 text-[#667085] text-[18px] leading-[30px] font-normal">
+          <p className="text-[16px] text-[#6b7280]">
             Get inspired from some of our happy customers showing off their
             custom apparel
           </p>
         </div>
 
-        {/* TESTIMONIAL CARDS */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-7 mt-16">
-          {testimonials.map((item, index) => (
+        <div className="grid w-full grid-cols-1 gap-7 md:grid-cols-3">
+          {cards.map((t) => (
             <div
-              key={index}
-              className="
-                bg-[#FAFAFA]
-                border
-                border-[#E5E7EB]
-                rounded-[16px]
-                px-8
-                pt-7
-                pb-8
-                min-h-[304px]
-                flex
-                flex-col
-              "
+              key={t.name}
+              className="flex flex-col rounded-lg border border-[#e5e5e5] bg-white p-5"
             >
-              {/* QUOTE */}
-              <div className="mb-5">
-                <Image
-                  src="/images/home/quote.png"
-                  alt="quote"
-                  width={34}
-                  height={34}
-                  className="object-contain"
-                />
-              </div>
-
-              {/* TITLE */}
-              <h3 className="text-[#171717] text-[20px] leading-[34px] font-bold max-w-[320px]">
-                {item.title}
+              <Quote className="h-6 w-6 fill-brand-gold text-brand-gold" />
+              <h3 className="mt-4 text-[19px] font-bold text-[#222222]">
+                {t.title}
               </h3>
-
-              {/* DESCRIPTION */}
-              <p className="mt-4 text-[#555555] text-[16px] leading-[32px] font-normal">
-                {item.text}
+              <p className="mt-3 flex-1 text-[13px] leading-5 text-[#555555]">
+                {t.body}
               </p>
-
-              {/* USER */}
-              <div className="flex items-center gap-4 mt-auto pt-8">
-                <div className="relative w-[56px] h-[56px] rounded-full overflow-hidden flex-shrink-0">
-                  <Image
-                    src={item.avatar}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-
-                <div>
-                  <h4 className="text-[#171717] text-[18px] leading-none font-bold">
-                    {item.name}
-                  </h4>
-
-                  <p className="mt-2 text-[#0A66C2] text-[16px] leading-none font-normal">
-                    {item.company}
-                  </p>
+              <div className="mt-5 flex items-center gap-3">
+                <span className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-brand-gold/20 text-[15px] font-bold text-brand-copper">
+                  {t.initials}
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-bold text-[#222222]">
+                    {t.name}
+                  </span>
+                  <span className="text-[13px] text-[#006cb9]">{t.role}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* BUTTON */}
-        <div className="flex justify-center mt-20">
-          <Button
-            asChild
-            variant="outline"
-            className="
-              h-[58px]
-              min-w-[184px]
-              rounded-full
-              border-2
-              border-[#B87D4C]
-              bg-transparent
-              hover:bg-[#B87D4C]
-              hover:text-white
-              text-[#B87D4C]
-              text-[20px]
-              font-semibold
-              px-10
-              transition-all
-              duration-300
-            "
-          >
-            <Link href="/look-book">Read More</Link>
-          </Button>
-        </div>
+        <Link
+          href="/contact-us"
+          className="rounded-full border-2 border-brand-orange px-12 py-3 text-[16px] font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white"
+        >
+          Read More
+        </Link>
       </div>
     </section>
   );

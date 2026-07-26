@@ -1,400 +1,330 @@
-import axios from "axios";
+import { colorToHex } from "./colors";
+import type { Product as CardProduct } from "@/components/collection/ProductCard";
+import type {
+  ProductDetail,
+  ProductColor,
+} from "@/components/product/ProductBuyBox";
+import type { ProductInfo } from "@/components/product/ProductDetailInfo";
 
-const backendURL = process.env.NEXT_PUBLIC_MAIN_BACKEND || "";
+const BACKEND = (process.env.NEXT_PUBLIC_MAIN_BACKEND ?? "").replace(/\/$/, "");
 
-// For backend API calls (from Node.js)
-const api = axios.create({
-  baseURL: backendURL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const PLACEHOLDER = "/images/home/cat-tshirt.png";
 
-// For client-side API calls to Next.js routes
-const clientApi = axios.create({
-  baseURL: "",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Automatically attach the auth token from localStorage when a caller hasn't
-// already set an Authorization header. This keeps existing explicit-token calls
-// working while removing the need to thread the token through every request.
-api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined" && !config.headers?.Authorization) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers = config.headers || {};
-      (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
-
-export const loginUser = async (email: string, password: string) => {
-  const res = await api.post("/api/users/login", { email, password });
-  return res.data;
+// Backend customizationTypes -> design badge labels.
+const BADGE_MAP: Record<string, string> = {
+  DTF: "DTF TRANSFER",
+  Screen: "SCREEN PRINT",
+  Embroidery: "EMBROIDERY",
+  "Heat Transfer": "HEAT TRANSFER",
 };
 
-export const signupUser = async (name: string, email: string, password: string) => {
-  const res = await api.post("/api/users/signup", { name, email, password });
-  return res.data;
-};
-
-export const forgotPassword = async (email: string) => {
-  const res = await api.post("/api/users/forgot-password", { email });
-  return res.data;
-};
-
-export const resetPassword = async (email: string, otp: string, newPassword: string) => {
-  const res = await api.post("/api/users/reset-password", { email, otp, newPassword });
-  return res.data;
-};
-
-export const logoutUser = async (token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.post("/api/users/logout", {}, { headers });
-  return res.data;
-};
-
-export const contactUs = async (name: string, email: string, message: string, subject: string) => {
-    const res = await api.post("/api/contacts", { name, email, message, subject });
-    return res.data;
+function badgeFor(types?: string[]): string {
+  const first = types?.[0];
+  return (first && BADGE_MAP[first]) || "CUSTOM";
 }
 
-export const getLookbookAll = async () => {
-  const res = await api.get("/api/lookbook");
-  return res.data;
+function discountedPrice(basePrice: number, discountPct?: number): number {
+  if (!discountPct) return Math.round(basePrice);
+  return Math.round(basePrice * (1 - discountPct / 100));
+}
+
+// ---- Raw backend shapes (only the fields we consume) ----
+type RawVariant = {
+  _id: string;
+  media?: { images?: string[]; videos?: string[] };
+  availableStock?: number;
+  addPercentageInBasePrice?: number;
+  color?: string;
 };
 
-export const getCategories = async () => {
-  const res = await api.get("/api/categories");
-  return res.data;
+type RawProduct = {
+  _id: string;
+  id: string;
+  title: string;
+  slug: string;
+  basePrice: number;
+  discountPercentage?: number;
+  description?: string;
+  customizationTypes?: string[];
+  colors?: string[];
+  sizes?: string[];
+  category?: { name?: string; slug?: string } | null;
+  categoryId?: { name?: string; slug?: string } | null;
+  productDetails?: string[];
+  materialAndCare?: { material?: string; careInstructions?: string[] };
+  specifications?: Record<string, string | undefined>;
+  printZones?: {
+    name: string;
+    side?: string;
+    widthIn?: number;
+    heightIn?: number;
+    dpi?: number;
+  }[];
+  measurements?: ProductMeasurement[];
+  seller?: { name?: string } | null;
+  variants?: RawVariant[];
 };
 
-export const getCollections = async () => {
-  const res = await clientApi.get("/api/collections");
-  return res.data;
+export type ProductMeasurement = {
+  size: string;
+  chest?: number;
+  length?: number;
+  shoulder?: number;
+  sleeve?: number;
 };
 
-export const getProducts = async (params?: Record<string, unknown>) => {
-  const res = await clientApi.get("/api/products", { params });
-  return res.data;
+export type ProductsMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage?: boolean;
+  hasPrevPage?: boolean;
 };
 
-export const getProductBySlug = async (slug: string) => {
-  const res = await api.get(`/api/products/slug/${slug}`);
-  return res.data;
-};
+// ---- Fetch helpers ----
+async function apiGet<T>(path: string): Promise<T | null> {
+  if (!BACKEND) return null;
+  try {
+    const res = await fetch(`${BACKEND}${path}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
 
-// ========== BULK PRODUCTS API ==========
-export const getBulkProductsPublic = async (params?: Record<string, any>) => {
-  // Backend endpoint as requested: /bulk-products/public
-  const res = await api.get("/api/bulk-products/public", { params });
-  return res.data;
-};
+function firstImage(p: RawProduct): string {
+  for (const v of p.variants ?? []) {
+    const img = v.media?.images?.[0];
+    if (img) return img;
+  }
+  return PLACEHOLDER;
+}
 
-export const getBulkProductBySlug = async (slug: string) => {
-  const res = await api.get(`/api/bulk-products/slug/${slug}`);
-  return res.data;
-};
-
-// ========== APPAREL API ==========
-export const getAllApparel = async (token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get("/api/apparel", { headers });
-  return res.data;
-};
-
-export const getApparelById = async (id: string, token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get(`/api/apparel/${id}`, { headers });
-  return res.data;
-};
-
-export const createCustomOrder = async (
-  productId: string,
-  orderData: {
-    selectedGSM: number;
-    selectedColor: string;
-    designFiles: string[];
-    printPlacements: string[];
-    additionalNotes?: string;
-    sizesAndQty: { size: string; quantity: number }[];
-    deliveryDetails: {
-      fullName: string;
-      phone: string;
-      address: string;
-      city: string;
-      state: string;
-      pincode: string;
-      email: string;
-    };
-  },
-  token?: string
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.post(`/api/custom-orders/${productId}/custom-order`, orderData, { headers });
-  return res.data;
-};
-
-export const getMyApparelOrders = async (token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get("/api/custom-orders/my-orders", { headers });
-  return res.data;
-};
-
-export const getApparelOrderById = async (id: string, token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get(`/api/custom-orders/my-orders/${id}`, { headers });
-  return res.data;
-};
-
-// ========== TICKETS API ==========
-export const createTicket = async (formData: FormData, token?: string) => {
-  const config: any = {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+function toCardProduct(p: RawProduct): CardProduct {
+  const cat = p.category ?? p.categoryId ?? null;
+  return {
+    slug: p.slug,
+    title: p.title,
+    subtitle: cat?.name || "Custom Apparel",
+    price: discountedPrice(p.basePrice, p.discountPercentage),
+    badge: badgeFor(p.customizationTypes),
+    image: firstImage(p),
+    colors: (p.colors ?? []).slice(0, 4).map(colorToHex),
   };
+}
 
-  // Use the shared `api` instance so the request hits the backend base URL.
-  // (Previously this used a relative axios.post with no matching Next route.)
-  // FormData sets multipart/form-data automatically.
-  const res = await api.post(`/api/tickets/create`, formData, config);
-  return res.data;
+// ---- Site content (homepage CMS) ----
+export type SiteTestimonial = {
+  title?: string;
+  body: string;
+  name: string;
+  role?: string;
 };
 
-export const getMyTickets = async (token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get("/api/tickets/my-tickets", { headers });
-  return res.data;
+export type SiteContent = {
+  hero?: {
+    visible?: boolean;
+    badge?: string;
+    heading1?: string;
+    heading2?: string;
+    subheading?: string;
+    cta1?: string;
+    cta2?: string;
+    image?: string;
+  };
+  trustBadges?: { visible?: boolean; items?: { icon?: string; label: string }[] };
+  topCategories?: { visible?: boolean };
+  orderingProcess?: { visible?: boolean };
+  printingServices?: { visible?: boolean };
+  testimonials?: { visible?: boolean; items?: SiteTestimonial[] };
+  collectionCarousel?: { visible?: boolean };
+  sellerBanner?: { visible?: boolean };
+  announcement?: { visible?: boolean; text?: string; hours?: string };
 };
 
-// ========== WALLET API ==========
-export const getWalletBalance = async (token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get("/api/wallet/balance", { headers });
-  return res.data;
-};
-
-// Step 1: create a Razorpay order for a wallet recharge. Returns
-// { orderId, amount, currency, keyId } for opening the Razorpay checkout.
-export const createWalletRecharge = async (amount: number, token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.post(
-    "/api/wallet/recharge/create",
-    { amount },
-    { headers }
-  );
-  return res.data;
-};
-
-// Step 2: after the Razorpay checkout succeeds, verify the payment so the
-// wallet is credited server-side.
-export const verifyWalletRecharge = async (
-  payload: {
-    razorpayOrderId: string;
-    razorpayPaymentId: string;
-    razorpaySignature: string;
-  },
-  token?: string
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.post("/api/wallet/recharge/verify", payload, {
-    headers,
-  });
-  return res.data;
-};
-
-export const getWalletTransactions = async (
-  token?: string,
-  page: number = 1,
-  limit: number = 10
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get("/api/wallet/transactions", {
-    headers,
-    params: { page, limit },
-  });
-  return res.data;
-};
-
-// ========== PROFILE API ==========
-export const getUserProfile = async (token?: string, dateFilter?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const params: Record<string, string> = {};
-  if (dateFilter) params.dateFilter = dateFilter;
-  const res = await api.get("/api/users/profile", { headers, params });
-  return res.data;
-};
-
-export const updateUserProfile = async (
-  profileData: {
-    name?: string;
+export type SiteSettings = {
+  business?: {
+    businessName?: string;
+    legalName?: string;
+    email?: string;
     phone?: string;
-    address?: {
-      street?: string;
-      city?: string;
-      state?: string;
-      pincode?: string;
-      country?: string;
+    address?: string;
+    cityState?: string;
+    pin?: string;
+    country?: string;
+  };
+  branding?: { logoUrl?: string; faviconUrl?: string; primaryColor?: string };
+  social?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    linkedin?: string;
+  };
+};
+
+export async function getSiteData(): Promise<{
+  content: SiteContent;
+  settings: SiteSettings;
+}> {
+  const json = await apiGet<{
+    data: { content: SiteContent; settings: SiteSettings };
+  }>("/api/site-content");
+  return {
+    content: json?.data?.content ?? {},
+    settings: json?.data?.settings ?? {},
+  };
+}
+
+export async function getSiteContent(): Promise<SiteContent> {
+  return (await getSiteData()).content;
+}
+
+// ---- Public API ----
+export type CollectionParams = {
+  category?: string;
+  search?: string;
+  sort?: string;
+  page?: number;
+  printMethod?: string;
+  size?: string;
+  color?: string;
+  priceRange?: string;
+};
+
+export async function getProducts(
+  params: CollectionParams,
+): Promise<{ products: CardProduct[]; meta: ProductsMeta }> {
+  const qs = new URLSearchParams();
+  qs.set("limit", "16");
+  if (params.page) qs.set("page", String(params.page));
+  if (params.category) qs.set("category", params.category);
+  if (params.search) qs.set("search", params.search);
+  if (params.sort) qs.set("sort", params.sort);
+  if (params.printMethod) qs.set("printMethod", params.printMethod);
+  if (params.size) qs.set("size", params.size);
+  if (params.color) qs.set("color", params.color);
+  if (params.priceRange) qs.set("priceRange", params.priceRange);
+
+  const json = await apiGet<{ data: RawProduct[]; meta: ProductsMeta }>(
+    `/api/products?${qs.toString()}`,
+  );
+
+  if (!json?.data) {
+    return {
+      products: [],
+      meta: { page: 1, limit: 16, total: 0, totalPages: 0 },
     };
-  },
-  token?: string
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.put("/api/users/profile", profileData, { headers });
-  return res.data;
+  }
+
+  return {
+    products: json.data.map(toCardProduct),
+    meta: json.meta ?? { page: 1, limit: 16, total: json.data.length, totalPages: 1 },
+  };
+}
+
+export async function getCategories(): Promise<
+  { label: string; value: string }[]
+> {
+  const json = await apiGet<{
+    data: { categories: { name: string; slug: string }[] };
+  }>(`/api/categories`);
+  const cats = json?.data?.categories ?? [];
+  return cats
+    .filter((c) => c.slug && c.name)
+    .map((c) => ({ label: c.name, value: c.slug }));
+}
+
+export type FullProduct = {
+  detail: ProductDetail & { images: string[] };
+  info: Pick<
+    ProductInfo,
+    "productDetails" | "specifications" | "material" | "careInstructions"
+  >;
+  measurements: ProductMeasurement[];
 };
 
-// ========== CART API ==========
-export const addToCart = async (
-  cartData: {
-    productType: "ready" | "bulk" | "custom";
-    productId: string;
-    variantId: string;
-    quantity: number;
-    size: string;
-    customDesign?: string;
-    designFiles?: string[];
-    designState?: any;
-  },
-  token?: string
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.post("/api/cart", cartData, { headers });
-  return res.data;
-};
+const SPEC_LABELS: [keyof NonNullable<RawProduct["specifications"]>, string][] = [
+  ["fabric", "Fabrics"],
+  ["gsm", "GSM"],
+  ["fashionType", "Fashion Trends"],
+  ["fit", "Fit"],
+  ["type", "Type"],
+  ["neck", "Neck"],
+];
 
-export const getCart = async (token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get("/api/cart", { headers });
-  return res.data;
-};
+export async function getProductBySlug(
+  slug: string,
+): Promise<FullProduct | null> {
+  const json = await apiGet<{ data: RawProduct }>(
+    `/api/products/slug/${encodeURIComponent(slug)}`,
+  );
+  const p = json?.data;
+  if (!p) return null;
 
-export const updateCartItem = async (
-  cartItemId: string,
-  quantity: number,
-  token?: string
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.put("/api/cart", { cartItemId, quantity }, { headers });
-  return res.data;
-};
-export const removeFromCart = async (cartItemId: string, token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.delete(`/api/cart/${cartItemId}`, { headers });
-  return res.data;
-};
+  const cat = p.category ?? p.categoryId ?? null;
+  const price = discountedPrice(p.basePrice, p.discountPercentage);
+  const mrp = p.discountPercentage ? Math.round(p.basePrice) : undefined;
 
-// Fetch a single order owned by the logged-in user. The backend enforces that
-// the order belongs to this user, so the confirmation screen can show verified
-// amounts/status instead of trusting URL query params.
-export const getOrderById = async (orderId: string, token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.get(`/api/orders/${orderId}`, { headers });
-  return res.data;
-};
+  const images = Array.from(
+    new Set((p.variants ?? []).flatMap((v) => v.media?.images ?? [])),
+  );
+  const inStock = (p.variants ?? []).reduce(
+    (sum, v) => sum + (v.availableStock ?? 0),
+    0,
+  );
+  const colors: ProductColor[] = (p.colors ?? []).map((name) => ({
+    name,
+    hex: colorToHex(name),
+    variantId: (p.variants ?? []).find(
+      (v) => v.color?.toLowerCase() === name.toLowerCase(),
+    )?._id,
+  }));
 
-// Place an entire cart in one atomic request. The backend reserves all stock,
-// charges the wallet once, and creates all orders in a single transaction —
-// so a partial failure (e.g. low balance) rolls everything back.
-export const checkoutCart = async (
-  checkoutData: {
-    items: {
-      productId: string;
-      productType: "ready" | "bulk";
-      variantId?: string;
-      color?: string;
-      size?: string;
-      quantity: number;
-      customDesign?: string;
-      designFiles?: string[];
-      designState?: any;
-      anyText?: string;
-    }[];
-    shippingAddress: {
-      street: string;
-      city: string;
-      state: string;
-      pincode: string;
-      country?: string;
-    };
-    phoneNumber: string;
-  },
-  token?: string
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.post("/api/orders/checkout", checkoutData, { headers });
-  return res.data;
-};
+  const specifications = SPEC_LABELS.filter(
+    ([key]) => p.specifications?.[key],
+  ).map(([key, label]) => ({ label, value: p.specifications![key] as string }));
 
-export const buyNowOrder = async (
-  orderData: {
-    productId: string;
-    productType: "ready" | "bulk";
-    variantId?: string;
-    color?: string;
-    size?: string;
-    quantity: number;
-    shippingAddress: {
-      street: string;
-      city: string;
-      state: string;
-      pincode: string;
-      country?: string;
-    };
-    phoneNumber: string;
-    customDesign?: string;
-    designFiles?: string[];
-    designState?: any;
-    anyText?: string;
-    guestName?: string;
-    guestEmail?: string;
-  },
-  token?: string
-) => {
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await api.post("/api/orders/buynow", orderData, { headers });
-  return res.data;
-};
+  // Surface configured print zones as a spec row (e.g. "Full Front 12″×16″")
+  if (p.printZones?.length) {
+    specifications.push({
+      label: "Print Areas",
+      value: p.printZones
+        .map((z) =>
+          z.widthIn && z.heightIn
+            ? `${z.name} ${z.widthIn}″×${z.heightIn}″`
+            : z.name,
+        )
+        .join(" · "),
+    });
+  }
 
-/**
- * Upload one or more customer design files (File/Blob) to S3 via the backend.
- * Returns the stored URLs so they can be attached to an order.
- */
-export const uploadDesigns = async (
-  files: File[],
-  token?: string
-): Promise<{ success: boolean; data?: { urls: string[] }; message?: string }> => {
-  const formData = new FormData();
-  files.forEach((f) => formData.append("designs", f));
-
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const res = await api.post("/api/orders/upload-designs", formData, { headers });
-  return res.data;
-};
-
-export default api;
+  return {
+    detail: {
+      productId: p._id,
+      slug: p.slug,
+      title: p.title,
+      subtitle: cat?.name || p.description?.slice(0, 80) || "Custom Apparel",
+      price,
+      mrp,
+      rating: 4.3, // ratings are static per product decision
+      ratingCount: "54.3k",
+      badge: badgeFor(p.customizationTypes),
+      sizes: p.sizes?.length ? p.sizes : ["S", "M", "L", "XL", "XXL"],
+      colors: colors.length ? colors : [{ name: "White", hex: "#ffffff" }],
+      inStock,
+      images: images.length ? images : [PLACEHOLDER],
+      sellerName: p.seller?.name ?? null,
+    },
+    info: {
+      productDetails: p.productDetails ?? [],
+      specifications,
+      material: p.materialAndCare?.material ?? "",
+      careInstructions: (p.materialAndCare?.careInstructions ?? []).join(" "),
+    },
+    measurements: p.measurements ?? [],
+  };
+}

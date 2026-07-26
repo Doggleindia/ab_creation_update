@@ -8,6 +8,8 @@ module.exports = {    darkMode: ["class"],
   	extend: {
  fontFamily: {
         'inter': ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        'poppins': ['var(--font-poppins)', 'Poppins', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
 	   keyframes: {
         marquee: {
@@ -30,14 +32,24 @@ module.exports = {    darkMode: ["class"],
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
-  			// AB Creation brand palette (single source of truth for the rebrand)
+  			// AB Creation brand palette — Figma design tokens + official brand
+  			// guide ("colour pallet.png" at repo root: 70% cream / 20% black /
+  			// 10% gold usage ratio).
   			brand: {
-  				black: '#171717',
-  				cream: '#F5F1EA',
-  				gold: '#CBAA75',
-  				copper: '#B87D4C',
-  				rose: '#C79280',
-  				stone: '#E8E6E3'
+  				ink: '#1a1c1c',      // logo wordmark / darkest text
+  				black: '#171717',    // Rich Black — logo, typography, strong elements
+  				text: '#374151',     // nav + body text
+  				muted: '#6b7280',    // secondary/placeholder text
+  				// primary CTA — runtime-themable via Settings → Branding
+  				// (layout injects --brand-orange-rgb when a custom colour is set)
+  				orange: 'rgb(var(--brand-orange-rgb, 255 92 0) / <alpha-value>)',
+  				rust: '#a04100',     // secondary button (footer Join)
+  				footer: '#30302f',   // footer background
+  				cream: '#F5F1EA',    // Luxury Cream — primary background
+  				gold: '#CBAA75',     // Signature Gold — main accent
+  				copper: '#B87D4C',   // Copper Gold — secondary accent (logo color)
+  				rose: '#C79280',     // Rose Gold — soft accent
+  				stone: '#E8E6E3'     // Soft Stone — neutral backgrounds
   			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

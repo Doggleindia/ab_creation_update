@@ -1,292 +1,463 @@
-import React, { useState, useEffect } from 'react';
-import { renderIcon } from '../utils/iconRenderer';
-import { apiService } from '../utils/api';
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  FiDollarSign,
-  FiShoppingCart,
-  FiUsers,
-  FiTrendingUp,
-  FiClock,
-  FiDownload,
-  FiHeart
-} from 'react-icons/fi';
-import Layout from '../components/Layout';
-import { useAuthStore } from '../store/authStore';
+  FiUserPlus,
+  FiPackage,
+  FiMail,
+  FiShoppingBag,
+  FiArchive,
+} from "react-icons/fi";
+import Shell, { Card } from "../components/Shell";
+import {
+  api,
+  inr,
+  shortOrderId,
+  type AdminOrder,
+  type Application,
+  type AdminProduct,
+} from "../lib/api";
 
-interface StatCard {
-  label: string;
-  value: string;
-  change: string;
-  icon: React.ReactNode;
-  color: string;
-}
-
-interface ChartData {
-  month: string;
-  revenue: number;
-  orders: number;
-}
-
-const Dashboard: React.FC = () => {
-  const { user } = useAuthStore();
-
-  const stats: StatCard[] = [
-    {
-      label: 'Total Revenue',
-      value: '$24,563',
-      change: '+12.5%',
-      icon: renderIcon(FiDollarSign, { size: 24 }),
-      color: 'from-[#CBAA75] to-[#B87D4C]'
-    },
-    {
-      label: 'Total Orders',
-      value: '1,234',
-      change: '+8.2%',
-      icon: renderIcon(FiShoppingCart, { size: 24 }),
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      label: 'Total Users',
-      value: '892',
-      change: '+15.3%',
-      icon: renderIcon(FiUsers, { size: 24 }),
-      color: 'from-[#CBAA75] to-pink-500'
-    },
-    {
-      label: 'Growth Rate',
-      value: '23.5%',
-      change: '+4.1%',
-      icon: renderIcon(FiTrendingUp, { size: 24 }),
-      color: 'from-[#CBAA75] to-red-500'
-    }
-  ];
-
-  const chartData: ChartData[] = [
-    { month: 'Jan', revenue: 12000, orders: 450 },
-    { month: 'Feb', revenue: 15000, orders: 520 },
-    { month: 'Mar', revenue: 13500, orders: 480 },
-    { month: 'Apr', revenue: 18000, orders: 620 },
-    { month: 'May', revenue: 22000, orders: 750 },
-    { month: 'Jun', revenue: 24563, orders: 834 }
-  ];
-
-  const maxRevenue = Math.max(...chartData.map(d => d.revenue));
-
-  // Demo rows shown until live orders load (kept as a fallback, never removed).
-  const demoRecentOrders = [
-    { id: '#12345', customer: 'John Doe', amount: '$1,299', status: 'Completed', date: '2025-01-19' },
-    { id: '#12344', customer: 'Jane Smith', amount: '$899', status: 'Pending', date: '2025-01-18' },
-    { id: '#12343', customer: 'Mike Johnson', amount: '$2,499', status: 'Completed', date: '2025-01-17' },
-    { id: '#12342', customer: 'Sarah Williams', amount: '$599', status: 'Processing', date: '2025-01-16' },
-    { id: '#12341', customer: 'Tom Brown', amount: '$1,699', status: 'Completed', date: '2025-01-15' }
-  ];
-  const [recentOrders, setRecentOrders] = useState(demoRecentOrders);
-
-  useEffect(() => {
-    let active = true;
-    apiService
-      .getAdminOrders()
-      .then((res) => {
-        const mapped = (res?.data || []).slice(0, 5).map((o: any) => ({
-          id: o.orderId || o._id,
-          customer: o.userId?.name || o.guestName || 'Guest',
-          amount: `₹${(o.totalAmount ?? 0).toLocaleString('en-IN')}`,
-          status:
-            o.orderStatus === 'delivered'
-              ? 'Completed'
-              : o.orderStatus === 'pending'
-              ? 'Pending'
-              : o.orderStatus
-              ? o.orderStatus.charAt(0).toUpperCase() + o.orderStatus.slice(1)
-              : 'Processing',
-          date: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '',
-        }));
-        if (active && mapped.length > 0) setRecentOrders(mapped);
-      })
-      .catch(() => {
-        /* keep demo data on error */
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const handleExport = () => {
-    const headers = ['Order ID', 'Customer', 'Amount', 'Status', 'Date'];
-    const rows = recentOrders.map(o => [o.id, o.customer, o.amount, o.status, o.date]);
-    const csv = [headers, ...rows]
-      .map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'recent-orders.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  return (
-    <Layout>
-      <div className="space-y-8">
-        {/* Welcome Section */}
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Welcome back, {user?.name}! 👋</h2>
-          <p className="text-gray-600 mt-1">Here's your business performance overview</p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border border-slate-100"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center text-white`}>
-                      {stat.icon}
-                    </div>
-                    <span className="text-sm font-medium text-green-600">{stat.change}</span>
-                  </div>
-                  <p className="text-gray-600 text-sm font-medium">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Revenue Chart */}
-              <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-slate-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-gray-900">Revenue Trend</h3>
-                  <select className="px-3 py-1 border border-slate-200 rounded-lg text-sm bg-white">
-                    <option>Last 6 months</option>
-                    <option>Last Year</option>
-                  </select>
-                </div>
-
-                <div className="flex items-end justify-around h-64 gap-2">
-                  {chartData.map((data, index) => (
-                    <div
-                      key={index}
-                      className="flex-1 flex flex-col items-center gap-2"
-                    >
-                      <div className="relative w-full h-48 bg-slate-100 rounded-t-lg overflow-hidden group">
-                        <div
-                          className="w-full bg-gradient-to-t from-[#CBAA75] to-[#B87D4C] rounded-t-lg transition-all hover:from-[#CBAA75] hover:to-[#B87D4C] cursor-pointer"
-                          style={{
-                            height: `${(data.revenue / maxRevenue) * 100}%`
-                          }}
-                        >
-                          <div className="h-full flex items-end justify-center pb-2 text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                            ${data.revenue / 1000}k
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-xs font-medium text-gray-600">{data.month}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-4 pt-6 border-t border-slate-100">
-                  <div>
-                    <p className="text-sm text-gray-600">Average Revenue</p>
-                    <p className="text-lg font-bold text-gray-900">$17,510</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Total Orders</p>
-                    <p className="text-lg font-bold text-gray-900">3,654</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-100 space-y-4">
-                <h3 className="text-lg font-bold text-gray-900">Quick Stats</h3>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#F5F1EA] to-[#F5F1EA] rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-600">Conversion Rate</p>
-                      <p className="text-lg font-bold text-gray-900">3.24%</p>
-                    </div>
-                    <span className="text-green-500">{renderIcon(FiTrendingUp, { size: 24 })}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-600">Avg Order Value</p>
-                      <p className="text-lg font-bold text-gray-900">$127.50</p>
-                    </div>
-                    <span className="text-green-500">{renderIcon(FiDollarSign, { size: 24 })}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#F5F1EA] to-pink-50 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-600">Customer Satisfaction</p>
-                      <p className="text-lg font-bold text-gray-900">4.8/5.0</p>
-                    </div>
-                    <span className="text-red-500">{renderIcon(FiHeart, { size: 24 })}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#F5F1EA] to-red-50 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-600">Return Rate</p>
-                      <p className="text-lg font-bold text-gray-900">2.15%</p>
-                    </div>
-                    <span className="text-[#B87D4C]">{renderIcon(FiClock, { size: 24 })}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Orders */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-              <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                <h3 className="text-lg font-bold text-gray-900">Recent Orders</h3>
-                <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 text-[#B87D4C] hover:bg-[#F5F1EA] rounded-lg transition-colors">
-                  {renderIcon(FiDownload, { size: 16 })}
-                  <span className="text-sm font-medium">Export</span>
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {recentOrders.map((order, index) => (
-                      <tr key={index} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{order.id}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{order.customer}</td>
-                        <td className="px-6 py-4 text-sm font-semibold text-gray-900">{order.amount}</td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            order.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                            order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-[#E8E6E3] text-[#B87D4C]'
-                          }`}>
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{order.date}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-      </div>
-    </Layout>
-  );
+const PRIORITY_CHIP: Record<string, { label: string; cls: string }> = {
+  rush: { label: "Super Rush", cls: "bg-[#fdecc8] text-[#b45309]" },
+  express: { label: "Rush", cls: "bg-[#fdf3dd] text-[#b07d1a]" },
+  standard: { label: "Normal", cls: "bg-[#f3f4f6] text-[#6b7280]" },
 };
 
-export default Dashboard;
+const QUEUE_DOT: Record<string, { label: string; color: string }> = {
+  pending: { label: "Queued", color: "#9ca3af" },
+  confirmed: { label: "Confirmed", color: "#0891b2" },
+  in_production: { label: "Printing", color: "#ea580c" },
+  quality_check: { label: "Quality Check", color: "#f59e0b" },
+  ready_to_pack: { label: "Ready to Pack", color: "#16a34a" },
+  shipped: { label: "Dispatched", color: "#f59e0b" },
+  delivered: { label: "Delivered", color: "#22c55e" },
+  cancelled: { label: "Cancelled", color: "#ef4444" },
+};
+
+export default function Dashboard() {
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [apps, setApps] = useState<Application[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [sellers, setSellers] = useState<number>(0);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [contacts, setContacts] = useState<number>(0);
+  const [awaiting, setAwaiting] = useState<number>(0);
+  const [range, setRange] = useState<7 | 30 | 90>(30);
+
+  useEffect(() => {
+    api<{ data: AdminOrder[] }>("/api/orders/admin/all")
+      .then((j) => setOrders(j.data ?? []))
+      .catch(() => {});
+    api<{ data: { applications: Application[] } }>(
+      "/api/applications?status=pending",
+    )
+      .then((j) => setApps(j.data?.applications ?? []))
+      .catch(() => {});
+    api<{ data: AdminProduct[] }>("/api/products/admin?limit=100")
+      .then((j) =>
+        setProducts(
+          (Array.isArray(j.data) ? j.data : []).filter(
+            (p) => !p.status || p.status === "published",
+          ),
+        ),
+      )
+      .catch(() => {});
+    api<{ data: { users: { accountType?: string }[] } }>(
+      "/api/admin/users/all",
+    )
+      .then((j) =>
+        setSellers(
+          (j.data?.users ?? []).filter((u) => u.accountType === "seller")
+            .length,
+        ),
+      )
+      .catch(() => {});
+    api<{ data: { balance: number } }>("/api/admin/wallet/balance")
+      .then((j) => setBalance(j.data?.balance ?? null))
+      .catch(() => {});
+    api<{ data: { sellerProducts: unknown[] } }>(
+      "/api/seller-products/admin?status=pending",
+    )
+      .then((j) => setAwaiting((j.data?.sellerProducts ?? []).length))
+      .catch(() => {});
+    api<{ data: { contacts: { status?: string }[] } }>("/api/contacts")
+      .then((j) =>
+        setContacts(
+          (j.data?.contacts ?? []).filter((c) => c.status === "new").length,
+        ),
+      )
+      .catch(() => {});
+  }, []);
+
+  const now = new Date();
+  const inMonth = (o: AdminOrder, offset: number) => {
+    const d = o.createdAt ? new Date(o.createdAt) : null;
+    if (!d) return false;
+    const m = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear();
+  };
+  const revOf = (offset: number) =>
+    orders
+      .filter((o) => inMonth(o, offset) && o.orderStatus !== "cancelled")
+      .reduce((s, o) => s + (o.totalAmount || 0), 0);
+  const revenue = revOf(0);
+  const lastRevenue = revOf(-1);
+  const pct =
+    lastRevenue > 0 ? Math.round(((revenue - lastRevenue) / lastRevenue) * 100) : null;
+  const pendingProduction = orders.filter((o) =>
+    ["pending", "confirmed", "in_production", "quality_check", "ready_to_pack"].includes(o.orderStatus),
+  ).length;
+  const queue = orders
+    .filter((o) => !["delivered", "cancelled"].includes(o.orderStatus))
+    .slice(0, 5);
+  const sellerApps = apps.filter((a) => a.type === "seller");
+  const bulkApps = apps.filter((a) => a.type === "bulk");
+
+  // Smooth 30-day revenue curve (Catmull-Rom → cubic bezier)
+  const chart = useMemo(() => {
+    const days: number[] = Array.from({ length: range }, () => 0);
+    for (const o of orders) {
+      if (!o.createdAt || o.orderStatus === "cancelled") continue;
+      const diff = Math.floor(
+        (now.getTime() - new Date(o.createdAt).getTime()) / 86400000,
+      );
+      if (diff >= 0 && diff < range) days[range - 1 - diff] += o.totalAmount || 0;
+    }
+    const max = Math.max(...days, 1);
+    const pts = days.map((v, i) => [
+      (i / (range - 1)) * 100,
+      42 - (v / max) * 34,
+    ]) as [number, number][];
+    let d = `M ${pts[0][0]},${pts[0][1]}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[Math.min(pts.length - 1, i + 2)];
+      const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+      const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+      const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += ` C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2[0].toFixed(2)},${p2[1].toFixed(2)}`;
+    }
+    const end = pts[pts.length - 1];
+    return { d, end };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orders, range]);
+
+  const axisLabel = (daysAgo: number) =>
+    new Date(now.getTime() - daysAgo * 86400000).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    });
+
+  return (
+    <Shell title="Admin Dashboard" subtitle="Overview of operations and pending tasks.">
+      {/* Stats */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="p-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+            Total Revenue (this month)
+          </p>
+          <p className="flex items-center gap-2 pt-2">
+            <span className="text-[30px] font-bold leading-none text-black">
+              {inr(revenue)}
+            </span>
+            {pct !== null && (
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-[12px] font-bold ${
+                  pct >= 0
+                    ? "bg-[#dcfce7] text-[#16a34a]"
+                    : "bg-[#fee2e2] text-[#ba1a1a]"
+                }`}
+              >
+                {pct >= 0 ? "+" : ""}
+                {pct}%
+              </span>
+            )}
+          </p>
+          <p className="pt-3 text-[12.5px] text-[#6b7280]">
+            {lastRevenue > 0 ? `vs ${inr(lastRevenue)} last month` : "First month of sales"}
+          </p>
+        </Card>
+        <Card className="p-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+            Orders
+          </p>
+          <p className="flex items-center justify-between pt-2">
+            <span className="text-[30px] font-bold leading-none text-black">
+              {orders.length}
+            </span>
+            <span className="rounded-md bg-[#f3f4f6] px-2 py-1 text-[12px] font-bold text-[#374151]">
+              Total
+            </span>
+          </p>
+          <p className="pt-3 text-[12.5px] font-medium text-[#dc2626]">
+            {pendingProduction} pending production
+          </p>
+        </Card>
+        <Card className="p-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+            Active Sellers
+          </p>
+          <p className="flex items-center justify-between pt-2">
+            <span className="text-[30px] font-bold leading-none text-black">
+              {sellers}
+            </span>
+            <FiShoppingBag className="h-5 w-5 text-[#b07d1a]" />
+          </p>
+          <p className="pt-3 text-[12.5px] font-medium text-[#b45309]">
+            {sellerApps.length} application{sellerApps.length === 1 ? "" : "s"} pending
+          </p>
+        </Card>
+        <Card className="p-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-[#6b7280]">
+            Products Live
+          </p>
+          <p className="flex items-center justify-between pt-2">
+            <span className="text-[30px] font-bold leading-none text-black">
+              {products.length}
+            </span>
+            <FiArchive className="h-5 w-5 text-[#374151]" />
+          </p>
+          <p className="pt-3 text-[12.5px] font-medium text-[#b45309]">
+            {awaiting > 0
+              ? `${awaiting} awaiting approval`
+              : balance !== null
+                ? `Wallet ${inr(balance)}`
+                : "—"}
+          </p>
+        </Card>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
+        {/* Production queue */}
+        <Card>
+          <div className="flex items-center justify-between border-b border-[#f3f4f6] px-6 py-4">
+            <h2 className="text-[16px] font-bold text-black">
+              Production Queue
+            </h2>
+            <Link
+              to="/production"
+              className="text-[13px] font-bold text-black hover:underline"
+            >
+              View All ›
+            </Link>
+          </div>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-[#f8f9fb] text-[10.5px] font-bold uppercase tracking-[0.6px] text-[#6b7280]">
+                <th className="px-6 py-3">Order ID</th>
+                <th className="px-3 py-3">Mockup</th>
+                <th className="px-3 py-3">Customer</th>
+                <th className="px-3 py-3">Method</th>
+                <th className="px-3 py-3">Priority</th>
+                <th className="px-3 py-3">Amount</th>
+                <th className="px-6 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {queue.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-[13px] text-[#9ca3af]">
+                    Nothing in production.
+                  </td>
+                </tr>
+              )}
+              {queue.map((o) => {
+                const dot = QUEUE_DOT[o.orderStatus] ?? QUEUE_DOT.pending;
+                const mock =
+                  o.designFiles?.[0] ?? o.variantId?.media?.images?.[0];
+                return (
+                  <tr key={o._id} className="border-t border-[#f3f4f6] text-[13.5px]">
+                    <td className="px-6 py-4 font-bold text-black">
+                      #{shortOrderId(o)}
+                    </td>
+                    <td className="px-3 py-4">
+                      <span className="block h-10 w-10 overflow-hidden rounded border border-[#e5e7eb] bg-[#f3f4f6]">
+                        {mock && (
+                          <img
+                            src={mock}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-3 py-4 text-[#374151]">
+                      {o.userId?.name ?? "—"}
+                    </td>
+                    <td className="px-3 py-4 text-[#374151]">
+                      {o.customDesign ? "DTF" : "Catalog"}
+                    </td>
+                    <td className="px-3 py-4">
+                      {(() => {
+                        const p = PRIORITY_CHIP[o.shippingMethod ?? "standard"];
+                        return (
+                          <span className={`rounded px-2 py-1 text-[10px] font-bold uppercase ${p.cls}`}>
+                            {p.label}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-3 py-4 text-[#374151]">{inr(o.totalAmount)}</td>
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-2 text-[13px] font-medium" style={{ color: dot.color }}>
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ background: dot.color }}
+                        />
+                        {dot.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+
+        {/* Pending actions */}
+        <Card className="p-6">
+          <h2 className="text-[16px] font-bold text-black">Pending Actions</h2>
+          <div className="flex flex-col gap-6 pt-6">
+            <div className="flex gap-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fdf3dd] text-[#b45309]">
+                <FiUserPlus className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="text-[14px] font-bold text-black">
+                  {sellerApps.length} Seller Application
+                  {sellerApps.length === 1 ? "" : "s"}
+                </p>
+                <p className="text-[12.5px] text-[#6b7280]">
+                  New creators waiting for review.
+                </p>
+                <Link
+                  to="/sellers"
+                  className="mt-1 inline-block text-[12.5px] font-bold text-black underline"
+                >
+                  Review Applications
+                </Link>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fdf3dd] text-[#b45309]">
+                <FiPackage className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="text-[14px] font-bold text-black">
+                  {bulkApps.length} Bulk Quote Request
+                  {bulkApps.length === 1 ? "" : "s"}
+                </p>
+                <p className="text-[12.5px] text-[#6b7280]">
+                  Organizations awaiting a proposal.
+                </p>
+                <Link
+                  to="/bulk-orders"
+                  className="mt-1 inline-block text-[12.5px] font-bold text-black underline"
+                >
+                  Review Requests
+                </Link>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                  contacts > 0
+                    ? "bg-[#fee2e2] text-[#dc2626]"
+                    : "bg-[#f3f4f6] text-[#6b7280]"
+                }`}
+              >
+                <FiMail className="h-4 w-4" />
+              </span>
+              <div>
+                <p
+                  className={`text-[14px] font-bold ${
+                    contacts > 0 ? "text-[#dc2626]" : "text-black"
+                  }`}
+                >
+                  {contacts} Contact Message{contacts === 1 ? "" : "s"}
+                </p>
+                <p className="text-[12.5px] text-[#6b7280]">
+                  Customer enquiries from the contact form.
+                </p>
+                <Link
+                  to="/messages"
+                  className="mt-1 inline-block text-[12.5px] font-bold text-black underline"
+                >
+                  Open Messages
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Revenue trend */}
+      <Card className="mt-6 p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[16px] font-bold text-black">
+            Revenue Trend (Last {range} Days)
+          </h2>
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5 text-[12px] text-[#6b7280]">
+              <span className="h-2 w-2 rounded-full bg-black" /> Revenue in ₹
+            </span>
+            <div className="flex overflow-hidden rounded-lg border border-[#e5e7eb]">
+              {([7, 30, 90] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRange(r)}
+                  className={`px-3 py-1.5 text-[12.5px] font-semibold ${
+                    range === r
+                      ? "bg-black text-white"
+                      : "bg-[#f8f9fb] text-[#374151] hover:bg-[#f3f4f6]"
+                  }`}
+                >
+                  {r}D
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <svg viewBox="0 0 100 46" preserveAspectRatio="none" className="mt-6 h-[190px] w-full">
+          {[12, 24, 36].map((y) => (
+            <line
+              key={y}
+              x1="0"
+              x2="100"
+              y1={y}
+              y2={y}
+              stroke="#e5e7eb"
+              strokeWidth="0.3"
+              strokeDasharray="1.5 1.5"
+            />
+          ))}
+          <path
+            d={chart.d}
+            fill="none"
+            stroke="#171717"
+            strokeWidth="0.9"
+            vectorEffect="non-scaling-stroke"
+          />
+          <circle
+            cx={chart.end[0]}
+            cy={chart.end[1]}
+            r="1.1"
+            fill="#f0c96b"
+            stroke="#171717"
+            strokeWidth="0.3"
+          />
+        </svg>
+        <div className="flex justify-between pt-2 text-[11px] text-[#9ca3af]">
+          <span>{axisLabel(range - 1)}</span>
+          <span>{axisLabel(Math.round((range - 1) * 0.75))}</span>
+          <span>{axisLabel(Math.round((range - 1) * 0.5))}</span>
+          <span>{axisLabel(Math.round((range - 1) * 0.25))}</span>
+          <span>Today</span>
+        </div>
+      </Card>
+    </Shell>
+  );
+}

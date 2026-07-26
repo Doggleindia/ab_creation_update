@@ -1,141 +1,97 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 
-const collectionItems = [
+const TILES = [
   {
-    id: 1,
     title: "T-Shirts",
-    subtitle: "Premium Blanks & Vintage Washes",
-    image: "/images/home/collection1.png",
-    className: "col-span-2 row-span-1 h-[220px]",
+    sub: "Premium Blanks & Vintage Washes",
+    img: "/images/home/explore-tshirts.png",
+    slug: "t-shirts",
+    span: "lg:col-span-2",
   },
   {
-    id: 2,
     title: "DTF Transfers",
-    subtitle: "Vibrant, Durable Prints",
-    image: "/images/home/collection2.png",
-    className: "col-span-1 row-span-2 h-[460px]",
+    sub: "Vibrant, Durable Prints",
+    img: "/images/home/explore-dtf.png",
+    slug: "dtf-transfers",
+    span: "lg:row-span-2",
   },
   {
-    id: 3,
     title: "Hoodies",
-    subtitle: "Heavyweight Fleece",
-    image: "/images/home/collection3.png",
-    className: "col-span-1 row-span-1 h-[220px]",
+    sub: "Heavyweight Fleece",
+    img: "/images/home/explore-hoodies.png",
+    slug: "hoodies",
+    span: "",
   },
   {
-    id: 4,
     title: "Embroidery",
-    subtitle: "High-End Count Precision",
-    image: "/images/home/collection4.png",
-    className: "col-span-2 row-span-1 h-[220px]",
+    sub: "High-Thread Count Precision",
+    img: "/images/home/explore-embroidery.png",
+    slug: "embroidery",
+    span: "lg:col-span-2",
   },
   {
-    id: 5,
     title: "Sweatshirt",
-    subtitle: "Caps & Beanies",
-    image: "/images/home/collection5.png",
-    className: "col-span-1 row-span-1 h-[220px]",
+    sub: "Caps & Beanies",
+    img: "/images/home/explore-sweatshirt.png",
+    slug: "sweatshirts",
+    span: "",
   },
   {
-    id: 6,
     title: "Screen Print",
-    subtitle: "Bulk Orders",
-    image: "/images/home/collection6.png",
-    className: "col-span-1 row-span-1 h-[160px]",
+    sub: "Bulk Orders",
+    img: "/images/home/explore-screenprint.png",
+    slug: "screen-print",
+    span: "",
   },
   {
-    id: 7,
     title: "Tote Bags",
-    subtitle: "Canvas & Organic Cotton",
-    image: "/images/home/collection7.png",
-    className: "col-span-1 row-span-1 h-[160px]",
+    sub: "Canvas & Cotton",
+    img: "/images/home/explore-tote.png",
+    slug: "tote-bags",
+    span: "",
   },
   {
-    id: 8,
     title: "Polo Tshirt",
-    subtitle: "Weatherproof Vinyl",
-    image: "/images/home/collection8.png",
-    className: "col-span-2 row-span-1 h-[160px]",
+    sub: "Weatherproof Vinyl",
+    img: "/images/home/explore-polo.png",
+    slug: "polo-shirts",
+    span: "lg:col-span-2",
   },
 ];
 
 export default function ExploreCollectionSection() {
   return (
-    <section className="bg-[#F5F1EA] py-20 lg:py-28">
-      <div className="max-w-[1320px] mx-auto px-4">
-        {/* HEADING */}
-        <div className="text-center mb-14">
-          <h2 className="text-[#171717] text-[34px] sm:text-[48px] font-bold leading-[110%] tracking-[-1px]">
+    <section className="w-full bg-white px-4 py-20 sm:px-8 lg:px-24 lg:py-24">
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-16">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <h2 className="font-poppins text-3xl font-bold text-[#111827] sm:text-[40px]">
             Explore our Collection
           </h2>
-
-          <p className="mt-4 text-[#6B7280] text-[15px] sm:text-[16px] leading-[26px] max-w-[620px] mx-auto">
+          <p className="text-[16px] text-[#6b7280]">
             Get inspired from some of our happy customers showing off their
             custom apparel
           </p>
         </div>
 
-        {/* GRID */}
-        <div className="grid grid-cols-4 gap-4 auto-rows-auto">
-          {collectionItems.map((item) => (
+        <div className="grid auto-rows-[220px] grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {TILES.map((t) => (
             <Link
-              key={item.id}
-              href={`/product-collection?id=${item.id}`}
-              className={`relative overflow-hidden rounded-[18px] group ${item.className}`}
-            >
-              {/* IMAGE */}
-              <Image
-                src={item.image}
-                alt={item.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-
-              {/* OVERLAY */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
-              {/* CONTENT */}
-              <div className="absolute bottom-0 left-0 p-5 z-10">
-                <h3 className="text-white text-[20px] font-bold leading-none mb-2">
-                  {item.title}
-                </h3>
-
-                <p className="text-white/80 text-[13px] leading-none">
-                  {item.subtitle}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* MOBILE GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
-          {collectionItems.map((item) => (
-            <Link
-              key={item.id}
-              href={`/product-collection?id=${item.id}`}
-              className="relative h-[240px] overflow-hidden rounded-[18px] group"
+              key={t.title}
+              href={`/collection?category=${t.slug}`}
+              className={`group relative overflow-hidden rounded-2xl bg-[#1f2937] ${t.span}`}
             >
               <Image
-                src={item.image}
-                alt={item.title}
+                src={t.img}
+                alt={t.title}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
-              <div className="absolute bottom-0 left-0 p-5 z-10">
-                <h3 className="text-white text-[20px] font-bold mb-1">
-                  {item.title}
-                </h3>
-
-                <p className="text-white/80 text-[13px]">
-                  {item.subtitle}
-                </p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-6 left-6 flex flex-col gap-1">
+                <h3 className="text-[22px] font-bold text-white">{t.title}</h3>
+                <p className="font-poppins text-[14px] text-[#e5e7eb]">{t.sub}</p>
               </div>
             </Link>
           ))}

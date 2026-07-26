@@ -2,6 +2,7 @@ import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import Variant from '../models/Variant.js';
 import Inventory from '../models/Inventory.js';
+import SellerProduct from '../models/SellerProduct.js';
 import AppError from '../utils/AppError.js';
 import { safeRegexFilter, toStr } from '../utils/sanitize.js';
 
@@ -28,6 +29,8 @@ export const createProduct = async(req, res, next) => {
             productDetails,
             materialAndCare,
             specifications,
+            printZones,
+            measurements,
         } = req.body;
 
 
@@ -59,6 +62,8 @@ export const createProduct = async(req, res, next) => {
             productDetails,
             materialAndCare,
             specifications,
+            printZones,
+            measurements,
         });
 
 
@@ -99,6 +104,8 @@ export const updateProduct = async(req, res, next) => {
             "productDetails",
             "materialAndCare",
             "specifications",
+            "printZones",
+            "measurements",
         ];
         const updates = {};
         for (const key of ALLOWED_FIELDS) {
@@ -205,6 +212,7 @@ export const getProducts = async(req, res, next) => {
         const [products, total] = await Promise.all([
             Product.find(filter)
             .populate("categoryId", "name slug")
+            .populate("variants", "id color sku media")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(Number(limit))
@@ -594,6 +602,16 @@ export const getSingleProduct = async(req, res, next) => {
 
         if (!product) return next(new AppError("Product not found", 404));
 
+        // Count the view — fire-and-forget, never blocks the response
+        Product.updateOne({ _id: product._id }, { $inc: { views: 1 } }).catch(() => {});
+
+        // Seller attribution for marketplace products published from a
+        // seller submission (null for AB Creation's own catalog).
+        const sellerSub = await SellerProduct.findOne({
+            publishedProductId: product._id,
+            status: "approved",
+        }).populate("sellerId", "name");
+
         const variants = await Variant.aggregate([
             { $match: { productId: product._id } },
             {
@@ -644,6 +662,12 @@ export const getSingleProduct = async(req, res, next) => {
                 productDetails: product.productDetails,
                 materialAndCare: product.materialAndCare,
                 specifications: product.specifications,
+                customizationTypes: product.customizationTypes,
+                printZones: product.printZones,
+                measurements: product.measurements,
+                seller: sellerSub?.sellerId?.name
+                    ? { name: sellerSub.sellerId.name }
+                    : null,
                 variants,
             },
         });

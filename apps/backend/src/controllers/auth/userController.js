@@ -5,6 +5,7 @@ import UserWallet from "../../models/UserWallet.js";
 import AppError from "../../utils/AppError.js";
 import sendOtp from "../../utils/sendOtp.js";
 import { hashOtp } from "../../utils/otp.js";
+import { toStr } from "../../utils/sanitize.js";
 
 const generateToken = (id) =>
   jwt.sign({ id, role: "user" }, process.env.JWT_SECRET, {
@@ -49,7 +50,10 @@ export const signupUser = async (req, res, next) => {
  */
 export const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    // Coerce email to a primitive string so a crafted object (e.g.
+    // {"$ne":null}) can't turn the lookup into a NoSQL operator query.
+    const email = toStr(req.body.email);
 
     // Check if email & password provided
     if (!email || !password) {
@@ -70,6 +74,14 @@ export const loginUser = async (req, res, next) => {
       });
     }
 
+    // Suspended accounts can authenticate but are not allowed in.
+    if (user.status === "suspended") {
+      return res.status(403).json({
+        status: "fail",
+        message: "This account has been suspended. Please contact support.",
+      });
+    }
+
     // Generate JWT token
     const token = generateToken(user._id);
 
@@ -81,6 +93,9 @@ export const loginUser = async (req, res, next) => {
           id: user._id,
           name: user.name,
           email: user.email,
+          accountType: user.accountType,
+          mustChangePassword: user.mustChangePassword,
+          avatar: user.avatar || null,
         },
       },
     });
@@ -167,6 +182,7 @@ export const resetPassword = async (req, res, next) => {
     user.password = newPassword;
     user.resetOtp = undefined;
     user.resetOtpExpires = undefined;
+    user.mustChangePassword = false;
     await user.save();
 
     res.status(200).json({
@@ -258,6 +274,17 @@ export const getUserProfile = async (req, res, next) => {
       name: user.name,
       email: user.email,
       phone: user.phone || null,
+      accountType: user.accountType,
+      mustChangePassword: user.mustChangePassword,
+      avatar: user.avatar || null,
+      gender: user.gender || "",
+      dateOfBirth: user.dateOfBirth || null,
+      notificationPrefs: {
+        orderUpdates: user.notificationPrefs?.orderUpdates ?? true,
+        promotionalEmails: user.notificationPrefs?.promotionalEmails ?? false,
+        designReminders: user.notificationPrefs?.designReminders ?? true,
+        smsUpdates: user.notificationPrefs?.smsUpdates ?? true,
+      },
       address: {
         street: user.address?.street || null,
         city: user.address?.city || null,
@@ -298,13 +325,37 @@ export const updateUserProfile = async (req, res, next) => {
 
     // Explicit allowlist — never trust the raw body. This blocks mass-assignment
     // of sensitive/internal fields (password, role, email, otp, etc.).
-    const { name, phone, address } = req.body;
+    const { name, phone, address, gender, dateOfBirth, notificationPrefs } = req.body;
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (phone !== undefined) updates.phone = phone;
     if (address !== undefined) {
       const { street, city, state, pincode, country } = address || {};
       updates.address = { street, city, state, pincode, country };
+    }
+    if (gender !== undefined) {
+      if (!["", "male", "female", "other"].includes(gender)) {
+        return next(new AppError("Invalid gender value", 400));
+      }
+      updates.gender = gender;
+    }
+    if (dateOfBirth !== undefined) {
+      if (dateOfBirth === "" || dateOfBirth === null) {
+        updates.dateOfBirth = null;
+      } else {
+        const dob = new Date(dateOfBirth);
+        if (Number.isNaN(dob.getTime()) || dob > new Date()) {
+          return next(new AppError("Date of birth must be a valid past date", 400));
+        }
+        updates.dateOfBirth = dob;
+      }
+    }
+    if (notificationPrefs !== undefined && typeof notificationPrefs === "object") {
+      for (const key of ["orderUpdates", "promotionalEmails", "designReminders", "smsUpdates"]) {
+        if (typeof notificationPrefs[key] === "boolean") {
+          updates[`notificationPrefs.${key}`] = notificationPrefs[key];
+        }
+      }
     }
 
     const user = await User.findByIdAndUpdate(userId, updates, {
@@ -322,6 +373,17 @@ export const updateUserProfile = async (req, res, next) => {
       name: user.name,
       email: user.email,
       phone: user.phone || null,
+      accountType: user.accountType,
+      mustChangePassword: user.mustChangePassword,
+      avatar: user.avatar || null,
+      gender: user.gender || "",
+      dateOfBirth: user.dateOfBirth || null,
+      notificationPrefs: {
+        orderUpdates: user.notificationPrefs?.orderUpdates ?? true,
+        promotionalEmails: user.notificationPrefs?.promotionalEmails ?? false,
+        designReminders: user.notificationPrefs?.designReminders ?? true,
+        smsUpdates: user.notificationPrefs?.smsUpdates ?? true,
+      },
       address: {
         street: user.address?.street || null,
         city: user.address?.city || null,
@@ -337,6 +399,140 @@ export const updateUserProfile = async (req, res, next) => {
       status: "success",
       message: "Profile updated successfully",
       data: { user: userData },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ======================
+ * CHANGE PASSWORD
+ * ======================
+ * Used both for the forced first-login change (temp password -> new password)
+ * and for a normal voluntary change from the profile screen. Clears the
+ * mustChangePassword flag so an approved bulk/seller user only sets it once.
+ */
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Current and new password are required",
+      });
+    }
+
+    if (typeof newPassword !== "string" || newPassword.length < 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "New password must be at least 6 characters",
+      });
+    }
+
+    // req.user was loaded without the password (select:false); re-fetch with it.
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+
+    const isCorrect = await user.correctPassword(
+      currentPassword,
+      user.password,
+    );
+    if (!isCorrect) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Current password is incorrect",
+      });
+    }
+
+    user.password = newPassword; // pre-save hook re-hashes
+    user.mustChangePassword = false;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ======================
+ * AVATAR UPLOAD
+ * POST /api/users/avatar (multipart, field "avatar")
+ * ======================
+ */
+export const uploadAvatar = async (req, res, next) => {
+  try {
+    const file = req.file;
+    if (!file || !(file.mimetype || "").startsWith("image/")) {
+      return next(new AppError("Upload a profile image file", 400));
+    }
+    const { uploadFileToS3 } = await import("../../config/s3Service.js");
+    const result = await uploadFileToS3(file);
+    if (!result?.Location) {
+      return next(new AppError("Could not store the image — try again", 502));
+    }
+    await User.updateOne({ _id: req.user._id }, { $set: { avatar: result.Location } });
+    res.status(200).json({
+      status: "success",
+      message: "Profile photo updated.",
+      data: { avatar: result.Location },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ======================
+ * DELETE ACCOUNT (self-serve)
+ * DELETE /api/users/account — requires the current password.
+ * Orders and wallet transactions stay as business records; the login,
+ * profile and wallet are removed. Sellers and funded wallets are blocked.
+ * ======================
+ */
+export const deleteAccount = async (req, res, next) => {
+  try {
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+    if (!password) {
+      return next(new AppError("Enter your password to delete the account", 400));
+    }
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+    const ok = await user.correctPassword(password, user.password);
+    if (!ok) {
+      return next(new AppError("Password is incorrect", 401));
+    }
+    if (user.accountType === "seller") {
+      return next(
+        new AppError(
+          "Seller accounts can't self-delete — contact support so we can settle payouts and take down your products first.",
+          409,
+        ),
+      );
+    }
+    const wallet = await UserWallet.findOne({ userId: user._id }).select("balance");
+    if ((wallet?.balance ?? 0) > 0) {
+      return next(
+        new AppError(
+          `Your wallet still holds ₹${wallet.balance} — withdraw or spend it before deleting the account.`,
+          409,
+        ),
+      );
+    }
+    await UserWallet.deleteOne({ userId: user._id });
+    await User.deleteOne({ _id: user._id });
+    res.status(200).json({
+      status: "success",
+      message: "Your account has been deleted. Order records are retained for compliance.",
     });
   } catch (err) {
     next(err);

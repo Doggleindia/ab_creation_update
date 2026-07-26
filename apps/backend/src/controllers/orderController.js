@@ -9,9 +9,45 @@ import Inventory from "../models/Inventory.js";
 import {
   deductFromUserWallet,
   creditToAdminWallet,
+  creditToUserWallet,
+  deductFromAdminWallet,
+  creditSellerPayout,
 } from "../services/walletService.js";
+import WalletTransaction from "../models/WalletTransaction.js";
 import { toStr } from "../utils/sanitize.js";
 import { uploadFileToS3 } from "../config/s3Service.js";
+import SellerProduct from "../models/SellerProduct.js";
+import EmailTransporter from "../utils/EmailTransporter.js";
+
+/**
+ * SELLER — orders placed against this seller's published catalog products.
+ */
+export const getSellerOrders = async (req, res, next) => {
+  try {
+    if (req.user?.accountType !== "seller") {
+      return next(new AppError("Seller account required", 403));
+    }
+    const subs = await SellerProduct.find({
+      sellerId: req.user._id,
+      status: "approved",
+      publishedProductId: { $ne: null },
+    }).select("publishedProductId title retailPrice");
+    const ids = subs.map((s) => s.publishedProductId);
+    const orders = await Order.find({ productId: { $in: ids } })
+      .sort({ createdAt: -1 })
+      .populate("productId", "title slug")
+      // productModel must be selected — productId populates via refPath on it
+      .select(
+        "orderId quantity totalAmount orderStatus paymentStatus createdAt productId productModel size color",
+      );
+    res.status(200).json({
+      status: "success",
+      data: { orders, products: subs },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * Upload one or more customer design files to S3 and return their URLs.
@@ -58,6 +94,7 @@ export const buyNow = async (req, res) => {
       phoneNumber,
       customDesign,
       designFiles,
+      shippingMethod,
       designState,
       anyText,
     } = req.body;
@@ -268,6 +305,7 @@ export const buyNow = async (req, res) => {
               phoneNumber: finalPhoneNumber,
               customDesign,
               designFiles: Array.isArray(designFiles) ? designFiles : [],
+              shippingMethod: ["standard", "express", "rush"].includes(shippingMethod) ? shippingMethod : "standard",
               designState: designState || undefined,
               anyText,
               orderStatus: "pending",
@@ -406,7 +444,8 @@ const resolveCheckoutItem = async (item) => {
 export const checkoutCart = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { items, shippingAddress, phoneNumber } = req.body;
+    const { items, shippingAddress, phoneNumber, shippingMethod } = req.body;
+    const finalShippingMethod = ["standard", "express", "rush"].includes(shippingMethod) ? shippingMethod : "standard";
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty." });
@@ -481,6 +520,7 @@ export const checkoutCart = async (req, res) => {
           shippingAddress: finalShippingAddress,
           phoneNumber: finalPhoneNumber,
           customDesign: r.customDesign,
+          shippingMethod: finalShippingMethod,
           designFiles: Array.isArray(r.designFiles) ? r.designFiles : [],
           designState: r.designState || undefined,
           anyText: r.anyText,
@@ -561,9 +601,14 @@ export const getOrderById = async (req, res) => {
     const { orderId } = req.params;
     const userId = req.user._id;
 
-    // Fetch order matching either _id or orderId, owned by the logged-in user
+    // Fetch order matching either _id or orderId, owned by the logged-in user.
+    // Only match _id when the param is a valid ObjectId — a human orderId like
+    // "ORD-..." would otherwise throw a CastError and turn into a 500.
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
     const order = await Order.findOne({
-      $or: [{ _id: orderId }, { orderId: orderId }],
+      $or: idClauses,
       userId,
     })
       .populate("productId")
@@ -650,5 +695,357 @@ export const getAdminAllOrders = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+/**
+ * ADMIN — update an order's status (production pipeline).
+ * PATCH /api/orders/admin/:orderId/status  { orderStatus }
+ */
+export const updateAdminOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const orderStatus = toStr(req.body.orderStatus);
+
+    const allowed = [
+      "pending",
+      "confirmed",
+      "in_production",
+      "quality_check",
+      "ready_to_pack",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+    if (!allowed.includes(orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `orderStatus must be one of: ${allowed.join(", ")}`,
+      });
+    }
+
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
+    const order = await Order.findOne({ $or: idClauses });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+
+    // Production floor bookkeeping: stamp when printing starts; count QC fails
+    if (orderStatus === "in_production" && !order.productionStartedAt) {
+      order.productionStartedAt = new Date();
+    }
+    if (req.body.qcFail === true) {
+      order.qcFails = (order.qcFails || 0) + 1;
+    }
+
+    // Seller margin payout — runs once, on the first transition into
+    // "delivered" for a paid order of a seller-published product.
+    let payoutInfo = null;
+    if (
+      orderStatus === "delivered" &&
+      order.orderStatus !== "delivered" &&
+      order.paymentStatus === "paid" &&
+      order.productId
+    ) {
+      const sub = await SellerProduct.findOne({
+        status: "approved",
+        publishedProductId: order.productId,
+      }).populate("baseProductId", "basePrice");
+      const marginPerUnit = sub
+        ? Math.max(0, (sub.retailPrice || 0) - (sub.baseProductId?.basePrice || 0))
+        : 0;
+      const payout = Math.round(marginPerUnit * (order.quantity || 1));
+      const requestId = `payout-seller-${order.orderId}`;
+      const alreadyPaid = payout > 0 && (await WalletTransaction.exists({ requestId }));
+      if (sub && payout > 0 && !alreadyPaid) {
+        const session = await mongoose.startSession();
+        try {
+          await session.withTransaction(async () => {
+            await deductFromAdminWallet(payout, `payout-admin-${order.orderId}`, session);
+            await creditSellerPayout(sub.sellerId, payout, requestId, session);
+            order.orderStatus = "delivered";
+            await order.save({ session });
+          });
+          payoutInfo = { sellerId: sub.sellerId, amount: payout };
+        } finally {
+          session.endSession();
+        }
+      } else {
+        order.orderStatus = orderStatus;
+        await order.save();
+      }
+    } else {
+      order.orderStatus = orderStatus;
+      await order.save();
+    }
+
+    const populated = await Order.findById(order._id)
+      .populate("userId", "name email notificationPrefs")
+      .populate("productId")
+      .populate("variantId");
+
+    // Buyer order-update email on the milestones that matter, respecting the
+    // user's Order Updates notification preference. Best-effort — a mail
+    // failure never fails the status change.
+    if (["shipped", "delivered"].includes(orderStatus)) {
+      try {
+        const buyer = populated?.userId;
+        if (buyer?.email && buyer.notificationPrefs?.orderUpdates !== false) {
+          const site = process.env.FRONTEND_URL || "http://localhost:3000";
+          const subject =
+            orderStatus === "shipped"
+              ? `Your AB Creation order ${order.orderId} has shipped`
+              : `Your AB Creation order ${order.orderId} was delivered`;
+          const shippingLine =
+            orderStatus === "shipped" && (order.carrier || order.trackingNumber)
+              ? `\nCarrier: ${order.carrier || "-"}  Tracking: ${order.trackingNumber || "-"}`
+              : "";
+          await EmailTransporter.sendEmail(
+            buyer.email,
+            subject,
+            `Hi ${buyer.name || ""},\n\n${
+              orderStatus === "shipped"
+                ? "Good news — your order is on its way!"
+                : "Your order has been delivered. We hope you love it!"
+            }${shippingLine}\n\nTrack it any time: ${site}/track-order/${encodeURIComponent(order.orderId)}\n\nThe AB Creation Team`,
+          );
+        }
+      } catch (mailErr) {
+        console.error("buyer order-update email failed:", mailErr.message);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      ...(payoutInfo
+        ? { message: `Seller payout of Rs ${payoutInfo.amount} credited.` }
+        : {}),
+      data: populated,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * ADMIN — update shipping meta / internal note.
+ * PATCH /api/orders/admin/:orderId/meta  { carrier?, trackingNumber?, internalNote? }
+ */
+export const updateAdminOrderMeta = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
+    const order = await Order.findOne({ $or: idClauses });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+    if (typeof req.body.carrier === "string") order.carrier = toStr(req.body.carrier);
+    if (typeof req.body.trackingNumber === "string") {
+      order.trackingNumber = toStr(req.body.trackingNumber);
+    }
+    if (typeof req.body.internalNote === "string") {
+      order.internalNote = toStr(req.body.internalNote);
+    }
+    if (typeof req.body.assignee === "string") {
+      order.assignee = toStr(req.body.assignee);
+    }
+    await order.save();
+    res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * ADMIN — refund a paid order to the buyer's wallet and cancel it.
+ * The user credit and admin debit happen in one transaction, mirroring
+ * checkout in reverse. Idempotent via the refunded paymentStatus.
+ * POST /api/orders/admin/:orderId/refund
+ */
+export const refundAdminOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const idClauses = mongoose.isValidObjectId(orderId)
+      ? [{ _id: orderId }, { orderId: orderId }]
+      : [{ orderId: orderId }];
+    const order = await Order.findOne({ $or: idClauses });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+    if (order.paymentStatus !== "paid") {
+      return res.status(409).json({
+        success: false,
+        message: `Order payment status is '${order.paymentStatus}' — only paid orders can be refunded.`,
+      });
+    }
+
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await deductFromAdminWallet(order.totalAmount, `refund-admin-${order.orderId}`, session);
+        await creditToUserWallet(order.userId, order.totalAmount, `refund-user-${order.orderId}`, session);
+        order.paymentStatus = "refunded";
+        order.orderStatus = "cancelled";
+        await order.save({ session });
+      });
+    } finally {
+      session.endSession();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Refunded ₹${order.totalAmount} to the customer's wallet and cancelled the order.`,
+      data: order,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * ADMIN — per-seller payout summary.
+ * pending  = delivered + paid seller-product orders not yet settled
+ * upcoming = paid seller-product orders still in production
+ * products = margin map so the console can compute platform share per order
+ */
+export const getSellerPayoutSummary = async (req, res, next) => {
+  try {
+    const subs = await SellerProduct.find({
+      status: "approved",
+      publishedProductId: { $ne: null },
+    })
+      .populate("baseProductId", "basePrice")
+      .populate("sellerId", "name email");
+    const byProduct = new Map(
+      subs.map((s) => [
+        String(s.publishedProductId),
+        {
+          sellerId: String(s.sellerId?._id ?? s.sellerId),
+          name: s.sellerId?.name ?? "Seller",
+          email: s.sellerId?.email ?? "",
+          marginPerUnit: Math.max(
+            0,
+            (s.retailPrice || 0) - (s.baseProductId?.basePrice || 0),
+          ),
+        },
+      ]),
+    );
+    const orders = await Order.find({
+      productId: { $in: [...byProduct.keys()] },
+      paymentStatus: "paid",
+      orderStatus: { $ne: "cancelled" },
+    }).select("orderId productId quantity totalAmount orderStatus createdAt");
+
+    const groups = { pending: new Map(), upcoming: new Map() };
+    for (const order of orders) {
+      const info = byProduct.get(String(order.productId));
+      if (!info || info.marginPerUnit <= 0) continue;
+      const margin = Math.round(info.marginPerUnit * (order.quantity || 1));
+      let bucket;
+      if (order.orderStatus === "delivered") {
+        const settled = await WalletTransaction.exists({
+          requestId: `payout-seller-${order.orderId}`,
+        });
+        if (settled) continue;
+        bucket = groups.pending;
+      } else {
+        bucket = groups.upcoming;
+      }
+      const g = bucket.get(info.sellerId) ?? {
+        sellerId: info.sellerId,
+        name: info.name,
+        email: info.email,
+        sales: 0,
+        revenue: 0,
+        payout: 0,
+      };
+      g.sales += 1;
+      g.revenue += order.totalAmount || 0;
+      g.payout += margin;
+      bucket.set(info.sellerId, g);
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        pending: [...groups.pending.values()],
+        upcoming: [...groups.upcoming.values()],
+        products: [...byProduct.entries()].map(([productId, i]) => ({
+          productId,
+          sellerId: i.sellerId,
+          name: i.name,
+          marginPerUnit: i.marginPerUnit,
+        })),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ADMIN — settle outstanding payouts (all sellers, or one via sellerId).
+ * Covers delivered paid seller-product orders that have no payout ledger
+ * entry yet. Each order settles in its own transaction; an insufficient
+ * platform balance stops the run and reports what happened.
+ */
+export const processSellerPayouts = async (req, res, next) => {
+  try {
+    const sellerFilter = toStr(req.body.sellerId);
+    const subs = await SellerProduct.find({
+      status: "approved",
+      publishedProductId: { $ne: null },
+      ...(sellerFilter ? { sellerId: sellerFilter } : {}),
+    }).populate("baseProductId", "basePrice");
+    const byProduct = new Map(subs.map((s) => [String(s.publishedProductId), s]));
+    const orders = await Order.find({
+      productId: { $in: [...byProduct.keys()] },
+      orderStatus: "delivered",
+      paymentStatus: "paid",
+    });
+
+    let processed = 0;
+    let total = 0;
+    let halted = null;
+    for (const order of orders) {
+      const requestId = `payout-seller-${order.orderId}`;
+      if (await WalletTransaction.exists({ requestId })) continue;
+      const sub = byProduct.get(String(order.productId));
+      const margin = Math.round(
+        Math.max(0, (sub.retailPrice || 0) - (sub.baseProductId?.basePrice || 0)) *
+          (order.quantity || 1),
+      );
+      if (margin <= 0) continue;
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          await deductFromAdminWallet(margin, `payout-admin-${order.orderId}`, session);
+          await creditSellerPayout(sub.sellerId, margin, requestId, session);
+        });
+        processed += 1;
+        total += margin;
+      } catch (err) {
+        halted = err.message;
+        break;
+      } finally {
+        session.endSession();
+      }
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: halted
+        ? `Processed ${processed} payout(s) totalling ₹${total.toLocaleString("en-IN")} before stopping: ${halted}`
+        : processed
+          ? `Processed ${processed} payout(s) totalling ₹${total.toLocaleString("en-IN")}.`
+          : "No pending payouts — everything is settled.",
+      data: { processed, total, halted },
+    });
+  } catch (err) {
+    next(err);
   }
 };

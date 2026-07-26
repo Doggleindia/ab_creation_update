@@ -1,66 +1,53 @@
-import Footer from "@/components/Footer";
+import type { Metadata } from "next";
+import ProsePage from "@/components/common/ProsePage";
 
-export default function TermsAndConditionsPage() {
+export const metadata: Metadata = {
+  title: "Terms & Conditions | AB Creation",
+};
+
+export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="bg-[#F5F1EA]">
-        <div className="max-w-5xl mx-auto px-6 py-12">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-600">Policies</p>
-          <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">
-            Terms and Conditions
-          </h1>
-          <p className="mt-3 text-sm text-gray-600">
-            Last updated: February 3, 2026
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-12 text-gray-700 text-sm leading-7">
-        <p>
-          By accessing or using our website, you agree to these Terms and
-          Conditions. If you do not agree, please do not use the site.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Use of the Site</h2>
-        <ul className="mt-3 list-disc pl-5 space-y-2">
-          <li>You must be at least 18 years old or have permission from a guardian.</li>
-          <li>You agree not to misuse the site or attempt to disrupt services.</li>
-          <li>Content is provided for personal and non-commercial use only.</li>
-        </ul>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Orders and Payments</h2>
-        <ul className="mt-3 list-disc pl-5 space-y-2">
-          <li>All orders are subject to acceptance and product availability.</li>
-          <li>Prices and promotions may change without notice.</li>
-          <li>We reserve the right to cancel or limit quantities per order.</li>
-        </ul>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Intellectual Property</h2>
-        <p className="mt-3">
-          All content, logos, images, and designs are the property of the
-          company and may not be used without permission.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Limitation of Liability</h2>
-        <p className="mt-3">
-          We are not liable for indirect, incidental, or consequential damages
-          arising from your use of the website or products.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Changes to These Terms</h2>
-        <p className="mt-3">
-          We may update these Terms and Conditions from time to time. Continued
-          use of the site means you accept the revised terms.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Contact Us</h2>
-        <p className="mt-3">
-          If you have questions about these Terms and Conditions, please reach
-          out using the contact details listed on our website.
-        </p>
-      </div>
-
-      <Footer />
-    </div>
+    <ProsePage
+      title="Terms & Conditions"
+      intro="These terms govern your use of the AB Creation storefront, design studio, wallet, and seller & bulk-order programs. By placing an order or submitting an application you agree to them."
+      sections={[
+        {
+          heading: "Orders & payment",
+          body: [
+            "Orders are paid from your AB Creation wallet at the moment of checkout. An order is confirmed once payment succeeds and stock is reserved. Prices shown include taxes unless stated otherwise; shipping is calculated per order.",
+          ],
+        },
+        {
+          heading: "Custom designs",
+          body: [
+            "You confirm that you own, or are licensed to use, any artwork you upload, and that it does not infringe third-party rights or contain unlawful content. We may decline to print artwork that violates this policy and will refund the affected order to your wallet.",
+          ],
+        },
+        {
+          heading: "Production & delivery",
+          body: [
+            "Standard production is 7-10 business days after design approval, plus shipping time. Estimated delivery dates are estimates, not guarantees. Once an order is dispatched, tracking details are available on the Track Order page.",
+          ],
+        },
+        {
+          heading: "Cancellations & returns",
+          body: [
+            "Ready-made products can be returned within 7 days of delivery in unused condition. Custom-printed items can only be returned for production defects or printing errors, since they are made specifically for you. Approved refunds are credited to your wallet.",
+          ],
+        },
+        {
+          heading: "Seller & bulk programs",
+          body: [
+            "Seller and bulk applications are reviewed by our team and may be approved or rejected at our discretion. Approved sellers receive account credentials by email and are bound by the commission and payout terms shared during onboarding.",
+          ],
+        },
+        {
+          heading: "Liability",
+          body: [
+            "Our liability for any order is limited to the amount paid for that order. We are not liable for indirect or consequential losses.",
+          ],
+        },
+      ]}
+    />
   );
 }

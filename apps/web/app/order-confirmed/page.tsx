@@ -1,283 +1,255 @@
-"use client"
+"use client";
 
-import { Suspense, useEffect, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { CheckCircle2, ShoppingBag, ArrowRight, Calendar, CreditCard, Truck, Copy, Check } from "lucide-react"
-import Footer from "@/components/Footer"
-import { Button } from "@/components/ui/button"
-import { getOrderById } from "@/lib/api"
-import type { Order } from "@kt/types"
+import { Suspense, useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ArrowRight, Check, MapPin, Printer } from "lucide-react";
 
-function OrderConfirmedContent() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
+type LastOrder = {
+  orderId: string;
+  email: string;
+  address: string[];
+  items: {
+    title: string;
+    variant: string;
+    image: string;
+    price: number;
+    quantity: number;
+  }[];
+  subtotal: number;
+  shipping: { id: string; label: string; time: string; price: number };
+  payment: "razorpay" | "cod";
+  codFee: number;
+  total: number;
+  etaLabel: string;
+};
 
-  const orderId = searchParams.get("orderId")
-  const paymentMethod = searchParams.get("paymentMethod") || "Prepaid Online"
+const STEPS = ["Confirmed", "In Production", "Dispatched", "Delivered"];
+const CURRENT_STEP = 0; // Confirmed — production starts after admin review
 
-  const [copied, setCopied] = useState(false)
-  // Amount is sourced from the verified order fetched from the backend, not
-  // from the URL (which a user could tamper with). Falls back to the URL value
-  // only when the order can't be fetched (e.g. guest checkout).
-  const [amount, setAmount] = useState<string | null>(searchParams.get("amount"))
+function Confirmation() {
+  const params = useSearchParams();
+  const [order, setOrder] = useState<LastOrder | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!orderId) return
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("token") || undefined
-        : undefined
-    if (!token) return
-    let active = true
-    getOrderById(orderId, token)
-      .then((res) => {
-        const order: Partial<Order> = res?.data || res?.order || {}
-        if (active && order.totalAmount != null) {
-          setAmount(String(order.totalAmount))
-        }
-      })
-      .catch(() => {
-        /* keep URL fallback if the order can't be verified */
-      })
-    return () => {
-      active = false
+    setMounted(true);
+    try {
+      const raw = sessionStorage.getItem("ab:lastOrder");
+      if (raw) setOrder(JSON.parse(raw));
+    } catch {
+      // fall through to defaults
     }
-  }, [orderId])
+  }, []);
 
-  const handleCopyId = () => {
-    if (orderId) {
-      navigator.clipboard.writeText(orderId)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
+  const orderId = order?.orderId || params.get("orderId") || "ABC-20260710-0047";
 
-  // Format amount to INR
-  const formatPrice = (value: string | null) => {
-    if (!value) return "Rs. 0.00"
-    const parsed = parseFloat(value)
-    if (isNaN(parsed)) return value
-    return `Rs. ${parsed.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
-  }
+  if (!mounted) return <div className="min-h-[60vh] bg-white" />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F5F1EA]/30 to-white pt-24 pb-16 flex flex-col justify-between">
-      <div className="max-w-3xl mx-auto px-4 w-full">
-        
-        {/* SUCCESS ICON & HEADER */}
-        <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 120, damping: 15 }}
-            className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-emerald-50 text-emerald-500 mb-6 relative"
-          >
-            <CheckCircle2 size={56} className="stroke-[1.5]" />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: [0, 1, 0], scale: [1, 1.4, 1.8] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeOut" }}
-              className="absolute inset-0 rounded-full border-2 border-emerald-500/30"
-            />
-          </motion.div>
-          
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-3xl md:text-4xl font-extrabold text-neutral-900 tracking-tight"
-          >
-            Order Confirmed!
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-neutral-500 mt-2 text-sm md:text-base"
-          >
-            Thank you for shopping with us. Your payment has been received and order is being prepared.
-          </motion.p>
+    <main className="w-full bg-white px-4 pb-20 pt-20">
+      <div className="mx-auto flex max-w-[700px] flex-col">
+        {/* Success header */}
+        <div className="flex flex-col items-center pb-20 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#bbf7d0] bg-[#f0fdf4]">
+            <Check className="h-8 w-8 text-[#22c55e]" strokeWidth={3} />
+          </div>
+          <h1 className="pt-5 text-[24px] font-bold tracking-[-0.48px] text-black">
+            Order Placed Successfully!
+          </h1>
+          <p className="pt-1 text-[16px] font-medium text-[#6b7280]">
+            Order #{orderId}
+          </p>
+          <p className="pt-1 text-[14px] text-[#6b7280]">
+            Thank you for your order! You&apos;ll receive a confirmation email
+            {order?.email ? (
+              <>
+                {" "}
+                at <span className="text-black">{order.email}</span>
+              </>
+            ) : (
+              " shortly"
+            )}
+            .
+          </p>
         </div>
 
-        {/* ORDER DETAILS CARD */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white rounded-2xl border border-neutral-100 shadow-xl shadow-neutral-100/50 overflow-hidden mb-8"
-        >
-          {/* Top banner / highlight */}
-          <div className="bg-[#F5F1EA] px-6 py-4 border-b border-neutral-100 flex flex-wrap justify-between items-center gap-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-neutral-700">
-              <Calendar size={16} className="text-[#CBAA75]" />
-              <span>Estimated Delivery: {new Date(Date.now() + 4 * 86400000).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}</span>
-            </div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-              Paid Successfully
-            </span>
-          </div>
+        <div className="flex flex-col gap-4">
+          {/* Order summary card */}
+          <section className="rounded-[12px] border border-[#c4c7c7] bg-white p-[25px] shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
+            <h2 className="text-[12px] font-semibold uppercase leading-3 tracking-[1.2px] text-[#444748]">
+              Order Summary
+            </h2>
 
-          <div className="p-6 md:p-8 space-y-6">
-            {/* Quick summary grids */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-neutral-100 pb-6">
-              <div>
-                <span className="text-xs text-neutral-400 uppercase tracking-wider block mb-1">Order Details</span>
-                {orderId ? (
-                  <div className="flex items-center gap-2 group">
-                    <span className="font-mono text-sm font-semibold text-neutral-800">{orderId}</span>
-                    <button
-                      onClick={handleCopyId}
-                      className="text-neutral-400 hover:text-neutral-600 transition p-1 rounded hover:bg-neutral-50"
-                      title="Copy Order ID"
-                    >
-                      {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                    </button>
+            <div className="pt-2">
+              {(order?.items?.length
+                ? order.items
+                : [
+                    {
+                      title: "Your order",
+                      variant: "",
+                      image: "",
+                      price: 0,
+                      quantity: 1,
+                    },
+                  ]
+              ).map((item, i) => (
+                <div key={i} className="flex items-center gap-4 py-4">
+                  <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-[8px] bg-[#eeeeee]">
+                    {item.image && (
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    )}
                   </div>
-                ) : (
-                  <span className="text-sm font-medium text-neutral-800">KT-ORD-SUCCESS</span>
-                )}
-              </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[16px] font-bold text-black">
+                      {item.title}
+                    </p>
+                    {item.variant && (
+                      <p className="text-[14px] text-[#444748]">
+                        {item.variant}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-[16px] font-bold text-black">
+                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              ))}
+            </div>
 
-              <div>
-                <span className="text-xs text-neutral-400 uppercase tracking-wider block mb-1">Amount Paid</span>
-                <span className="text-lg font-bold text-[#B87D4C]">
-                  {formatPrice(amount)}
+            <div className="border-t border-[#c4c7c7]" />
+
+            <div className="flex flex-col gap-3 pt-6 text-[14px]">
+              <div className="flex items-center justify-between">
+                <span className="text-[#444748]">Payment</span>
+                <span className="font-medium text-black">
+                  {order?.payment === "cod"
+                    ? "Cash on Delivery"
+                    : "Razorpay — UPI"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#444748]">Shipping</span>
+                <span className="font-medium text-black">
+                  {order
+                    ? `${order.shipping.label} Delivery (${order.shipping.time.replace("days", "business days")})`
+                    : "Standard Delivery (5-7 business days)"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#444748]">Estimated Delivery</span>
+                <span className="font-medium text-black">
+                  {order?.etaLabel ?? "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-dashed border-[#c4c7c7] pt-3">
+                <span className="text-[16px] font-bold text-black">Total:</span>
+                <span className="text-[24px] font-bold tracking-[-0.48px] text-black">
+                  {order ? `₹${order.total.toLocaleString("en-IN")}` : "—"}
                 </span>
               </div>
             </div>
+          </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-neutral-100 pb-6">
+          {/* Shipping address card */}
+          <section className="rounded-[12px] border border-[#c4c7c7] bg-white p-[25px] shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
+            <div className="flex items-start gap-4">
+              <MapPin className="h-5 w-5 shrink-0 text-black" />
               <div>
-                <span className="text-xs text-neutral-400 uppercase tracking-wider block mb-1">Payment Method</span>
-                <div className="flex items-center gap-2 text-sm font-medium text-neutral-700 mt-0.5">
-                  <CreditCard size={16} className="text-neutral-400" />
-                  <span>{paymentMethod}</span>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-xs text-neutral-400 uppercase tracking-wider block mb-1">Carrier Status</span>
-                <div className="flex items-center gap-2 text-sm font-medium text-neutral-700 mt-0.5">
-                  <Truck size={16} className="text-neutral-400" />
-                  <span>Preparing Shipment</span>
+                <h2 className="text-[14px] font-semibold text-black">
+                  Shipping Address
+                </h2>
+                <div className="text-[14px] leading-[22.75px] text-[#444748]">
+                  {(order?.address?.length
+                    ? order.address
+                    : ["Address on file"]
+                  ).map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
                 </div>
               </div>
             </div>
+          </section>
 
-            {/* PROCESS TIMELINE */}
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-800 mb-4">Delivery Timeline</h3>
-              <div className="relative">
-                {/* Horizontal line for desktop, vertical for mobile */}
-                <div className="absolute left-[15px] md:left-0 md:right-0 top-3 bottom-3 md:bottom-auto md:top-[15px] h-full md:h-[2px] bg-neutral-100 -z-10" />
-                <div className="absolute left-[15px] md:left-0 md:right-[66%] top-3 bottom-3 md:bottom-auto md:top-[15px] h-[33%] md:h-[2px] bg-emerald-500 -z-10" />
-                
-                <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-4 relative z-10">
-                  {/* Step 1 */}
-                  <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-2 md:w-1/4">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-emerald-500/20">
-                      1
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-semibold text-neutral-800">Order Confirmed</div>
-                      <div className="text-[10px] text-emerald-600">Payment Verified</div>
-                    </div>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-2 md:w-1/4">
-                    <div className="w-8 h-8 rounded-full bg-[#CBAA75] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#B87D4C]/20 animate-pulse">
-                      2
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-semibold text-neutral-800">Processing</div>
-                      <div className="text-[10px] text-[#B87D4C]">Preparing Custom Prints</div>
-                    </div>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-2 md:w-1/4">
-                    <div className="w-8 h-8 rounded-full bg-neutral-100 text-neutral-400 flex items-center justify-center font-bold text-xs">
-                      3
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-semibold text-neutral-400">Shipped</div>
-                      <div className="text-[10px] text-neutral-400">Awaiting Dispatch</div>
-                    </div>
-                  </div>
-
-                  {/* Step 4 */}
-                  <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-2 md:w-1/4">
-                    <div className="w-8 h-8 rounded-full bg-neutral-100 text-neutral-400 flex items-center justify-center font-bold text-xs">
-                      4
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-semibold text-neutral-400">Delivered</div>
-                      <div className="text-[10px] text-neutral-400">Enjoy your adhesives!</div>
-                    </div>
-                  </div>
+          {/* Order status */}
+          <section className="flex flex-col gap-8 pt-6">
+            <h2 className="text-center text-[16px] font-bold text-black">
+              Order Status
+            </h2>
+            <div className="relative flex items-start justify-between px-4">
+              <div className="absolute left-[15%] right-[15%] top-[14px] h-[2px] bg-[#e8e8e8]" />
+              <div className="absolute left-[15%] right-[85%] top-[14px] h-[2px] bg-[#22c55e]" />
+              {STEPS.map((label, i) => (
+                <div
+                  key={label}
+                  className="relative flex flex-1 flex-col items-center gap-3"
+                >
+                  {i < CURRENT_STEP ? (
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#22c55e]">
+                      <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+                    </span>
+                  ) : i === CURRENT_STEP ? (
+                    <span className="relative flex h-7 w-7 items-center justify-center rounded-full bg-black ring-2 ring-black/25">
+                      <span className="h-2 w-2 rounded-full bg-white" />
+                    </span>
+                  ) : (
+                    <span className="h-7 w-7 rounded-full bg-[#e8e8e8]" />
+                  )}
+                  <span
+                    className={`text-[12px] ${
+                      i < CURRENT_STEP
+                        ? "font-bold text-[#16a34a]"
+                        : i === CURRENT_STEP
+                          ? "font-bold text-black"
+                          : "font-medium text-[#444748]"
+                    }`}
+                  >
+                    {label}
+                  </span>
                 </div>
-              </div>
+              ))}
             </div>
+            <div className="flex items-center justify-center gap-3 rounded-[8px] border border-[#c4c7c7]/30 bg-[#f3f3f4] p-[17px]">
+              <Printer className="h-4 w-4 shrink-0 text-[#444748]" />
+              <p className="text-[14px] text-[#444748]">
+                Current Status: <span className="text-black">Confirmed</span>{" "}
+                — We're preparing your order for production
+              </p>
+            </div>
+          </section>
 
-          </div>
-        </motion.div>
-
-        {/* CTAS */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
-        >
-          <Button
-            asChild
-            className="w-full sm:w-auto bg-[#171717] hover:bg-[#B87D4C] px-8 py-6 rounded-xl font-medium text-white shadow-lg shadow-[#171717]/10 group transition"
-          >
-            <Link href={orderId ? `/dashboard/orders/${orderId}` : `/dashboard/orders`}>
-              Track Order Status
-              <ArrowRight size={16} className="ml-1.5 group-hover:translate-x-1 transition-transform" />
+          {/* CTAs */}
+          <div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
+            <Link
+              href={`/track-order/${orderId}`}
+              className="flex h-[52px] min-w-[200px] items-center justify-center gap-2 rounded-[26px] bg-brand-orange px-9 text-[16px] font-bold text-white transition-opacity hover:opacity-90"
+            >
+              Track Order <ArrowRight className="h-4 w-4" />
             </Link>
-          </Button>
-
-          <Button
-            asChild
-            variant="outline"
-            className="w-full sm:w-auto border-neutral-300 text-neutral-700 bg-white hover:bg-neutral-50 px-8 py-6 rounded-xl font-medium shadow-sm transition"
-          >
-            <Link href="/">
-              <ShoppingBag size={16} className="mr-1.5" />
+            <Link
+              href="/collection"
+              className="flex h-[52px] min-w-[200px] items-center justify-center rounded-[8px] border border-[#c4c7c7] bg-white px-6 text-[16px] font-bold text-black transition-colors hover:bg-[#f3f3f4]"
+            >
               Continue Shopping
             </Link>
-          </Button>
-        </motion.div>
-
-        {/* HELPFUL SUPPORT INFORMATION */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.7 }}
-          transition={{ delay: 0.6 }}
-          className="text-center text-xs text-neutral-500 max-w-md mx-auto"
-        >
-          A confirmation email with order details and tracking instructions has been sent. Have questions? Reach out to our customer care team at <a href="mailto:support@kt-adhesives.com" className="underline hover:text-neutral-800">support@kt-adhesives.com</a>
-        </motion.p>
-
+          </div>
+        </div>
       </div>
-      <Footer />
-    </div>
-  )
+    </main>
+  );
 }
 
 export default function OrderConfirmedPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-[#F5F1EA]/30 to-white pt-24 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#B87D4C]" />
-      </div>
-    }>
-      <OrderConfirmedContent />
+    <Suspense fallback={<div className="min-h-[60vh] bg-white" />}>
+      <Confirmation />
     </Suspense>
-  )
+  );
 }

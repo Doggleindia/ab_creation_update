@@ -1,137 +1,107 @@
-import Footer from '@/components/Footer'
-import ProductPage from '@/components/Product-Collection/ProductPage'
-import ClientTestimonials from '@/components/product-page/ClientTestimonials'
-import ExploreOtherProducts from '@/components/product-page/ExploreOtherProducts'
-import FeatureStrip from '@/components/common/FeatureStrip'
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import ProductGallery from "@/components/product/ProductGallery";
+import ProductBuyBox, { type SpecRow } from "@/components/product/ProductBuyBox";
+import SizeChartSection from "@/components/product/SizeChartSection";
+import ProductDetailInfo, {
+  type RatingBar,
+  type Review,
+} from "@/components/product/ProductDetailInfo";
+import { getProductBySlug } from "@/lib/api";
 
-async function fetchProduct(slug: string) {
-  const base = process.env.NEXT_PUBLIC_MAIN_BACKEND
+// Ratings & reviews are static per product decision (no review backend yet).
+const RATING_BARS: RatingBar[] = [
+  { star: 5, count: "39k", pct: 72, color: "#22c55e" },
+  { star: 4, count: "9.8k", pct: 18, color: "#4ade80" },
+  { star: 3, count: "3.2k", pct: 6, color: "#facc15" },
+];
 
-  const host = base ? String(base).replace(/\/$/, '') : ''
-  const url = host
-    ? `${host}/api/products/slug/${encodeURIComponent(slug)}`
-    : `/api/products/slug/${encodeURIComponent(slug)}`
+const REVIEWS: Review[] = [
+  {
+    initials: "RA",
+    name: "Rupam Adhikary",
+    rating: 4,
+    date: "OCT 20, 2023",
+    text: '"Extremely comfortable and stylish. The padding is really good for all-day wear. The print quality is excellent and hasn\'t faded after several washes."',
+    avatarBg: "#ffdbcc",
+    avatarText: "#a04100",
+  },
+  {
+    initials: "SK",
+    name: "Suresh Kumar",
+    rating: 5,
+    date: "SEP 15, 2023",
+    text: '"Perfect for our corporate event. The team was very helpful with the design approval process. Highly recommended for bulk orders!"',
+    avatarBg: "#dae1e3",
+    avatarText: "#586062",
+  },
+];
 
+type Params = Promise<{ productid: string }>;
 
-  try {
-    const res = await fetch(url, { next: { revalidate: 120 } })
-    if (!res.ok) {
-      let body = ''
-      try {
-        body = await res.text()
-      } catch (e) {
-        body = '<unable to read body>'
-      }
-      console.error('[fetchProduct] API error', res.status, res.statusText, 'body:', body)
-      return null
-    }
-
-    const json = await res.json()
-    return json?.data ?? null
-  } catch (err) {
-    console.error('[fetchProduct] Fetch failed for', url, err)
-    return null
-  }
-}
-
-
-async function extractProductId(params: any): Promise<string | undefined> {
-  if (!params) return undefined
-  // If params is a promise/thenable, await it
-  if (typeof params === 'object' && typeof (params as any).then === 'function') {
-    try {
-      params = await params
-    } catch (e) {
-      return undefined
-    }
-  }
-
-  // If it's a JSON string
-  if (typeof params === 'string') {
-    try {
-      params = JSON.parse(params)
-    } catch (e) {
-      return undefined
-    }
-  }
-
-  // Direct property
-  if (typeof params === 'object' && params?.productid) return params.productid
-
-  // Some frameworks wrap values in a `value` string
-  if (params?.value && typeof params.value === 'string') {
-    try {
-      const parsed = JSON.parse(params.value)
-      if (parsed?.productid) return parsed.productid
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  // Fallback: search recursively for a productid key
-  const stack = [params]
-  while (stack.length) {
-    const cur = stack.pop()
-    if (!cur || typeof cur !== 'object') continue
-    if (typeof cur.productid === 'string') return cur.productid
-    for (const k of Object.keys(cur)) {
-      stack.push(cur[k])
-    }
-  }
-
-  return undefined
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ productid: string }> }) {
-  const productId = await extractProductId(params)
-  const product = productId ? await fetchProduct(productId) : null
-  if (!product) return { title: 'Product' }
-  const seo = product.seo || {}
-  return {
-    title: seo.metaTitle || product.title,
-    description: seo.metaDescription || product.description,
-    openGraph: {
-      title: seo.ogTitle || product.title,
-      description: seo.ogDescription || product.description,
-      images: seo.ogImage ? [seo.ogImage] : product?.variants?.[0]?.media?.images ?? [],
-    },
-    alternates: { canonical: seo.canonicalUrl || undefined },
-  }
-}
-
-const Page = async ({
+export async function generateMetadata({
   params,
 }: {
-  params: any
-}) => {
-  const productId = await extractProductId(params)
-
-  if (!productId) return <div>Invalid product</div>
-
-  const product = await fetchProduct(productId)
-  if (!product) {
-    return <div>Product not found</div>
-  }
-  // Collect images from variants (flatten, unique)
-  const images: string[] = []
-  if (product?.variants) {
-    for (const v of product.variants) {
-      const imgs = v?.media?.images || []
-      for (const i of imgs) {
-        if (i && !images.includes(i)) images.push(i)
-      }
-    }
-  }
-
-  return (
-    <div>
-      <ProductPage images={images} product={product} />
-      <ClientTestimonials />
-      <ExploreOtherProducts />
-      <FeatureStrip />
-      <Footer />
-    </div>
-  )
+  params: Params;
+}): Promise<Metadata> {
+  const { productid } = await params;
+  const product = await getProductBySlug(productid);
+  if (!product) return { title: "Product not found | AB Creation" };
+  return {
+    title: `${product.detail.title} | AB Creation`,
+    description: product.detail.subtitle,
+  };
 }
 
-export default Page
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Params;
+}) {
+  const { productid } = await params;
+  const product = await getProductBySlug(productid);
+
+  if (!product) notFound();
+
+  const { detail, info } = product;
+
+  // Compact spec rows for the buy box's Fabric & Specifications block
+  const specs: SpecRow[] = [
+    info.material ? { label: "Material", value: info.material } : null,
+    ...info.specifications.map((s) => ({ label: s.label, value: s.value })),
+    info.careInstructions?.[0]
+      ? { label: "Care", value: info.careInstructions[0] }
+      : null,
+  ].filter((s): s is SpecRow => Boolean(s));
+
+  return (
+    <main>
+      <section className="w-full bg-white px-4 py-8 sm:px-8 lg:px-[86.5px]">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,540px)_1fr]">
+          <ProductGallery
+            images={detail.images}
+            wishlistItem={{
+              slug: detail.slug,
+              title: detail.title,
+              price: detail.price,
+              image: detail.images[0],
+            }}
+          />
+          <ProductBuyBox product={detail} specs={specs} />
+        </div>
+      </section>
+
+      <SizeChartSection measurements={product.measurements} />
+
+      <ProductDetailInfo
+        info={{
+          ...info,
+          rating: detail.rating,
+          ratingCount: detail.ratingCount,
+          ratingBars: RATING_BARS,
+          reviews: REVIEWS,
+        }}
+      />
+    </main>
+  );
+}

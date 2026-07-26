@@ -1,75 +1,45 @@
-import Footer from "@/components/Footer";
+import type { Metadata } from "next";
+import ProsePage from "@/components/common/ProsePage";
+
+export const metadata: Metadata = { title: "Privacy Policy | AB Creation" };
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="bg-[#F5F1EA]">
-        <div className="max-w-5xl mx-auto px-6 py-12">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-600">Policies</p>
-          <h1 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900">
-            Privacy Policy
-          </h1>
-          <p className="mt-3 text-sm text-gray-600">
-            Last updated: February 3, 2026
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-12 text-gray-700 text-sm leading-7">
-        <p>
-          This Privacy Policy explains how we collect, use, and protect your
-          information when you visit our website or place an order.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Information We Collect</h2>
-        <ul className="mt-3 list-disc pl-5 space-y-2">
-          <li>Contact details such as name, email address, phone number, and shipping address.</li>
-          <li>Order details including products purchased and payment status.</li>
-          <li>Basic usage data like pages visited and device or browser type.</li>
-        </ul>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">How We Use Information</h2>
-        <ul className="mt-3 list-disc pl-5 space-y-2">
-          <li>To process orders, payments, shipping, and returns.</li>
-          <li>To provide customer support and respond to inquiries.</li>
-          <li>To improve the website, products, and overall experience.</li>
-          <li>To send updates related to your order or important account notices.</li>
-        </ul>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Sharing and Disclosure</h2>
-        <p className="mt-3">
-          We only share information with trusted service providers needed to
-          operate our business (payment processors, shipping partners, analytics
-          tools). We do not sell personal data.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Cookies and Analytics</h2>
-        <p className="mt-3">
-          We may use cookies or similar technologies to remember preferences and
-          understand how the site is used. You can control cookies in your
-          browser settings.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Data Retention</h2>
-        <p className="mt-3">
-          We retain personal information only as long as needed for legitimate
-          business purposes and legal requirements.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Your Rights</h2>
-        <p className="mt-3">
-          You may request access, correction, or deletion of your personal
-          information, subject to applicable laws.
-        </p>
-
-        <h2 className="mt-8 text-lg font-semibold text-gray-900">Contact Us</h2>
-        <p className="mt-3">
-          For privacy-related questions, please reach out using the contact
-          details listed on our website.
-        </p>
-      </div>
-
-      <Footer />
-    </div>
+    <ProsePage
+      title="Privacy Policy"
+      intro="AB Creation respects your privacy. This policy explains what information we collect when you use our storefront and design studio, how we use it, and the choices you have."
+      sections={[
+        {
+          heading: "Information we collect",
+          body: [
+            "Account details you provide (name, email, phone), order and shipping information, custom design files you upload, and payment records for wallet transactions. We also collect basic usage data such as pages visited and device type to keep the site reliable.",
+          ],
+        },
+        {
+          heading: "How we use it",
+          body: [
+            "To produce and deliver your orders, print your uploaded designs, process wallet payments, respond to support requests, and review seller or bulk-order applications. We do not sell your personal information to third parties.",
+          ],
+        },
+        {
+          heading: "Design files",
+          body: [
+            "Artwork you upload is used solely to fulfil your order or review your application. You retain all rights to your designs; we only reproduce them on the products you order.",
+          ],
+        },
+        {
+          heading: "Payments",
+          body: [
+            "Wallet recharges are processed by Razorpay. We never store your card, UPI, or banking credentials — payment collection happens on Razorpay's secure systems and we record only the outcome of the transaction.",
+          ],
+        },
+        {
+          heading: "Data retention & your rights",
+          body: [
+            "Order records are retained for accounting and warranty purposes. You can request a copy of your data, correction of inaccurate details, or deletion of your account by contacting support.",
+          ],
+        },
+      ]}
+    />
   );
 }

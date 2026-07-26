@@ -1,0 +1,447 @@
+import mongoose from "mongoose";
+import AppError from "../utils/AppError.js";
+import SellerProduct from "../models/SellerProduct.js";
+import Product from "../models/Product.js";
+import Variant from "../models/Variant.js";
+import Inventory from "../models/Inventory.js";
+import { uploadFileToS3 } from "../config/s3Service.js";
+import { toStr } from "../utils/sanitize.js";
+import EmailTransporter from "../utils/EmailTransporter.js";
+import User from "../models/auth/userModel.js";
+import { notificationEnabled } from "./siteContentController.js";
+
+// Best-effort decision email — review outcomes never fail on SMTP issues.
+// Respects the admin Settings → Notifications toggle.
+const notifySeller = async (submission, subject, text) => {
+  try {
+    if (!(await notificationEnabled("productDecisions"))) return;
+    const seller = await User.findById(submission.sellerId);
+    if (seller?.email) {
+      await EmailTransporter.sendEmail(seller.email, subject, text);
+    }
+  } catch (err) {
+    console.error("seller decision email failed:", err.message);
+  }
+};
+
+// Placement payload from the wizard's Position & Preview step
+const sanitizePlacement = (p) => {
+  if (!p || typeof p !== "object") return undefined;
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : undefined);
+  const placement = {
+    zone: toStr(p.zone) || undefined,
+    xCm: num(p.xCm),
+    yCm: num(p.yCm),
+    widthCm: num(p.widthCm),
+    heightCm: num(p.heightCm),
+    rotationDeg: num(p.rotationDeg),
+  };
+  return Object.values(placement).some((v) => v !== undefined)
+    ? placement
+    : undefined;
+};
+
+const requireSeller = (req, next) => {
+  if (req.user?.accountType !== "seller") {
+    next(new AppError("Only seller accounts can submit products", 403));
+    return false;
+  }
+  return true;
+};
+
+/** SELLER — upload design/mockup images (max 5, images only). */
+export const uploadSellerProductImages = async (req, res, next) => {
+  if (!requireSeller(req, next)) return;
+  const files = (req.files || []).filter((f) =>
+    (f.mimetype || "").startsWith("image/"),
+  );
+  if (!files.length) return next(new AppError("No image files uploaded", 400));
+  const urls = [];
+  for (const file of files.slice(0, 5)) {
+    const result = await uploadFileToS3(file);
+    if (result?.Location) urls.push(result.Location);
+  }
+  res.status(200).json({ status: "success", data: { urls } });
+};
+
+/** SELLER — submit a product for review. */
+export const createSellerProduct = async (req, res, next) => {
+  if (!requireSeller(req, next)) return;
+  const {
+    title,
+    description,
+    baseProductId,
+    method,
+    color,
+    retailPrice,
+    sizes,
+    tags,
+    images,
+  } = req.body;
+
+  if (!title || !retailPrice) {
+    return next(new AppError("title and retailPrice are required", 400));
+  }
+  const price = Number(retailPrice);
+  if (!Number.isFinite(price) || price < 1) {
+    return next(new AppError("retailPrice must be a positive number", 400));
+  }
+
+  let baseProduct = null;
+  if (baseProductId && mongoose.isValidObjectId(baseProductId)) {
+    baseProduct = await Product.findById(baseProductId);
+  }
+  // Pricing below base cost would zero the seller's margin and confuse the
+  // storefront — the wizard blocks it, so must the API.
+  if (baseProduct && price <= baseProduct.basePrice) {
+    return next(
+      new AppError(
+        `Retail price must be above the base cost of ₹${baseProduct.basePrice}`,
+        400,
+      ),
+    );
+  }
+
+  const cleanImages = Array.isArray(images)
+    ? images
+        .filter(
+          (u) =>
+            typeof u === "string" &&
+            (u.startsWith("http://") || u.startsWith("https://")),
+        )
+        .slice(0, 5)
+    : [];
+  if (cleanImages.length === 0) {
+    return next(new AppError("At least one design image is required", 400));
+  }
+
+  const submission = await SellerProduct.create({
+    placement: sanitizePlacement(req.body.placement),
+    sellerId: req.user._id,
+    title: toStr(title),
+    description: toStr(description),
+    baseProductId: baseProduct?._id,
+    baseProductName: baseProduct?.title ?? toStr(req.body.baseProductName),
+    method: ["DTF", "Screen", "Embroidery", "Heat Transfer"].includes(method)
+      ? method
+      : "DTF",
+    color: toStr(color) || "White",
+    retailPrice: price,
+    sizes: Array.isArray(sizes) ? sizes.filter((s) => typeof s === "string").slice(0, 10) : [],
+    tags: Array.isArray(tags) ? tags.filter((t) => typeof t === "string").slice(0, 10) : [],
+    images: cleanImages,
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Design submitted for review. We'll notify you once it's checked.",
+    data: { sellerProduct: { id: submission._id, status: submission.status } },
+  });
+};
+
+/** SELLER — own submissions. */
+export const getMySellerProducts = async (req, res, next) => {
+  if (!requireSeller(req, next)) return;
+  const products = await SellerProduct.find({ sellerId: req.user._id })
+    .sort({ createdAt: -1 })
+    .populate("baseProductId", "title basePrice")
+    .populate("publishedProductId", "slug views status");
+  res.status(200).json({ status: "success", data: { sellerProducts: products } });
+};
+
+/** SELLER — delete an own submission that isn't live on the storefront. */
+export const deleteMySellerProduct = async (req, res, next) => {
+  if (!requireSeller(req, next)) return;
+  const submission = await findSubmission(req.params.id, next);
+  if (!submission) return;
+  if (String(submission.sellerId) !== String(req.user._id)) {
+    return next(new AppError("Not your submission", 403));
+  }
+  if (submission.status === "approved") {
+    return next(
+      new AppError(
+        "This design is live on the storefront — contact support to take it down.",
+        409,
+      ),
+    );
+  }
+  await SellerProduct.deleteOne({ _id: submission._id });
+  res.status(200).json({ status: "success", message: "Submission deleted." });
+};
+
+/** ADMIN — approvals queue. */
+export const getAdminSellerProducts = async (req, res, next) => {
+  const filter = {};
+  const status = toStr(req.query.status);
+  if (status) {
+    if (!["pending", "approved", "rejected", "changes"].includes(status)) {
+      return next(new AppError("Invalid status", 400));
+    }
+    filter.status = status;
+  }
+  const products = await SellerProduct.find(filter)
+    .sort({ createdAt: -1 })
+    .populate("sellerId", "name email")
+    .populate("baseProductId", "title basePrice")
+    .populate("publishedProductId", "slug");
+  res.status(200).json({
+    status: "success",
+    results: products.length,
+    data: { sellerProducts: products },
+  });
+};
+
+const findSubmission = async (id, next) => {
+  if (!mongoose.isValidObjectId(id)) {
+    next(new AppError("Invalid submission id", 400));
+    return null;
+  }
+  const submission = await SellerProduct.findById(id);
+  if (!submission) {
+    next(new AppError("Submission not found", 404));
+    return null;
+  }
+  return submission;
+};
+
+/** ADMIN — persist review aids (notes/checklist). */
+export const reviewSellerProduct = async (req, res, next) => {
+  const submission = await findSubmission(req.params.id, next);
+  if (!submission) return;
+  if (typeof req.body.adminNotes === "string") {
+    submission.adminNotes = req.body.adminNotes;
+  }
+  if (Array.isArray(req.body.checklist)) {
+    submission.checklist = req.body.checklist
+      .filter((x) => typeof x === "string")
+      .slice(0, 20);
+  }
+  await submission.save();
+  res.status(200).json({
+    status: "success",
+    data: {
+      sellerProduct: {
+        id: submission._id,
+        adminNotes: submission.adminNotes,
+        checklist: submission.checklist,
+      },
+    },
+  });
+};
+
+const slugify = (s) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+
+// Catalog ids are validated as PROD### / VAR### — allocate the next free code.
+const nextCode = async (Model, prefix) => {
+  const docs = await Model.find({}, "id").lean();
+  let max = 0;
+  for (const d of docs) {
+    const m = new RegExp(`^${prefix}(\\d{3})$`).exec(d.id || "");
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  }
+  return `${prefix}${String(max + 1).padStart(3, "0")}`;
+};
+
+/**
+ * ADMIN — approve & publish: creates a real catalog Product + Variant +
+ * Inventory so the design is immediately purchasable on the storefront.
+ */
+export const approveSellerProduct = async (req, res, next) => {
+  const submission = await findSubmission(req.params.id, next);
+  if (!submission) return;
+  if (submission.status === "approved") {
+    return next(new AppError("Submission already approved", 409));
+  }
+
+  const base = submission.baseProductId
+    ? await Product.findById(submission.baseProductId)
+    : null;
+  if (!base) {
+    return next(
+      new AppError(
+        "Submission has no base catalog product to publish from. Ask the seller to resubmit against a catalog garment.",
+        400,
+      ),
+    );
+  }
+
+  const stamp = Date.now();
+  const slug = `${slugify(submission.title)}-${String(stamp).slice(-5)}`;
+
+  const product = await Product.create({
+    id: await nextCode(Product, "PROD"),
+    title: submission.title,
+    categoryId: base.categoryId,
+    basePrice: submission.retailPrice,
+    discountPercentage: 0,
+    description:
+      submission.description ||
+      `${submission.title} — a seller design printed on our ${base.title}.`,
+    slug,
+    // Must start as draft — the model blocks publishing before variants exist
+    status: "draft",
+    colors: [submission.color || "White"],
+    sizes: submission.sizes.length ? submission.sizes : base.sizes,
+    customizationTypes: [submission.method],
+    specifications: base.specifications,
+    materialAndCare: base.materialAndCare,
+  });
+
+  const color = submission.color || "White";
+  const variant = await Variant.create({
+    id: await nextCode(Variant, "VAR"),
+    productId: product._id,
+    color,
+    // Same format the Variant pre-save generator uses (it runs after the
+    // required-field validation, so we must supply the sku ourselves)
+    sku: `SP-${color.replace(/\s+/g, "").slice(0, 3).toUpperCase()}-${Date.now()
+      .toString()
+      .slice(-4)}`,
+    addPercentageInBasePrice: 0,
+    media: { images: submission.images },
+  });
+
+  await Inventory.create({
+    variantId: variant._id,
+    stock: 100,
+    reservedStock: 0,
+  });
+
+  product.status = "published";
+  await product.save();
+
+  submission.status = "approved";
+  submission.reviewedBy = req.admin._id;
+  submission.reviewedAt = new Date();
+  submission.publishedProductId = product._id;
+  await submission.save();
+
+  await notifySeller(
+    submission,
+    `Your design "${submission.title}" is live on AB Creation`,
+    `Hi,\n\nGreat news — your design "${submission.title}" was approved and is now live on the AB Creation storefront at /product/${slug} (retail price Rs. ${submission.retailPrice}).\n\nThe AB Creation Team`,
+  );
+
+  res.status(200).json({
+    status: "success",
+    message: `Approved and published to the catalog as /product/${slug}.`,
+    data: {
+      sellerProduct: { id: submission._id, status: submission.status },
+      product: { id: product._id, slug },
+    },
+  });
+};
+
+/** ADMIN — reject or request changes, with a reason. */
+const closeWith = (status) => async (req, res, next) => {
+  const submission = await findSubmission(req.params.id, next);
+  if (!submission) return;
+  if (submission.status === "approved") {
+    return next(new AppError("Submission already approved", 409));
+  }
+  submission.status = status;
+  submission.rejectionReason = toStr(req.body.reason);
+  submission.reviewedBy = req.admin._id;
+  submission.reviewedAt = new Date();
+  await submission.save();
+
+  const feedback = submission.rejectionReason
+    ? `\n\nReviewer feedback: ${submission.rejectionReason}`
+    : "";
+  await notifySeller(
+    submission,
+    status === "rejected"
+      ? `Update on your design "${submission.title}"`
+      : `Changes requested for "${submission.title}"`,
+    `Hi,\n\n${
+      status === "rejected"
+        ? `We reviewed your design "${submission.title}" and can't publish it this time.`
+        : `We reviewed your design "${submission.title}" and need a few changes before it can go live.`
+    }${feedback}\n\nYou can update and resubmit it from your seller area.\n\nThe AB Creation Team`,
+  );
+
+  res.status(200).json({
+    status: "success",
+    message:
+      status === "rejected"
+        ? "Submission rejected."
+        : "Changes requested from the seller.",
+    data: { sellerProduct: { id: submission._id, status: submission.status } },
+  });
+};
+
+export const rejectSellerProduct = closeWith("rejected");
+export const requestSellerProductChanges = closeWith("changes");
+
+/** SELLER — update a rejected/changes submission and send it back to review. */
+export const resubmitSellerProduct = async (req, res, next) => {
+  if (!requireSeller(req, next)) return;
+  const submission = await findSubmission(req.params.id, next);
+  if (!submission) return;
+  if (String(submission.sellerId) !== String(req.user._id)) {
+    return next(new AppError("Not your submission", 403));
+  }
+  if (!["rejected", "changes"].includes(submission.status)) {
+    return next(
+      new AppError(
+        "Only rejected or changes-requested submissions can be resubmitted",
+        409,
+      ),
+    );
+  }
+  const b = req.body;
+  if (b.title) submission.title = toStr(b.title);
+  if (typeof b.description === "string") submission.description = toStr(b.description);
+  if (b.retailPrice) {
+    const price = Number(b.retailPrice);
+    if (!Number.isFinite(price) || price < 1) {
+      return next(new AppError("retailPrice must be a positive number", 400));
+    }
+    const base = submission.baseProductId
+      ? await Product.findById(submission.baseProductId).select("basePrice")
+      : null;
+    if (base && price <= base.basePrice) {
+      return next(
+        new AppError(
+          `Retail price must be above the base cost of ₹${base.basePrice}`,
+          400,
+        ),
+      );
+    }
+    submission.retailPrice = price;
+  }
+  if (["DTF", "Screen", "Embroidery", "Heat Transfer"].includes(b.method)) {
+    submission.method = b.method;
+  }
+  if (b.color) submission.color = toStr(b.color);
+  if (Array.isArray(b.sizes)) {
+    submission.sizes = b.sizes.filter((s) => typeof s === "string").slice(0, 10);
+  }
+  if (Array.isArray(b.tags)) {
+    submission.tags = b.tags.filter((t) => typeof t === "string").slice(0, 10);
+  }
+  if (Array.isArray(b.images)) {
+    submission.images = b.images
+      .filter(
+        (u) =>
+          typeof u === "string" &&
+          (u.startsWith("http://") || u.startsWith("https://")),
+      )
+      .slice(0, 5);
+  }
+  const placement = sanitizePlacement(req.body.placement);
+  if (placement) submission.placement = placement;
+  submission.status = "pending";
+  submission.rejectionReason = undefined;
+  await submission.save();
+  res.status(200).json({
+    status: "success",
+    message: "Resubmitted for review.",
+    data: { sellerProduct: { id: submission._id, status: submission.status } },
+  });
+};

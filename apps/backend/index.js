@@ -22,6 +22,9 @@ import orderRoutes from "./src/routes/orders.js";
 import walletRoutes from "./src/routes/walletRoutes.js";
 import adminWalletRoutes from "./src/routes/adminWalletRoutes.js";
 import ticketRoutes from "./src/routes/ticketRoutes.js";
+import applicationRoutes from "./src/routes/applicationRoutes.js";
+import sellerProductRoutes from "./src/routes/sellerProductRoutes.js";
+import siteContentRoutes from "./src/routes/siteContentRoutes.js";
 
 dotenv.config();
 
@@ -52,6 +55,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 connectDB();
 
+// One reverse proxy (load balancer / CDN) in front in production — needed so
+// req.ip is the real client address, which the per-IP rate limiters key on.
+app.set("trust proxy", 1);
+
 // Middleware
 app.use(helmet());
 app.use(cors(corsOptions));
@@ -81,6 +88,9 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/admin/wallet", adminWalletRoutes);
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/seller-products", sellerProductRoutes);
+app.use("/api/site-content", siteContentRoutes);
 
 // 404 handler for unmatched routes
 app.use((req, res, next) => {

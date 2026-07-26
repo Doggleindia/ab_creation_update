@@ -1,90 +1,72 @@
-"use client";
-
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
-const services = [
+const SERVICES = [
   {
-    id: 1,
     title: "Embroidery service",
-    description:
-      "Embroidery is a method of decorating fabric by stitching a design onto it using a needle and thread. It is a durable and high-quality...",
-    image: "/images/home/embroidery-service.png",
+    img: "/images/home/service-embroidery.png",
+    body: "Embroidery is a method of decorating fabric by stitching a design onto it using a needle and thread. It is a durable and high-quality...",
+    href: "/service/embroidery",
   },
   {
-    id: 2,
     title: "Screen printing",
-    description:
-      "Screen printing is a printing technique in which a mesh screen is used to transfer ink onto fabric. The screen is created by blocking...",
-    image: "/images/home/screen-printing.png",
+    img: "/images/home/service-screen.png",
+    body: "Screen printing is a printing technique in which a mesh screen is used to transfer ink onto fabric. The screen is created by blocking...",
+    href: "/service/screen-printing",
   },
   {
-    id: 3,
     title: "DTG printing",
-    description:
-      "DTG or Direct-to-garment printing is a printing method that involves printing ink directly onto the fabric of a garment using inkjet...",
-    image: "/images/home/dtg-printing.png",
+    img: "/images/home/service-dtg.png",
+    body: "DTG or Direct-to-garment printing is a printing method that involves printing ink directly onto the fabric of a garment using inkjet...",
+    href: "/service/dtg-printing",
   },
 ];
 
 export default function PrintingServicesSection() {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16 md:py-24">
-      {/* HEADING */}
-      <h2 className="text-3xl md:text-[40px] font-bold text-center mb-4 text-[#171717]">
-        Our Printing Services
-      </h2>
-      <p className="text-center text-gray-500 mb-12 text-lg max-w-2xl mx-auto">
-        Our best selling apparel great for any occasion.
-      </p>
+    <section className="w-full bg-[#f9fafb] px-4 py-20 sm:px-8 lg:px-[86.5px]">
+      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h2 className="font-poppins text-3xl font-bold text-[#111827] sm:text-[40px]">
+            Our Printing Services
+          </h2>
+          <p className="text-[18px] text-[#6b7280] sm:text-[24px]">
+            Our best selling apparel great for any occasion.
+          </p>
+        </div>
 
-      {/* SERVICES GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-        {services.map((service) => (
-          <div
-            key={service.id}
-            className="group flex flex-col bg-white border border-gray-200 rounded-[24px] overflow-hidden"
-          >
-            {/* IMAGE */}
-            <div className="relative w-full h-[260px] bg-gray-100 overflow-hidden">
-              <Image
-                src={service.image}
-                alt={service.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
-
-            {/* CONTENT */}
-            <div className="p-6 md:p-8 flex flex-col flex-grow">
-              <h3 className="text-xl font-bold mb-3 text-[#171717]">
-                {service.title}
-              </h3>
-              <p className="text-gray-500 mb-6 leading-relaxed text-[15px] flex-grow">
-                {service.description}
-              </p>
-
-              <Link 
-                href={`/service/${service.id}`}
-                className="inline-flex items-center text-[#B87D4C] font-bold hover:text-[#171717] transition-colors"
-              >
-                Read more
-                <svg
-                  className="ml-2 w-[14px] h-[14px] mt-[2px]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+        <div className="grid w-full grid-cols-1 gap-8 pt-6 md:grid-cols-3">
+          {SERVICES.map((s) => (
+            <div
+              key={s.title}
+              className="flex flex-col overflow-hidden rounded-[26px] border border-[#dddddd] bg-white shadow-[0px_1px_2px_rgba(0,0,0,0.05)]"
+            >
+              <div className="relative h-[290px] w-full">
+                <Image
+                  src={s.img}
+                  alt={s.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 422px"
+                />
+              </div>
+              <div className="flex flex-col gap-3 p-6">
+                <h3 className="font-poppins text-[21px] font-bold text-[#111827]">
+                  {s.title}
+                </h3>
+                <p className="text-[15px] leading-[21px] text-[#4b5563]">
+                  {s.body}
+                </p>
+                <Link
+                  href={s.href}
+                  className="inline-flex items-center gap-2 pt-1 text-[17px] font-semibold text-brand-orange hover:underline"
                 >
-                  <circle cx="12" cy="12" r="7"></circle>
-                </svg>
-              </Link>
+                  Read more →
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

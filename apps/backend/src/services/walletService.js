@@ -183,7 +183,7 @@ export const deductFromUserWallet = async (userId, amount, requestId, session) =
  * Credit to admin wallet
  */
 export const creditToAdminWallet = async (amount, requestId, session) => {
-  const adminWallet = await AdminWallet.getGlobalWallet();
+  const adminWallet = await AdminWallet.getGlobalWallet(session);
   adminWallet.balance += amount;
   await adminWallet.save({ session });
 
@@ -274,4 +274,68 @@ export const getUserWalletReports = async () => {
     logger.error('Error getting user wallet reports:', error);
     throw error;
   }
+};
+
+
+/**
+ * Refund helpers — mirror the payment path in reverse, inside the caller's
+ * transaction session.
+ */
+export const creditToUserWallet = async (userId, amount, requestId, session) => {
+  let userWallet = await UserWallet.findOne({ userId }).session(session);
+  if (!userWallet) {
+    const [created] = await UserWallet.create([{ userId, balance: 0 }], session ? { session } : {});
+    userWallet = created;
+  }
+  userWallet.balance += amount;
+  await userWallet.save({ session });
+  const transaction = new WalletTransaction({
+    type: "refund",
+    amount,
+    userId,
+    status: "completed",
+    requestId,
+  });
+  await transaction.save({ session });
+  return userWallet.balance;
+};
+
+export const deductFromAdminWallet = async (amount, requestId, session) => {
+  const adminWallet = await AdminWallet.getGlobalWallet(session);
+  if (adminWallet.balance < amount) {
+    throw new Error("Admin wallet balance is insufficient for this refund");
+  }
+  adminWallet.balance -= amount;
+  await adminWallet.save({ session });
+  const transaction = new WalletTransaction({
+    type: "refund",
+    amount,
+    status: "completed",
+    requestId,
+  });
+  await transaction.save({ session });
+  return adminWallet.balance;
+};
+
+/**
+ * Credit a seller's wallet with their margin from a delivered order.
+ * Ledgered as type "payout" (distinct from refunds) for honest reporting.
+ */
+export const creditSellerPayout = async (userId, amount, requestId, session) => {
+  let userWallet = await UserWallet.findOne({ userId }).session(session);
+  if (!userWallet) {
+    const [created] = await UserWallet.create([{ userId, balance: 0 }], session ? { session } : {});
+    userWallet = created;
+  }
+  userWallet.balance += amount;
+  await userWallet.save({ session });
+  const transaction = new WalletTransaction({
+    type: "payout",
+    amount,
+    userId,
+    status: "completed",
+    requestId,
+  });
+  await transaction.save({ session });
+  return userWallet.balance;
 };

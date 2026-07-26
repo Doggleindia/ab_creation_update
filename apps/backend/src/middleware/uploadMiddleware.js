@@ -3,12 +3,19 @@ import multer from "multer";
 // Store file in memory for S3
 const storage = multer.memoryStorage();
 
-// Only allow image and video uploads — blocks arbitrary file storage abuse
+// Allow images/videos plus print-artwork vector formats (.pdf, .ai, .eps) —
+// still blocks arbitrary file storage abuse.
 const fileFilter = (req, file, cb) => {
-  if (/^(image|video)\//.test(file.mimetype)) {
+  const mime = file.mimetype || "";
+  if (
+    /^(image|video)\//.test(mime) ||
+    mime === "application/pdf" ||
+    mime === "application/postscript" ||
+    mime === "application/illustrator"
+  ) {
     cb(null, true);
   } else {
-    cb(new Error("Only image and video files are allowed"), false);
+    cb(new Error("Only image, video or print artwork (.pdf/.ai/.eps) files are allowed"), false);
   }
 };
 

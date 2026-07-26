@@ -107,10 +107,34 @@ const productSchema = new mongoose.Schema({
         default: "draft",
     },
 
+    // Storefront PDP view counter (incremented on public product fetch)
+    views: {
+        type: Number,
+        default: 0,
+    },
+
     // ✅ PRODUCT DETAILS
     productDetails: [{
         type: String,
         trim: true,
+    }],
+
+    // ✅ PRINT ZONES — printable areas used by the design studio / production
+    printZones: [{
+        name: { type: String, trim: true, required: true },
+        side: { type: String, enum: ["front", "back"], default: "front" },
+        widthIn: { type: Number, min: 0 },
+        heightIn: { type: Number, min: 0 },
+        dpi: { type: Number, default: 300 },
+    }],
+
+    // ✅ SIZE MEASUREMENTS (inches)
+    measurements: [{
+        size: { type: String, trim: true, required: true },
+        chest: { type: Number, min: 0 },
+        length: { type: Number, min: 0 },
+        shoulder: { type: Number, min: 0 },
+        sleeve: { type: Number, min: 0 },
     }],
 
     // ✅ MATERIAL & CARE
@@ -129,6 +153,11 @@ const productSchema = new mongoose.Schema({
     // ✅ SPECIFICATIONS
     specifications: {
         fabric: {
+            type: String,
+            trim: true,
+        },
+
+        gsm: {
             type: String,
             trim: true,
         },
@@ -190,6 +219,13 @@ productSchema.virtual("variantsCount", {
     localField: "_id",
     foreignField: "productId",
     count: true,
+});
+
+// Virtual for the variant documents themselves (populate explicitly)
+productSchema.virtual("variants", {
+    ref: "Variant",
+    localField: "_id",
+    foreignField: "productId",
 });
 
 // Pre-save validation for publishing

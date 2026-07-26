@@ -85,16 +85,30 @@ const orderSchema = new mongoose.Schema(
     anyText: {
       type: String,
     },
+    shippingMethod: {
+      type: String,
+      enum: ["standard", "express", "rush"],
+      default: "standard",
+    },
+    carrier: { type: String, trim: true },
+    trackingNumber: { type: String, trim: true },
+    internalNote: { type: String, trim: true },
+
+    // Production floor metadata
+    assignee: { type: String, trim: true },
+    productionStartedAt: { type: Date },
+    qcFails: { type: Number, default: 0 },
+
     orderStatus: {
       type: String,
       required: true,
-      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+      enum: ["pending", "confirmed", "in_production", "quality_check", "ready_to_pack", "shipped", "delivered", "cancelled"],
       default: "pending",
     },
     paymentStatus: {
       type: String,
       required: true,
-      enum: ["pending", "paid", "failed"],
+      enum: ["pending", "paid", "failed", "refunded"],
       default: "pending",
     },
   },

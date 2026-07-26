@@ -6,6 +6,7 @@ import {
   deleteContact,
 } from '../controllers/contactController.js';
 import { adminAuth  } from '../middleware/adminAuth.js';
+import { intakeLimiter } from '../middleware/rateLimiters.js';
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ const router = express.Router();
  * USER ROUTES
  * ======================
  */
-router.post('/', submitContact); 
+router.post('/', intakeLimiter, submitContact);
 
 /**
  * ======================

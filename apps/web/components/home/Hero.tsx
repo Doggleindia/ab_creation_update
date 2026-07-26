@@ -1,81 +1,133 @@
-"use client";
-
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import type { SiteContent } from "@/lib/api";
 
-export default function Hero() {
+const FEATURES = [
+  { icon: "💰", label: "Lowest Price Guaranteed" },
+  { icon: "🚚", label: "Pan India Delivery" },
+  { icon: "⚡", label: "Super Rush Delivery" },
+];
+
+export default function Hero({
+  content,
+  trust,
+}: {
+  content?: SiteContent["hero"];
+  trust?: SiteContent["trustBadges"];
+}) {
+  const heading1 = content?.heading1 || "Printed for You.";
+  const heading2 = content?.heading2 || "Built for Your Brand.";
+  const subheading =
+    content?.subheading ||
+    "Shop ready-made printed tees or bring your own design. We print it exactly the way you want it.";
+  const cta1 = content?.cta1 || "Customize Product";
+  const cta2 = content?.cta2 || "Explore Collection";
+  const badges =
+    trust?.items?.filter((i) => i.label?.trim()).length
+      ? trust.items!.filter((i) => i.label?.trim())
+      : FEATURES;
+
   return (
-    <section className="min-h-screen bg-white py-16 md:py-24 font-sans">
-      <div className="max-w-[1300px] mx-auto px-4 md:px-8">
-        
-        {/* TOP SECTION - SPLIT LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center mb-16 md:mb-24">
-          
-          {/* LEFT - TEXT & BUTTONS */}
-          <div className="max-w-xl">
-            <span className="inline-flex items-center gap-2 bg-[#171717] text-[#CBAA75] text-xs font-semibold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6">
-              ✦ Premium Custom Printing
-            </span>
-            <h1 className="text-5xl md:text-[64px] font-bold text-[#171717] leading-[1.15] mb-6 tracking-tight">
-              Printed for You.<br />
-              Built for Your Brand.
-            </h1>
-            <p className="text-[17px] text-gray-800 mb-10 leading-relaxed font-medium">
-              Shop ready-made printed tees or bring your own design<br className="hidden sm:block" />
-              We print it exactly the way you want it.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/design-editor" className="bg-[#171717] hover:bg-[#B87D4C] text-white px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all shadow-[0_8px_20px_-6px_rgba(184,125,76,0.5)]">
-                Customize Product
-                <ArrowRight className="ml-2 w-5 h-5" strokeWidth={2.5} />
+    <section className="w-full bg-white">
+      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-16 px-4 pb-16 pt-10 sm:px-8">
+        {/* Hero row */}
+        <div className="flex w-full flex-col items-center gap-12 lg:flex-row lg:justify-between">
+          {/* Copy */}
+          <div className="flex w-full max-w-[694px] flex-col items-start gap-14">
+            <div className="flex flex-col gap-4">
+              {content?.badge && (
+                <span className="w-fit rounded-full bg-[#111827] px-4 py-1.5 text-[12px] font-bold uppercase tracking-[1px] text-white">
+                  {content.badge}
+                </span>
+              )}
+              <h1 className="font-poppins text-4xl font-semibold leading-[1.25] text-[#111827] sm:text-5xl lg:text-[60px]">
+                {heading1}
+                <br />
+                {heading2}
+              </h1>
+              <p className="max-w-[572px] text-[18px] font-medium leading-7 text-black sm:text-[20px]">
+                {subheading}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Link
+                href="/design-studio"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-[18px] font-bold text-white shadow-[0px_10px_15px_-3px_#fed7aa,0px_4px_6px_-4px_#fed7aa] transition-opacity hover:opacity-90"
+              >
+                {cta1}
+                <ArrowRight className="h-5 w-5" />
               </Link>
-              <Link href="/product-collection" className="bg-white border border-gray-300 hover:border-gray-900 text-gray-900 px-7 py-3.5 rounded-full text-[16px] font-bold flex items-center justify-center transition-all">
-                Explore Collection
-                <ArrowRight className="ml-2 w-5 h-5" strokeWidth={2.5} />
+              <Link
+                href="/collection"
+                className="inline-flex items-center gap-2 rounded-full border border-black px-8 py-4 text-[18px] font-bold text-black transition-colors hover:bg-black hover:text-white"
+              >
+                {cta2}
+                <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
           </div>
 
-          {/* RIGHT - MASONRY IMAGES GRID */}
-          <div className="w-full">
+          {/* Collage */}
+          <div className="relative aspect-square w-full max-w-[554px] shrink-0">
             <Image
-              src="/images/home/heroImage.png"
-              alt="Hero Image"
-              width={1662}
-              height={1662}
+              src="/images/home/hero-base.png"
+              alt="Custom printed apparel"
+              fill
               priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="w-full h-auto"
+              className="object-cover"
+              sizes="(max-width: 1024px) 90vw, 554px"
             />
+            {/* Top-left tee tile */}
+            <div className="absolute left-[7%] top-[11%] h-[32.8%] w-[27.1%] rounded-[2.3%] bg-[#add7dc]" />
+            <div className="absolute left-[8.3%] top-[6%] h-[37.8%] w-[24.3%] overflow-hidden rounded-[2.3%]">
+              {content?.image ? (
+                /* eslint-disable-next-line @next/next/no-img-element -- CMS media lives on S3, host not in next.config images */
+                <img
+                  src={content.image}
+                  alt="Printed tee"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Image
+                  src="/images/home/hero-tee.png"
+                  alt="Printed tee"
+                  fill
+                  className="object-cover"
+                  sizes="150px"
+                />
+              )}
+            </div>
+            {/* Bottom-right jacket tile */}
+            <div className="absolute left-[48.1%] top-[62%] h-[32.5%] w-[44.6%] rounded-[4.7%] bg-[#10b981]" />
+            <div className="absolute left-[48%] top-[55%] h-[39.6%] w-[44.9%] overflow-hidden rounded-[4.7%]">
+              <Image
+                src="/images/home/hero-jacket.png"
+                alt="Printed jacket"
+                fill
+                className="object-cover"
+                sizes="250px"
+              />
+            </div>
           </div>
-          
         </div>
 
-        {/* BOTTOM SECTION - FEATURE BAR */}
-        <div className="w-full border border-gray-200 rounded-2xl p-2 md:p-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            {/* Feature 1 */}
-            <div className="bg-[#F5F1EA] rounded-xl py-5 px-4 flex items-center justify-center gap-3">
-              <span className="text-xl leading-none">💰</span>
-              <span className="text-[15px] font-bold text-gray-900 tracking-tight">Lowest Price Guaranteed</span>
-            </div>
-            
-            {/* Feature 2 */}
-            <div className="bg-[#F5F1EA] rounded-xl py-5 px-4 flex items-center justify-center gap-3">
-              <span className="text-xl leading-none">🚚</span>
-              <span className="text-[15px] font-bold text-gray-900 tracking-tight">Pan India Delivery</span>
-            </div>
-            
-            {/* Feature 3 */}
-            <div className="bg-[#F5F1EA] rounded-xl py-5 px-4 flex items-center justify-center gap-3">
-              <span className="text-xl leading-none">⚡</span>
-              <span className="text-[15px] font-bold text-gray-900 tracking-tight">Super Rush Delivery</span>
-            </div>
+        {/* Feature banner */}
+        {trust?.visible !== false && (
+          <div className="grid w-full grid-cols-1 gap-4 rounded-md border border-[#bfd6e4] bg-white p-3 shadow-[-1px_1px_3.5px_rgba(0,0,0,0.13)] sm:grid-cols-3">
+            {badges.map((f) => (
+              <div
+                key={f.label}
+                className="flex items-center justify-center gap-4 rounded-2xl bg-[#f9fafb] px-6 py-5"
+              >
+                <span className="text-3xl leading-9">{f.icon ?? "✨"}</span>
+                <span className="text-[16px] font-bold text-[#111827]">
+                  {f.label}
+                </span>
+              </div>
+            ))}
           </div>
-        </div>
-
+        )}
       </div>
     </section>
   );
