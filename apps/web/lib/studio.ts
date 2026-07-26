@@ -29,6 +29,10 @@ export type El = {
   font?: string; // key of FONTS
   bold?: boolean;
   textColor?: string;
+  uppercase?: boolean;
+  letterSpacing?: number; // 0–12, relative units scaled with the font size
+  strokeColor?: string;
+  strokeWidth?: number; // 0 = no outline, 1 = thin, 2 = thick
   // shape / clipart
   shape?: string; // key of SHAPE_DEFS
   fill?: string;
@@ -53,12 +57,12 @@ export const ZONES: {
 
 export const zoneCfg = (z: Zone) => ZONES.find((x) => x.id === z) ?? ZONES[0];
 
-// System font stacks — nothing external to load, prints map 1:1.
+// 14 font styles: 3 system stacks + 11 self-hosted display faces (lib/fonts).
+// "display"/"script" stay as aliases so older drafts keep their look.
+import { STUDIO_FONTS } from "@/lib/fonts";
 export const FONTS: Record<string, { label: string; stack: string }> = {
-  sans: { label: "Modern Sans", stack: "Arial, Helvetica, sans-serif" },
-  serif: { label: "Classic Serif", stack: "Georgia, 'Times New Roman', serif" },
+  ...STUDIO_FONTS,
   display: { label: "Bold Display", stack: "Impact, 'Arial Black', sans-serif" },
-  mono: { label: "Typewriter", stack: "'Courier New', Courier, monospace" },
   script: { label: "Script", stack: "'Brush Script MT', 'Segoe Script', cursive" },
 };
 
@@ -125,6 +129,88 @@ export const SHAPE_DEFS: Record<
     path: "M30 20 A9 12 0 1 0 30 44 A9 12 0 1 0 30 20 Z M70 20 A9 12 0 1 0 70 44 A9 12 0 1 0 70 20 Z M12 44 A8 10 0 1 0 12 64 A8 10 0 1 0 12 44 Z M88 44 A8 10 0 1 0 88 64 A8 10 0 1 0 88 44 Z M50 46 C66 46 78 62 78 74 C78 86 68 92 50 92 C32 92 22 86 22 74 C22 62 34 46 50 46 Z",
     category: "clipart",
   },
+  diamond: { label: "Diamond", path: "M50 4 L96 50 L50 96 L4 50 Z", category: "shape" },
+  ring: {
+    label: "Ring",
+    path: "M50 4 A46 46 0 1 0 50 96 A46 46 0 1 0 50 4 Z M50 24 A26 26 0 1 1 50 76 A26 26 0 1 1 50 24 Z",
+    category: "shape",
+  },
+  semicircle: { label: "Semicircle", path: "M4 70 A46 46 0 0 1 96 70 Z", category: "shape" },
+  plus: {
+    label: "Plus",
+    path: "M38 8 H62 V38 H92 V62 H62 V92 H38 V62 H8 V38 H38 Z",
+    category: "shape",
+  },
+  arrow: {
+    label: "Arrow",
+    path: "M6 38 H58 V16 L94 50 L58 84 V62 H6 Z",
+    category: "shape",
+  },
+  shield: {
+    label: "Shield",
+    path: "M50 4 L90 18 V48 C90 72 74 88 50 96 C26 88 10 72 10 48 V18 Z",
+    category: "shape",
+  },
+  burst: {
+    label: "Burst",
+    path: "M50 2 L58 32 L84 12 L68 40 L98 40 L70 54 L92 76 L62 66 L62 98 L50 70 L38 98 L38 66 L8 76 L30 54 L2 40 L32 40 L16 12 L42 32 Z",
+    category: "shape",
+  },
+  sun: {
+    label: "Sun",
+    path: "M50 26 A24 24 0 1 0 50 74 A24 24 0 1 0 50 26 Z M46 2 H54 V16 H46 Z M46 84 H54 V98 H46 Z M2 46 H16 V54 H2 Z M84 46 H98 V54 H84 Z M15 21 L21 15 L31 25 L25 31 Z M69 75 L75 69 L85 79 L79 85 Z M75 31 L69 25 L79 15 L85 21 Z M25 69 L31 75 L21 85 L15 79 Z",
+    category: "clipart",
+  },
+  moon: {
+    label: "Moon",
+    path: "M62 4 A46 46 0 1 0 96 62 A38 38 0 0 1 62 4 Z",
+    category: "clipart",
+  },
+  mountains: {
+    label: "Mountains",
+    path: "M4 88 L34 26 L50 56 L64 12 L96 88 Z",
+    category: "clipart",
+  },
+  wave: {
+    label: "Wave",
+    path: "M4 72 C14 50 22 44 30 50 C24 54 22 60 24 64 C34 46 46 34 60 36 C50 42 46 48 48 54 C60 40 76 34 96 40 C80 44 72 52 70 62 C56 58 46 62 40 70 C30 66 18 68 4 88 Z",
+    category: "clipart",
+  },
+  music: {
+    label: "Music Note",
+    path: "M38 8 L86 2 V64 A14 14 0 1 1 78 52 V22 L46 26 V76 A14 14 0 1 1 38 64 Z",
+    category: "clipart",
+  },
+  plane: {
+    label: "Paper Plane",
+    path: "M4 46 L96 8 L70 92 L48 62 L80 24 L40 56 Z",
+    category: "clipart",
+  },
+  pine: {
+    label: "Pine Tree",
+    path: "M50 4 L72 34 H60 L80 60 H66 L88 88 H56 V96 H44 V88 H12 L34 60 H20 L40 34 H28 Z",
+    category: "clipart",
+  },
+  anchor: {
+    label: "Anchor",
+    path: "M50 4 A12 12 0 1 0 50 28 A12 12 0 1 0 50 4 Z M44 30 H56 V78 A28 28 0 0 0 78 58 L88 64 A40 40 0 0 1 12 64 L22 58 A28 28 0 0 0 44 78 Z M32 40 H68 V48 H32 Z",
+    category: "clipart",
+  },
+  coffee: {
+    label: "Coffee",
+    path: "M14 34 H74 V70 A20 20 0 0 1 54 90 H34 A20 20 0 0 1 14 70 Z M78 40 H86 A12 12 0 0 1 86 64 H78 V56 H84 A6 6 0 0 0 84 48 H78 Z M22 8 C28 14 22 20 28 26 H36 C30 20 36 14 30 8 Z M42 8 C48 14 42 20 48 26 H56 C50 20 56 14 50 8 Z",
+    category: "clipart",
+  },
+  cat: {
+    label: "Cat",
+    path: "M20 8 L36 24 A34 34 0 0 1 64 24 L80 8 L82 34 A34 34 0 0 1 84 44 C84 68 69 84 50 84 C31 84 16 68 16 44 A34 34 0 0 1 18 34 Z M36 42 A4 5 0 1 1 36 54 A4 5 0 1 1 36 42 Z M64 42 A4 5 0 1 1 64 54 A4 5 0 1 1 64 42 Z M46 60 H54 L50 66 Z",
+    category: "clipart",
+  },
+  skate: {
+    label: "Skateboard",
+    path: "M6 40 A10 10 0 0 1 20 40 L26 46 H74 L80 40 A10 10 0 0 1 94 40 L82 54 H18 Z M30 58 A8 8 0 1 0 30 74 A8 8 0 1 0 30 58 Z M70 58 A8 8 0 1 0 70 74 A8 8 0 1 0 70 58 Z",
+    category: "clipart",
+  },
 };
 
 // Starter templates: real element sets added to the active zone.
@@ -137,16 +223,33 @@ export const TEMPLATES: {
     id: "brand-badge",
     label: "Brand Badge",
     els: [
-      { kind: "text", text: "YOUR BRAND", font: "display", bold: true, textColor: "#111111", xPct: 50, yPct: 42, scale: 1.1 },
-      { kind: "text", text: "EST. 2026", font: "mono", textColor: "#111111", xPct: 50, yPct: 58, scale: 0.6 },
+      { kind: "text", text: "YOUR BRAND", font: "archivo", textColor: "#111111", xPct: 50, yPct: 42, scale: 1.1, letterSpacing: 2 },
+      { kind: "text", text: "EST. 2026", font: "mono", textColor: "#111111", xPct: 50, yPct: 58, scale: 0.6, letterSpacing: 4 },
     ],
   },
   {
     id: "jersey",
     label: "Team Jersey",
     els: [
-      { kind: "text", text: "CITY TIGERS", font: "display", bold: true, textColor: "#111111", xPct: 50, yPct: 28, scale: 0.9 },
-      { kind: "text", text: "07", font: "display", bold: true, textColor: "#ff5c00", xPct: 50, yPct: 60, scale: 2 },
+      { kind: "text", text: "CITY TIGERS", font: "bebas", textColor: "#111111", xPct: 50, yPct: 28, scale: 0.9, letterSpacing: 3 },
+      { kind: "text", text: "07", font: "anton", textColor: "#ff5c00", xPct: 50, yPct: 60, scale: 2, strokeColor: "#111111", strokeWidth: 1 },
+    ],
+  },
+  {
+    id: "varsity",
+    label: "Varsity Arc",
+    els: [
+      { kind: "shape", shape: "shield", fill: "#1e3a8a", xPct: 50, yPct: 48, scale: 1.1, opacity: 95 },
+      { kind: "text", text: "ATHLETICS", font: "oswald", bold: true, textColor: "#ffffff", xPct: 50, yPct: 40, scale: 0.75, letterSpacing: 3 },
+      { kind: "text", text: "DEPT. 84", font: "oswald", textColor: "#facc15", xPct: 50, yPct: 54, scale: 0.55, letterSpacing: 4 },
+    ],
+  },
+  {
+    id: "retro-wave",
+    label: "Retro Wave",
+    els: [
+      { kind: "shape", shape: "sun", fill: "#ff5c00", xPct: 50, yPct: 34, scale: 0.8, opacity: 90 },
+      { kind: "text", text: "RETRO", font: "monoton", textColor: "#111111", xPct: 50, yPct: 62, scale: 0.95, letterSpacing: 2 },
     ],
   },
   {
@@ -154,14 +257,32 @@ export const TEMPLATES: {
     label: "Sunset Club",
     els: [
       { kind: "shape", shape: "circle", fill: "#ff5c00", xPct: 50, yPct: 44, scale: 1, opacity: 90 },
-      { kind: "text", text: "SUNSET CLUB", font: "sans", bold: true, textColor: "#111111", xPct: 50, yPct: 72, scale: 0.8 },
+      { kind: "shape", shape: "wave", fill: "#1e3a8a", xPct: 50, yPct: 58, scale: 1.1 },
+      { kind: "text", text: "Sunset Club", font: "pacifico", textColor: "#111111", xPct: 50, yPct: 78, scale: 0.85 },
+    ],
+  },
+  {
+    id: "wild-outdoors",
+    label: "Wild Outdoors",
+    els: [
+      { kind: "shape", shape: "mountains", fill: "#14532d", xPct: 50, yPct: 40, scale: 1 },
+      { kind: "text", text: "WILD OUTDOORS", font: "russo", textColor: "#111111", xPct: 50, yPct: 64, scale: 0.75, letterSpacing: 2 },
+      { kind: "text", text: "explore more", font: "caveat", textColor: "#7B5804", xPct: 50, yPct: 76, scale: 0.6 },
+    ],
+  },
+  {
+    id: "script-statement",
+    label: "Script Statement",
+    els: [
+      { kind: "text", text: "good vibes", font: "lobster", textColor: "#ff5c00", xPct: 50, yPct: 46, scale: 1.2 },
+      { kind: "text", text: "ONLY", font: "bebas", textColor: "#111111", xPct: 50, yPct: 62, scale: 0.7, letterSpacing: 8 },
     ],
   },
   {
     id: "minimal",
     label: "Minimal",
     els: [
-      { kind: "text", text: "minimal.", font: "serif", textColor: "#111111", xPct: 50, yPct: 50, scale: 1 },
+      { kind: "text", text: "minimal.", font: "playfair", textColor: "#111111", xPct: 50, yPct: 50, scale: 1 },
     ],
   },
 ];
@@ -199,6 +320,13 @@ export async function compositeDesign(els: El[]): Promise<string | null> {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
+  // Display faces must be loaded before canvas text renders with them
+  try {
+    await document.fonts.ready;
+  } catch {
+    // font loading unavailable — system fallbacks still draw
+  }
+
   for (const el of visible) {
     const area = zoneCfg(el.zone).area;
     const ax = (parseFloat(area.left) / 100) * W;
@@ -225,12 +353,26 @@ export async function compositeDesign(els: El[]): Promise<string | null> {
       }
     } else if (el.kind === "text" && el.text) {
       const stack = FONTS[el.font ?? "sans"]?.stack ?? FONTS.sans.stack;
-      const fontPx = w / Math.max(4, el.text.length * 0.62);
-      ctx.font = `${el.bold ? "700" : "400"} ${Math.max(12, fontPx)}px ${stack}`;
-      ctx.fillStyle = el.textColor ?? "#111111";
+      const raw = el.uppercase ? el.text.toUpperCase() : el.text;
+      const fontPx = Math.max(12, w / Math.max(4, raw.length * 0.62));
+      ctx.font = `${el.bold ? "700" : "400"} ${fontPx}px ${stack}`;
+      try {
+        // Scale tracking with the glyph size so DOM and print match
+        (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing =
+          `${((el.letterSpacing ?? 0) * fontPx) / 40}px`;
+      } catch {
+        // older canvas — tracking simply not applied
+      }
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(el.text, 0, 0);
+      if ((el.strokeWidth ?? 0) > 0) {
+        ctx.strokeStyle = el.strokeColor ?? "#ffffff";
+        ctx.lineWidth = Math.max(1, (el.strokeWidth ?? 1) * (fontPx / 28));
+        ctx.lineJoin = "round";
+        ctx.strokeText(raw, 0, 0);
+      }
+      ctx.fillStyle = el.textColor ?? "#111111";
+      ctx.fillText(raw, 0, 0);
     } else if (el.kind === "shape" && el.shape) {
       const def = SHAPE_DEFS[el.shape];
       if (def) {

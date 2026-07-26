@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getDesign, upsertDesign } from "@/lib/designs";
+import { studioFontClasses } from "@/lib/fonts";
 import {
   type El,
   FONTS,
@@ -128,7 +129,11 @@ function DesignStudio() {
   const dragging = useRef(false);
   const dragSnap = useRef<El[] | null>(null);
   const sliderSnap = useRef<El[] | null>(null);
+  const textSnap = useRef<El[] | null>(null);
   const draftId = useRef<string | null>(null);
+  const textInputRef = useRef<HTMLInputElement>(null);
+  // Always-current els for pure commit/undo logic
+  const elsRef = useRef<El[]>([]);
 
   // ---- Undo / redo -------------------------------------------------------
   const [history, setHistory] = useState<{ past: El[][]; future: El[][] }>({
@@ -138,13 +143,14 @@ function DesignStudio() {
   const pushPast = useCallback((snapshot: El[]) => {
     setHistory((h) => ({ past: [...h.past.slice(-49), snapshot], future: [] }));
   }, []);
-  // Discrete mutation: records the previous state for undo
+  // Discrete mutation: records the previous state for undo. State updaters
+  // must stay pure, so history is pushed OUTSIDE the setEls updater.
   const commit = useCallback(
     (next: El[] | ((prev: El[]) => El[])) => {
-      setEls((prev) => {
-        pushPast(prev);
-        return typeof next === "function" ? next(prev) : next;
-      });
+      const current = elsRef.current;
+      const resolved = typeof next === "function" ? next(current) : next;
+      pushPast(current);
+      setEls(resolved);
     },
     [pushPast],
   );
@@ -218,8 +224,14 @@ function DesignStudio() {
   }, []);
 
   // ---- Element helpers ---------------------------------------------------
+  elsRef.current = els;
   const zoneEls = els.filter((e) => e.zone === zone);
   const selected = els.find((e) => e.id === selectedId) ?? null;
+
+  function selectEl(id: string) {
+    setSelectedId(id);
+    setTab("design");
+  }
 
   const baseEl = (kind: El["kind"]): El => ({
     id: newId(),
@@ -419,9 +431,10 @@ function DesignStudio() {
     }
     if (el.kind === "text") {
       // Box width in px: tee is 380px wide, element box = 65% of zone × scale
+      const raw = el.uppercase ? (el.text ?? "").toUpperCase() : (el.text ?? "");
       const areaWPct = parseFloat(zoneCfg(el.zone).area.width) / 100;
       const boxPx = 380 * areaWPct * 0.65 * el.scale;
-      const fontPx = Math.max(9, boxPx / Math.max(4, (el.text ?? "").length * 0.62));
+      const fontPx = Math.max(9, boxPx / Math.max(4, raw.length * 0.62));
       return (
         <span
           className="block whitespace-nowrap text-center leading-none"
@@ -430,9 +443,14 @@ function DesignStudio() {
             fontWeight: el.bold ? 700 : 400,
             color: el.textColor ?? "#111111",
             fontSize: `${fontPx}px`,
+            letterSpacing: `${((el.letterSpacing ?? 0) * fontPx) / 40}px`,
+            WebkitTextStroke:
+              (el.strokeWidth ?? 0) > 0
+                ? `${Math.max(0.5, ((el.strokeWidth ?? 1) * fontPx) / 56)}px ${el.strokeColor ?? "#ffffff"}`
+                : undefined,
           }}
         >
-          {el.text}
+          {raw}
         </span>
       );
     }
@@ -477,9 +495,15 @@ function DesignStudio() {
         <div
           onPointerDown={(e) => {
             e.stopPropagation();
-            setSelectedId(el.id);
+            selectEl(el.id);
             dragging.current = true;
             dragSnap.current = els;
+          }}
+          onDoubleClick={() => {
+            if (el.kind === "text") {
+              selectEl(el.id);
+              setTimeout(() => textInputRef.current?.focus(), 0);
+            }
           }}
           className="cursor-move touch-none"
         >
@@ -521,7 +545,7 @@ function DesignStudio() {
               className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 ${selectedId === el.id ? "bg-[#f3f3f4]" : ""}`}
             >
               <button
-                onClick={() => setSelectedId(el.id)}
+                onClick={() => selectEl(el.id)}
                 className="min-w-0 flex-1 truncate text-left text-[12.5px] font-semibold text-black"
               >
                 {elName(el)}
@@ -577,7 +601,7 @@ function DesignStudio() {
     const category = picker === "shapes" ? "shape" : "clipart";
     const entries = Object.entries(SHAPE_DEFS).filter(([, d]) => d.category === category);
     return (
-      <div className="absolute left-0 top-0 z-40 w-64 rounded-r-xl border border-[#c4c7c7] bg-white p-3 shadow-lg lg:left-16">
+      <div className="absolute left-0 top-0 z-40 max-h-[440px] w-64 overflow-y-auto rounded-r-xl border border-[#c4c7c7] bg-white p-3 shadow-lg lg:left-16">
         <div className="flex items-center justify-between pb-2">
           <p className="text-[12px] font-bold uppercase tracking-[0.6px] text-black">
             {picker === "shapes" ? "Shapes" : "Clipart"}
@@ -613,7 +637,7 @@ function DesignStudio() {
   ];
 
   return (
-    <div className="flex min-h-[calc(100vh-113px)] flex-col bg-[#e8e8e8]">
+    <div className={`flex min-h-[calc(100vh-113px)] flex-col bg-[#e8e8e8] ${studioFontClasses}`}>
       {/* Top bar */}
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#c4c7c7] bg-white px-4">
         <div className="flex min-w-0 items-center gap-4">
@@ -901,46 +925,149 @@ function DesignStudio() {
                       <section className="flex flex-col gap-4 border-t border-[#c4c7c7] pt-6">
                         <h3 className={sectionLabel}>Text</h3>
                         <input
+                          ref={textInputRef}
                           value={selected.text ?? ""}
+                          onFocus={() => (textSnap.current = els)}
                           onChange={(e) => updateSel({ text: e.target.value })}
-                          onBlur={() => pushPast(els)}
+                          onBlur={() => {
+                            if (textSnap.current && textSnap.current !== els) {
+                              pushPast(textSnap.current);
+                            }
+                            textSnap.current = null;
+                          }}
                           placeholder="Your text"
                           className="h-11 w-full rounded-[8px] border border-[#c4c7c7] bg-[#f9f9f9] px-3 text-[14px] text-[#1a1c1c] focus:border-brand-orange focus:outline-none"
                         />
-                        <div className="relative">
-                          <select
-                            value={selected.font ?? "sans"}
-                            onChange={(e) => updateSel({ font: e.target.value }, true)}
-                            className="h-11 w-full appearance-none rounded-[8px] border border-[#c4c7c7] bg-[#f9f9f9] px-3 text-[14px] text-[#1a1c1c] focus:border-brand-orange focus:outline-none"
-                          >
-                            {Object.entries(FONTS).map(([key, f]) => (
-                              <option key={key} value={key}>
-                                {f.label}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#444748]" />
+                        <div>
+                          <span className={fieldLabel}>Font Style</span>
+                          <div className="mt-2 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto pr-1">
+                            {Object.entries(FONTS)
+                              .filter(([key]) => !["display", "script"].includes(key))
+                              .map(([key, f]) => (
+                                <button
+                                  key={key}
+                                  onClick={() => updateSel({ font: key }, true)}
+                                  className={`flex h-12 flex-col items-center justify-center rounded-[8px] border px-2 ${
+                                    (selected.font ?? "sans") === key
+                                      ? "border-2 border-black bg-[#f3f3f4]"
+                                      : "border-[#c4c7c7] hover:border-black"
+                                  }`}
+                                >
+                                  <span
+                                    className="max-w-full truncate text-[15px] leading-none text-[#1a1c1c]"
+                                    style={{ fontFamily: f.stack }}
+                                  >
+                                    Aa Bb
+                                  </span>
+                                  <span className="max-w-full truncate pt-1 text-[8.5px] font-bold uppercase tracking-[0.4px] text-[#9ca3af]">
+                                    {f.label}
+                                  </span>
+                                </button>
+                              ))}
+                          </div>
                         </div>
-                        <button
-                          onClick={() => updateSel({ bold: !selected.bold }, true)}
-                          className={`h-10 w-fit rounded-[8px] border px-5 text-[14px] font-bold ${
-                            selected.bold ? "border-black bg-black text-white" : "border-[#c4c7c7] text-black"
-                          }`}
-                        >
-                          B
-                        </button>
-                        <div className="flex flex-wrap gap-2">
-                          {TEXT_COLORS.map((c) => (
-                            <button
-                              key={c}
-                              aria-label={`Text colour ${c}`}
-                              onClick={() => updateSel({ textColor: c }, true)}
-                              className={`h-7 w-7 rounded-full border ${
-                                selected.textColor === c ? "border-2 border-black" : "border-[#c4c7c7]"
-                              }`}
-                              style={{ background: c }}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => updateSel({ bold: !selected.bold }, true)}
+                            className={`h-10 flex-1 rounded-[8px] border text-[14px] font-bold ${
+                              selected.bold ? "border-black bg-black text-white" : "border-[#c4c7c7] text-black"
+                            }`}
+                          >
+                            Bold
+                          </button>
+                          <button
+                            onClick={() => updateSel({ uppercase: !selected.uppercase }, true)}
+                            className={`h-10 flex-1 rounded-[8px] border text-[13px] font-bold ${
+                              selected.uppercase ? "border-black bg-black text-white" : "border-[#c4c7c7] text-black"
+                            }`}
+                          >
+                            AA
+                          </button>
+                        </div>
+                        <label className="flex flex-col gap-3">
+                          <div className="flex items-center justify-between">
+                            <span className={fieldLabel}>Letter Spacing</span>
+                            <span className="text-[14px] font-bold text-[#1a1c1c]">
+                              {selected.letterSpacing ?? 0}
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={12}
+                            step={1}
+                            value={selected.letterSpacing ?? 0}
+                            onPointerDown={() => (sliderSnap.current = els)}
+                            onPointerUp={() => {
+                              if (sliderSnap.current) pushPast(sliderSnap.current);
+                              sliderSnap.current = null;
+                            }}
+                            onChange={(e) => updateSel({ letterSpacing: Number(e.target.value) })}
+                            className="h-1.5 w-full accent-black"
+                          />
+                        </label>
+                        <div className="flex flex-col gap-2">
+                          <span className={fieldLabel}>Text Colour</span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {TEXT_COLORS.map((c) => (
+                              <button
+                                key={c}
+                                aria-label={`Text colour ${c}`}
+                                onClick={() => updateSel({ textColor: c }, true)}
+                                className={`h-7 w-7 rounded-full border ${
+                                  selected.textColor === c ? "border-2 border-black" : "border-[#c4c7c7]"
+                                }`}
+                                style={{ background: c }}
+                              />
+                            ))}
+                            <input
+                              type="color"
+                              aria-label="Custom text colour"
+                              value={selected.textColor ?? "#111111"}
+                              onChange={(e) => updateSel({ textColor: e.target.value })}
+                              onBlur={() => pushPast(els)}
+                              className="h-7 w-9 cursor-pointer rounded border border-[#c4c7c7] bg-white p-0.5"
                             />
-                          ))}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <span className={fieldLabel}>Outline</span>
+                          <div className="flex gap-2">
+                            {([
+                              [0, "None"],
+                              [1, "Thin"],
+                              [2, "Thick"],
+                            ] as const).map(([w, label]) => (
+                              <button
+                                key={label}
+                                onClick={() => updateSel({ strokeWidth: w }, true)}
+                                className={`h-9 flex-1 rounded-[8px] border text-[12.5px] font-bold ${
+                                  (selected.strokeWidth ?? 0) === w
+                                    ? "border-black bg-black text-white"
+                                    : "border-[#c4c7c7] text-black"
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                          {(selected.strokeWidth ?? 0) > 0 && (
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {TEXT_COLORS.map((c) => (
+                                <button
+                                  key={c}
+                                  aria-label={`Outline colour ${c}`}
+                                  onClick={() => updateSel({ strokeColor: c }, true)}
+                                  className={`h-6 w-6 rounded-full border ${
+                                    (selected.strokeColor ?? "#ffffff") === c
+                                      ? "border-2 border-black"
+                                      : "border-[#c4c7c7]"
+                                  }`}
+                                  style={{ background: c }}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </section>
                     )}
@@ -948,7 +1075,7 @@ function DesignStudio() {
                     {selected.kind === "shape" && (
                       <section className="flex flex-col gap-4 border-t border-[#c4c7c7] pt-6">
                         <h3 className={sectionLabel}>Fill Colour</h3>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           {TEXT_COLORS.map((c) => (
                             <button
                               key={c}
@@ -960,6 +1087,14 @@ function DesignStudio() {
                               style={{ background: c }}
                             />
                           ))}
+                          <input
+                            type="color"
+                            aria-label="Custom fill colour"
+                            value={selected.fill ?? "#111111"}
+                            onChange={(e) => updateSel({ fill: e.target.value })}
+                            onBlur={() => pushPast(els)}
+                            className="h-7 w-9 cursor-pointer rounded border border-[#c4c7c7] bg-white p-0.5"
+                          />
                         </div>
                       </section>
                     )}

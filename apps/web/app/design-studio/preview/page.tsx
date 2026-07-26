@@ -18,6 +18,7 @@ import {
   PenLine,
 } from "lucide-react";
 import { addToCart } from "@/lib/cart";
+import { studioFontClasses } from "@/lib/fonts";
 import {
   type El,
   FONTS,
@@ -74,6 +75,8 @@ function PreviewEl({ el }: { el: El }) {
     /* eslint-disable-next-line @next/next/no-img-element */
     content = <img src={el.src} alt="" className="block w-full select-none" draggable={false} />;
   } else if (el.kind === "text") {
+    const raw = el.uppercase ? (el.text ?? "").toUpperCase() : (el.text ?? "");
+    const fontPx = Math.max(8, boxPx / Math.max(4, raw.length * 0.62));
     content = (
       <span
         className="block whitespace-nowrap text-center leading-none"
@@ -81,10 +84,15 @@ function PreviewEl({ el }: { el: El }) {
           fontFamily: FONTS[el.font ?? "sans"]?.stack,
           fontWeight: el.bold ? 700 : 400,
           color: el.textColor ?? "#111111",
-          fontSize: `${Math.max(8, boxPx / Math.max(4, (el.text ?? "").length * 0.62))}px`,
+          fontSize: `${fontPx}px`,
+          letterSpacing: `${((el.letterSpacing ?? 0) * fontPx) / 40}px`,
+          WebkitTextStroke:
+            (el.strokeWidth ?? 0) > 0
+              ? `${Math.max(0.5, ((el.strokeWidth ?? 1) * fontPx) / 56)}px ${el.strokeColor ?? "#ffffff"}`
+              : undefined,
         }}
       >
-        {el.text}
+        {raw}
       </span>
     );
   } else if (el.kind === "shape" && el.shape && SHAPE_DEFS[el.shape]) {
@@ -255,7 +263,7 @@ export default function PreviewOrderPage() {
   ];
 
   return (
-    <main className="min-h-[calc(100vh-113px)] bg-white">
+    <main className={`min-h-[calc(100vh-113px)] bg-white ${studioFontClasses}`}>
       {/* Editor bar */}
       <div className="flex h-16 items-center justify-between border-b border-[#c4c7c7] bg-white px-4 sm:px-8">
         <Link
