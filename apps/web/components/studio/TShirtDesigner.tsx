@@ -35,7 +35,8 @@ import {
   Eye,
   FileDown,
   Lock,
-  Sliders
+  Sliders,
+  Users
 } from "lucide-react";
 import { SHAPE_DEFS } from "@/lib/studio";
 import { STUDIO_FONTS } from "@/lib/fonts";
@@ -455,7 +456,10 @@ export default function TShirtDesigner({
   const [designerSide, setDesignerSide] = useState<"front" | "back" | "both">("both");
   const [showSelector, setShowSelector] = useState(true);
   const [currentSide, setCurrentSide] = useState<DesignSide>("front");
-  const [activeTab, setActiveTab] = useState<"upload" | "text" | "shapes" | "layers">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "text" | "shapes" | "layers" | "team">("upload");
+
+  // Names & Numbers roster — one printed piece per entry (team orders)
+  const [roster, setRoster] = useState<{ name: string; number: string; size: string }[]>([]);
 
   // Element arrays per side
   const [elements, setElements] = useState<{ front: CanvasElement[]; back: CanvasElement[] }>({
@@ -509,6 +513,7 @@ export default function TShirtDesigner({
     if (initialState) {
       if (initialState.elements) setElements(initialState.elements);
       if (initialState.color) setTshirtColor(initialState.color);
+      if (Array.isArray(initialState.roster)) setRoster(initialState.roster);
       if (initialState.designerSide) {
         setDesignerSide(initialState.designerSide);
         setCurrentSide(initialState.designerSide === "back" ? "back" : "front");
@@ -1213,17 +1218,63 @@ export default function TShirtDesigner({
             });
           } else if (el.type === "text") {
             if (el.curve) {
-              // Curved text: rasterize an SVG arc and draw it into the element box
-              await new Promise<void>((res) => {
-                const fw = el.fontWeight ? el.fontWeight : el.bold ? 700 : 400;
-                const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                const strokeAttr = el.strokeColor && el.strokeWidth ? ` stroke="${el.strokeColor}" stroke-width="${el.strokeWidth}" paint-order="stroke"` : "";
-                const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${Math.max(1, Math.round(elW))}" height="${Math.max(1, Math.round(elH))}"><defs><path id="tp" d="${arcPathD(el.curve || 0)}" fill="none"/></defs><text fill="${el.color || "#FFFFFF"}" font-family="${el.fontFamily || "Outfit"}" font-weight="${fw}" font-style="${el.italic ? "italic" : "normal"}" font-size="22" letter-spacing="${el.letterSpacing || 0}" text-anchor="middle"${strokeAttr}><textPath href="#tp" startOffset="50%">${esc(el.content)}</textPath></text></svg>`;
-                const im = new Image();
-                im.onload = () => { ctx.drawImage(im, -elW / 2, -elH / 2, elW, elH); res(); };
-                im.onerror = () => res();
-                im.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg)));
-              });
+              // Curved text drawn character-by-character along the arc so the
+              // self-hosted display faces render in the print file (an SVG
+              // rasterization can't see document fonts).
+              const s = Math.min(elW, elH) / 100; // viewBox "meet" scale
+              const sag = ((el.curve || 0) / 100) * 35;
+              const qp = (t: number): [number, number] => [
+                (1 - t) * (1 - t) * 5 + 2 * (1 - t) * t * 50 + t * t * 95,
+                (1 - t) * (1 - t) * 55 + 2 * (1 - t) * t * (55 - sag) + t * t * 55,
+              ];
+              // Arc-length lookup table over the quadratic path
+              const N = 240;
+              const pts: [number, number][] = [];
+              const lens: number[] = [0];
+              for (let i = 0; i <= N; i++) {
+                const p = qp(i / N);
+                if (i > 0) lens.push(lens[i - 1] + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]));
+                pts.push(p);
+              }
+              const pathLen = lens[N];
+              const atLen = (L: number): { x: number; y: number; angle: number } => {
+                const target = Math.max(0, Math.min(pathLen, L));
+                let i = 1;
+                while (i < N && lens[i] < target) i++;
+                const seg = lens[i] - lens[i - 1] || 1;
+                const f = (target - lens[i - 1]) / seg;
+                const x = pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f;
+                const y = pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * f;
+                const angle = Math.atan2(pts[i][1] - pts[i - 1][1], pts[i][0] - pts[i - 1][0]);
+                return { x, y, angle };
+              };
+              const fw = el.fontWeight ? el.fontWeight : el.bold ? 700 : 400;
+              const fontPx = 22 * s;
+              ctx.font = `${el.italic ? "italic " : ""}${fw} ${fontPx}px ${el.fontFamily || "Arial"}`;
+              ctx.textAlign = "center";
+              ctx.textBaseline = "alphabetic";
+              const ls = (el.letterSpacing || 0) * s;
+              const chars = [...el.content];
+              const widths = chars.map((c) => ctx.measureText(c).width);
+              const total = widths.reduce((a, b) => a + b, 0) + ls * Math.max(0, chars.length - 1);
+              let cursor = (pathLen * s - total) / 2; // centered along the path
+              for (let i = 0; i < chars.length; i++) {
+                const mid = cursor + widths[i] / 2;
+                const pos = atLen(mid / s);
+                ctx.save();
+                ctx.translate(pos.x * s - 50 * s, pos.y * s - 50 * s);
+                ctx.rotate(pos.angle);
+                if (el.strokeColor && el.strokeWidth) {
+                  ctx.lineWidth = el.strokeWidth * s * 2;
+                  ctx.strokeStyle = el.strokeColor;
+                  ctx.lineJoin = "round";
+                  ctx.strokeText(chars[i], 0, 0);
+                }
+                ctx.fillStyle = el.color || "#FFFFFF";
+                ctx.fillText(chars[i], 0, 0);
+                ctx.restore();
+                cursor += widths[i] + ls;
+              }
             } else {
               // Straight (multi-line) text
               const fWeight = el.fontWeight ? `${el.fontWeight} ` : el.bold ? "bold " : "";
@@ -1747,6 +1798,78 @@ export default function TShirtDesigner({
     }
   };
 
+  // Vector export of the current side's print layers (1024-box, same math as
+  // the PNG export). Text stays live text; fonts are referenced by family.
+  const handleExportSVG = () => {
+    const px = 1024 * 0.32;
+    const py = 1024 * 0.25;
+    const pw = 1024 * 0.36;
+    const ph = 1024 * 0.46;
+    const esc = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const sorted = [...elements[currentSide]].sort((a, b) => a.zIndex - b.zIndex).filter((e) => !e.hidden);
+    const parts: string[] = [];
+    for (const el of sorted) {
+      const elX = px + (el.x / 100) * pw;
+      const elY = py + (el.y / 100) * ph;
+      const elW = (el.width / 100) * pw;
+      const elH = (el.height / 100) * ph;
+      const op = el.opacity == null ? 1 : Math.max(0, Math.min(100, el.opacity)) / 100;
+      const tf = `translate(${(elX + elW / 2).toFixed(1)} ${(elY + elH / 2).toFixed(1)}) rotate(${el.rotation}) scale(${el.flipX ? -1 : 1} ${el.flipY ? -1 : 1})`;
+      if (el.type === "image") {
+        parts.push(
+          `<image href="${el.content}" x="${(-elW / 2).toFixed(1)}" y="${(-elH / 2).toFixed(1)}" width="${elW.toFixed(1)}" height="${elH.toFixed(1)}" preserveAspectRatio="none" opacity="${op}" transform="${tf}"/>`,
+        );
+      } else if (el.type === "text") {
+        const fw = el.fontWeight ? el.fontWeight : el.bold ? 700 : 400;
+        const common = `font-family="${esc(el.fontFamily || "Arial")}" font-weight="${fw}" font-style="${el.italic ? "italic" : "normal"}" fill="${el.color || "#FFFFFF"}" letter-spacing="${el.letterSpacing || 0}"${el.strokeColor && el.strokeWidth ? ` stroke="${el.strokeColor}" stroke-width="${el.strokeWidth}" paint-order="stroke"` : ""}`;
+        if (el.curve) {
+          const s = Math.min(elW, elH) / 100;
+          parts.push(
+            `<g transform="${tf} scale(${s.toFixed(3)}) translate(-50 -50)" opacity="${op}"><defs><path id="tp_${el.id}" d="${arcPathD(el.curve)}" fill="none"/></defs><text ${common} font-size="22" text-anchor="middle"><textPath href="#tp_${el.id}" startOffset="50%">${esc(el.content)}</textPath></text></g>`,
+          );
+        } else {
+          const fSize = (el.fontSize || 24) * 2;
+          const lines = el.content.split("\n");
+          const lh = (el.lineHeight ?? 1.1) * fSize;
+          const startY = -((lines.length - 1) * lh) / 2;
+          const anchor = el.align === "left" ? "start" : el.align === "right" ? "end" : "middle";
+          const tx = el.align === "left" ? -elW / 2 : el.align === "right" ? elW / 2 : 0;
+          const tspans = lines
+            .map((l, i) => `<tspan x="${tx.toFixed(1)}" y="${(startY + i * lh).toFixed(1)}">${esc(l)}</tspan>`)
+            .join("");
+          parts.push(
+            `<text ${common} font-size="${fSize}" text-anchor="${anchor}" dominant-baseline="middle" opacity="${op}" transform="${tf}">${tspans}</text>`,
+          );
+        }
+      } else if (el.type === "shape") {
+        const fill = el.fillColor || "#ff5c00";
+        if (el.shapeType?.startsWith("glyph:")) {
+          const def = SHAPE_DEFS[el.shapeType.slice(6)];
+          if (def) {
+            parts.push(
+              `<g transform="${tf} scale(${(elW / 100).toFixed(3)} ${(elH / 100).toFixed(3)}) translate(-50 -50)" opacity="${op}"><path d="${def.path}" fill="${fill}" fill-rule="evenodd"/></g>`,
+            );
+          }
+        } else if (el.shapeType === "circle") {
+          parts.push(`<ellipse cx="0" cy="0" rx="${(elW / 2).toFixed(1)}" ry="${(elH / 2).toFixed(1)}" fill="${fill}" opacity="${op}" transform="${tf}"/>`);
+        } else if (el.shapeType === "triangle") {
+          parts.push(`<polygon points="0,${(-elH / 2).toFixed(1)} ${(elW / 2).toFixed(1)},${(elH / 2).toFixed(1)} ${(-elW / 2).toFixed(1)},${(elH / 2).toFixed(1)}" fill="${fill}" opacity="${op}" transform="${tf}"/>`);
+        } else {
+          // rect, line and remaining polygons export as their bounding rect
+          parts.push(`<rect x="${(-elW / 2).toFixed(1)}" y="${(-elH / 2).toFixed(1)}" width="${elW.toFixed(1)}" height="${elH.toFixed(1)}" fill="${fill}" opacity="${op}" transform="${tf}"/>`);
+        }
+      }
+    }
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<!-- AB Creation print layers (${currentSide}). Display fonts are referenced by family name; install them to view exactly. -->\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">${parts.join("")}</svg>`;
+    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `ab-creation-design-${currentSide}.svg`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   const handleSaveDesign = async () => {
     const frontPreview = elements.front.length > 0 ? await renderCanvasToDataURL("front") : undefined;
     const backPreview = elements.back.length > 0 ? await renderCanvasToDataURL("back") : undefined;
@@ -1761,7 +1884,8 @@ export default function TShirtDesigner({
     const stateObj = {
       elements,
       color: tshirtColor,
-      designerSide
+      designerSide,
+      roster: roster.filter((r) => r.name.trim() || r.number.trim()),
     };
 
     onSave(confirmPreviews, stateObj);
@@ -1952,6 +2076,15 @@ export default function TShirtDesigner({
                   <FileDown className="h-3.5 w-3.5 text-[#ff5c00]" /> Export PDF Spec
                 </button>
 
+                {/* Export SVG */}
+                <button
+                  onClick={handleExportSVG}
+                  className="flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#374151] hover:border-[#c4c7c7] hover:text-[#1a1c1c] hover:bg-[#eeeff1] transition-all shadow-md"
+                  title="Export the current side's print layers as vector SVG"
+                >
+                  <FileDown className="h-3.5 w-3.5 text-[#ff5c00]" /> SVG
+                </button>
+
                 {/* Finish & Save */}
                 <button
                   onClick={handleSaveDesign}
@@ -2010,6 +2143,17 @@ export default function TShirtDesigner({
                   >
                     <Layers className="h-5 w-5" />
                     <span className="text-[10px] font-medium hidden md:block">Layers</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("team")}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "team" ? "bg-[#ff5c00]/10 text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
+                      }`}
+                  >
+                    <Users className="h-5 w-5" />
+                    <span className="text-[10px] font-medium hidden md:block">
+                      Team{roster.length > 0 ? ` (${roster.length})` : ""}
+                    </span>
                   </button>
                 </div>
 
@@ -2293,6 +2437,71 @@ export default function TShirtDesigner({
                             </div>
                           ))}
                         </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TEAM NAMES & NUMBERS PANEL */}
+                  {activeTab === "team" && (
+                    <div className="flex flex-col gap-3">
+                      <h4 className="text-sm font-bold text-[#1a1c1c]">Names &amp; Numbers</h4>
+                      <p className="text-[11px] leading-4 text-[#6b7280]">
+                        Team order? Add one row per person — each entry prints one
+                        piece with that name &amp; number. Quantity at checkout
+                        equals the roster size.
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {roster.map((r, i) => (
+                          <div key={i} className="grid grid-cols-[1fr_52px_58px_24px] items-center gap-1.5">
+                            <input
+                              value={r.name}
+                              onChange={(e) =>
+                                setRoster((rows) => rows.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))
+                              }
+                              placeholder="Name"
+                              className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-2.5 text-xs font-medium text-[#1a1c1c] focus:border-[#ff5c00] outline-none"
+                            />
+                            <input
+                              value={r.number}
+                              onChange={(e) =>
+                                setRoster((rows) => rows.map((x, j) => (j === i ? { ...x, number: e.target.value.replace(/\D/g, "").slice(0, 3) } : x)))
+                              }
+                              placeholder="No."
+                              className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-2 text-center text-xs font-medium text-[#1a1c1c] focus:border-[#ff5c00] outline-none"
+                            />
+                            <select
+                              value={r.size}
+                              onChange={(e) =>
+                                setRoster((rows) => rows.map((x, j) => (j === i ? { ...x, size: e.target.value } : x)))
+                              }
+                              className="h-9 rounded-lg border border-[#e5e7eb] bg-white px-1.5 text-xs font-medium text-[#1a1c1c] focus:border-[#ff5c00] outline-none"
+                            >
+                              {["XS", "S", "M", "L", "XL", "2XL", "3XL"].map((s) => (
+                                <option key={s}>{s}</option>
+                              ))}
+                            </select>
+                            <button
+                              aria-label="Remove row"
+                              onClick={() => setRoster((rows) => rows.filter((_, j) => j !== i))}
+                              className="p-1 rounded text-[#9ca3af] hover:text-red-500"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setRoster((rows) => [...rows, { name: "", number: "", size: "M" }])}
+                        className="flex items-center gap-1.5 w-fit text-xs font-bold text-[#ff5c00] hover:underline"
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Add person
+                      </button>
+                      {roster.length > 0 && (
+                        <p className="text-[10.5px] leading-4 text-[#9ca3af]">
+                          Tip: put a sample name &amp; number on the canvas so the
+                          team sees the placement — production prints each
+                          person&apos;s details from this list.
+                        </p>
                       )}
                     </div>
                   )}

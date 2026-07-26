@@ -110,9 +110,12 @@ function DesignStudio() {
       });
     }
 
-    const color =
-      (editorState as { color?: string } | undefined)?.color ?? "#f6f6f6";
+    const meta = editorState as
+      | { color?: string; roster?: { name: string; number: string; size: string }[] }
+      | undefined;
+    const color = meta?.color ?? "#f6f6f6";
     const state = {
+      roster: meta?.roster?.length ? meta.roster : undefined,
       version: 2,
       els,
       image: previews.front ?? previews.back ?? null,

@@ -37,6 +37,7 @@ const BULK_PRICE = 449;
 type DesignState = {
   image: string | null;
   els?: El[];
+  roster?: { name: string; number: string; size: string }[];
   colorName: string;
   colorHex: string;
   colorDisplay: string;
@@ -188,7 +189,12 @@ export default function PreviewOrderPage() {
     try {
       const raw =
         localStorage.getItem("ab:design") ?? sessionStorage.getItem("ab:design");
-      if (raw) setDesign({ ...FALLBACK, ...JSON.parse(raw) });
+      if (raw) {
+        const d = { ...FALLBACK, ...JSON.parse(raw) } as DesignState;
+        setDesign(d);
+        // Team orders: one piece per roster entry
+        if (d.roster?.length) setQty(d.roster.length);
+      }
     } catch {
       // fall through to defaults
     }
@@ -225,11 +231,20 @@ export default function PreviewOrderPage() {
         e.src?.startsWith("data:") ? { ...e, src: "[uploaded artwork]" } : e,
       ),
     };
+    // Team orders: sizes come from the roster (a single common size, or Mixed)
+    const rosterSizes = [...new Set((design.roster ?? []).map((r) => r.size))];
+    const effectiveSize = design.roster?.length
+      ? rosterSizes.length === 1
+        ? rosterSizes[0]
+        : "Mixed"
+      : size;
     addToCart({
       id: `custom-${Date.now()}`,
       slug: design.product?.slug ?? "custom-design",
       title: `${productTitle} — Custom Design`,
-      variant: `${design.colorName} · Size ${size} · ${design.printMethod.split(" ")[0]} Print`,
+      variant: design.roster?.length
+        ? `${design.colorName} · Team ×${design.roster.length} · ${design.printMethod.split(" ")[0]} Print`
+        : `${design.colorName} · Size ${size} · ${design.printMethod.split(" ")[0]} Print`,
       image: "/images/home/hero-tee.png",
       price: unit,
       quantity: qty,
@@ -238,7 +253,7 @@ export default function PreviewOrderPage() {
       productType: design.product ? "ready" : undefined,
       variantId: design.product?.variantId,
       color: design.colorName,
-      size,
+      size: effectiveSize,
       customDesign: JSON.stringify(designMeta),
       artwork: composite ?? design.image ?? undefined,
     });
@@ -460,30 +475,62 @@ export default function PreviewOrderPage() {
               </div>
             </div>
 
+            {/* Team roster (names & numbers) */}
+            {(design.roster?.length ?? 0) > 0 && (
+              <div className="mt-8 rounded-[12px] border border-[#c4c7c7] p-5">
+                <p className="text-[12px] font-bold uppercase tracking-[0.6px] text-[#444748]">
+                  Team Roster — {design.roster!.length} piece{design.roster!.length === 1 ? "" : "s"}
+                </p>
+                <div className="mt-3 flex max-h-44 flex-col gap-1.5 overflow-y-auto">
+                  {design.roster!.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between text-[13.5px]">
+                      <span className="text-black">
+                        {r.name || "—"}
+                        {r.number ? (
+                          <span className="pl-2 font-bold text-brand-orange">#{r.number}</span>
+                        ) : null}
+                      </span>
+                      <span className="font-semibold text-[#444748]">{r.size}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="pt-3 text-[11.5px] leading-4 text-[#9ca3af]">
+                  Each entry prints one piece with that name &amp; number. Edit the
+                  list back in the studio&apos;s Team tab.
+                </p>
+              </div>
+            )}
+
             {/* Quantity */}
             <div className="mt-8">
               <p className="text-[12px] font-bold uppercase tracking-[0.6px] text-[#444748]">
                 Quantity
               </p>
-              <div className="mt-3 flex w-fit items-center rounded-[8px] border border-[#c4c7c7]">
-                <button
-                  aria-label="Decrease quantity"
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="flex h-10 w-10 items-center justify-center text-black"
-                >
-                  <Minus className="h-3.5 w-3.5" />
-                </button>
-                <span className="w-10 text-center text-[15px] font-medium text-black">
-                  {qty}
-                </span>
-                <button
-                  aria-label="Increase quantity"
-                  onClick={() => setQty((q) => q + 1)}
-                  className="flex h-10 w-10 items-center justify-center text-black"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                </button>
-              </div>
+              {design.roster?.length ? (
+                <p className="mt-3 w-fit rounded-[8px] border border-[#c4c7c7] bg-[#f3f3f4] px-5 py-2.5 text-[15px] font-bold text-black">
+                  {qty} — set by the team roster
+                </p>
+              ) : (
+                <div className="mt-3 flex w-fit items-center rounded-[8px] border border-[#c4c7c7]">
+                  <button
+                    aria-label="Decrease quantity"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    className="flex h-10 w-10 items-center justify-center text-black"
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="w-10 text-center text-[15px] font-medium text-black">
+                    {qty}
+                  </span>
+                  <button
+                    aria-label="Increase quantity"
+                    onClick={() => setQty((q) => q + 1)}
+                    className="flex h-10 w-10 items-center justify-center text-black"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Pricing */}
