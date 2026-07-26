@@ -2718,7 +2718,17 @@ export default function TShirtDesigner({
               </main>
 
               {/* 4. RIGHT SETTINGS PANEL (DYNAMIC PROPERTY CONTROLS) */}
-              <aside className="w-[280px] border-l border-[#e5e7eb] bg-[#eef0f2] p-5 overflow-y-auto hidden lg:block select-text">
+              {/* Desktop: fixed right column. Below lg: a bottom sheet that
+                  appears while an element is selected — otherwise the panel
+                  simply would not exist on snapped/small windows and users
+                  could select things but never customize them. */}
+              <aside
+                className={`overflow-y-auto bg-[#eef0f2] p-5 select-text lg:static lg:z-auto lg:block lg:w-[280px] lg:max-h-none lg:rounded-none lg:border-t-0 lg:border-l lg:border-[#e5e7eb] lg:shadow-none ${
+                  activeElement
+                    ? "fixed inset-x-0 bottom-0 z-[70] max-h-[60vh] rounded-t-2xl border-t border-[#e5e7eb] shadow-2xl"
+                    : "hidden lg:block"
+                }`}
+              >
                 <div className="flex flex-col gap-6">
 
                   {/* CONDITIONAL SETTING 1: NOTHING SELECTED -> CANVAS SETTINGS */}
