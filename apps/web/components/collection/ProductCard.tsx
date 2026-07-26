@@ -31,8 +31,8 @@ export default function ProductCard({ product }: { product: Product }) {
   const colorsList = Array.isArray(product.colors) ? product.colors : [];
   const priceDisplay =
     typeof product.price === "number"
-      ? product.price.toFixed(2)
-      : (product.price || "0.00");
+      ? product.price.toLocaleString("en-IN")
+      : (product.price || "0");
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-sm transition-all duration-200 hover:shadow-md">
@@ -79,7 +79,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <div className="flex items-center justify-between pt-3">
           <p className="text-[20px] font-extrabold text-[#111827]">
-            ${priceDisplay}
+            ₹{priceDisplay}
           </p>
           <div className="flex items-center gap-1.5">
             {colorsList.map((c, i) => (

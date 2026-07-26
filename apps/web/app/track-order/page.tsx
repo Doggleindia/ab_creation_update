@@ -8,7 +8,6 @@ import { Search, PackageCheck, Truck, ShieldCheck, ChevronRight } from "lucide-r
 export default function TrackOrderSearchPage() {
   const router = useRouter();
   const [orderIdInput, setOrderIdInput] = useState("");
-  const [emailOrPhone, setEmailOrPhone] = useState("");
 
   function handleTrack(e: React.FormEvent) {
     e.preventDefault();
@@ -62,18 +61,6 @@ export default function TrackOrderSearchPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-bold text-[#1b1c1b]">
-                Email Address or Phone Number (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="Enter email or 10-digit mobile number"
-                value={emailOrPhone}
-                onChange={(e) => setEmailOrPhone(e.target.value)}
-                className="h-12 w-full rounded-xl border border-[#d1d5db] bg-white px-4 text-[14px] text-black placeholder:text-[#9ca3af] focus:border-brand-orange focus:outline-none"
-              />
-            </div>
 
             <button
               type="submit"

@@ -85,20 +85,15 @@ function Confirmation() {
             <div className="divide-y divide-[#f3f4f6] pt-2">
               {(order?.items?.length
                 ? order.items
-                : [
+                : // Honest placeholder when the snapshot is gone (direct
+                  // visit/refresh) — never invent items or prices.
+                  [
                     {
-                      title: "Round Neck T-Shirt — Custom Design",
-                      variant: "White · Size L · DTF Print",
-                      image: "/images/home/hero-tee.png",
-                      price: 497,
+                      title: "Your order",
+                      variant: "Details are in your dashboard orders",
+                      image: "",
+                      price: 0,
                       quantity: 1,
-                    },
-                    {
-                      title: "Geometric Wave Tee",
-                      variant: "Black · Size M · DTF",
-                      image: "/images/home/cat-polo.png",
-                      price: 599,
-                      quantity: 2,
                     },
                   ]
               ).map((item, i) => (
@@ -124,7 +119,9 @@ function Confirmation() {
                     <p className="text-[12px] text-gray-500">Qty: {item.quantity}</p>
                   </div>
                   <span className="text-[15px] font-bold text-black">
-                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                    {item.price
+                      ? `₹${(item.price * item.quantity).toLocaleString("en-IN")}`
+                      : "—"}
                   </span>
                 </div>
               ))}
@@ -136,9 +133,11 @@ function Confirmation() {
               <div className="flex items-center justify-between">
                 <span className="text-[#6b7280]">Payment</span>
                 <span className="font-semibold text-black">
-                  {order?.payment === "cod"
-                    ? "Cash on Delivery"
-                    : "Razorpay — UPI / Card"}
+                  {order
+                    ? order.payment === "cod"
+                      ? "Cash on Delivery"
+                      : "Paid from Wallet"
+                    : "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -146,19 +145,19 @@ function Confirmation() {
                 <span className="font-semibold text-black">
                   {order
                     ? `${order.shipping.label} Delivery (${order.shipping.time})`
-                    : "Express Delivery (2-3 days)"}
+                    : "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#6b7280]">Estimated Delivery</span>
                 <span className="font-semibold text-black">
-                  {order?.etaLabel ?? "15 July 2026"}
+                  {order?.etaLabel ?? "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-dashed border-[#e5e7eb] pt-3">
                 <span className="text-[16px] font-bold text-black">Total:</span>
                 <span className="text-[22px] font-extrabold text-black">
-                  ₹{order ? order.total.toLocaleString("en-IN") : "1,844"}
+                  {order ? `₹${order.total.toLocaleString("en-IN")}` : "—"}
                 </span>
               </div>
             </div>
@@ -175,13 +174,7 @@ function Confirmation() {
                 <div className="mt-1 text-[13.5px] leading-relaxed text-[#4b5563]">
                   {(order?.address?.length
                     ? order.address
-                    : [
-                        "Rahul Sharma",
-                        "Building 4B, MG Road",
-                        "Indiranagar",
-                        "Bengaluru, Karnataka - 560038",
-                        "India",
-                      ]
+                    : ["Address on file — see your dashboard orders"]
                   ).map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}

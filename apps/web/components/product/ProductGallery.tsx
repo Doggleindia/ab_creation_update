@@ -5,15 +5,6 @@ import Image from "next/image";
 import WishlistButton from "@/components/common/WishlistButton";
 import type { WishlistItem } from "@/lib/wishlist";
 
-const MOCK_PICS = [
-  "/images/home/cat-polo.png",
-  "/images/home/cat-tshirt.png",
-  "/images/home/hero-tee.png",
-  "/images/home/cat-hoodie.png",
-  "/images/home/cat-sweatshirt.png",
-  "/images/home/cat-polo.png",
-];
-
 export default function ProductGallery({
   images,
   wishlistItem,
@@ -23,9 +14,8 @@ export default function ProductGallery({
 }) {
   const [active, setActive] = useState(0);
   const gallery =
-    images.length >= 6
-      ? images
-      : Array.from(new Set([...images, ...MOCK_PICS])).slice(0, 6);
+    // Only the product's own photos — never pad with unrelated stock art.
+    images;
 
   return (
     <div className="flex flex-col gap-4">

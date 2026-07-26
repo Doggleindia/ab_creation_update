@@ -23,7 +23,7 @@ const FEATURES = [
     icon: Percent,
     title: "Bulk Tiered Pricing",
     description:
-      "Save more as you scale. Automated tier discounts apply directly at checkout.",
+      "Save more as you scale — request a bulk quote and get tiered pricing on large orders.",
   },
 ];
 

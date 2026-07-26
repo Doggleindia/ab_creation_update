@@ -35,7 +35,7 @@ export default function ShopTopCategories() {
                 You can choose to design products for men of all ages
               </p>
               <Link
-                href="/collection?category=mens-collection"
+                href="/collection?category=t-shirt-mens"
                 className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-[15px] font-bold text-[#059669] shadow-sm transition-all hover:bg-gray-100"
               >
                 Explore products
@@ -63,7 +63,7 @@ export default function ShopTopCategories() {
                 You can choose to design products for women of all ages
               </p>
               <Link
-                href="/collection?category=womens-collection"
+                href="/collection?category=t-shirt-womens"
                 className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-[15px] font-bold text-[#ea580c] shadow-sm transition-all hover:bg-gray-50"
               >
                 Explore products

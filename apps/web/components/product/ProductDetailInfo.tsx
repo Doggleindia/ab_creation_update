@@ -30,24 +30,6 @@ export type ProductInfo = {
   reviews: Review[];
 };
 
-const DEFAULT_PRODUCT_DETAILS = [
-  "Blue T-shirt for men",
-  "Typography Printed",
-  "Regular Length",
-  "Short Sleeves,Regular Sleeves",
-  "Round neckline",
-  "Knitted cotton",
-  "Slip-on closure",
-];
-
-const DEFAULT_SPECS: Spec[] = [
-  { label: "Fabrics", value: "Cotton, Cotton" },
-  { label: "Fashion Trends", value: "Typography or Slogan Print" },
-  { label: "Fit", value: "Relaxed Fit" },
-  { label: "Type", value: "Long Sleeve Tee" },
-  { label: "Neck", value: "Round Neck" },
-];
-
 function Stars({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -64,10 +46,9 @@ function Stars({ rating }: { rating: number }) {
 }
 
 export default function ProductDetailInfo({ info }: { info: ProductInfo }) {
-  const details = info.productDetails.length
-    ? info.productDetails
-    : DEFAULT_PRODUCT_DETAILS;
-  const specs = info.specifications.length ? info.specifications : DEFAULT_SPECS;
+  // Real product data only — sections without data are hidden, not invented.
+  const details = info.productDetails;
+  const specs = info.specifications;
 
   return (
     <section className="w-full border-t border-[#e9e9e9] bg-white px-4 py-14 sm:px-8 lg:px-[86.5px]">
@@ -76,16 +57,18 @@ export default function ProductDetailInfo({ info }: { info: ProductInfo }) {
           {/* Column 1: Details, Material & Care, Ratings & Reviews */}
           <div className="flex flex-col gap-10">
             {/* Product Details */}
-            <div className="flex flex-col gap-4">
-              <h2 className="font-poppins text-[20px] font-bold uppercase tracking-wide text-[#1b1c1b]">
-                Product Details
-              </h2>
-              <ul className="flex flex-col gap-1.5 list-disc pl-5 text-[14px] leading-relaxed text-[#374151]">
-                {details.map((d) => (
-                  <li key={d}>{d}</li>
-                ))}
-              </ul>
-            </div>
+            {details.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <h2 className="font-poppins text-[20px] font-bold uppercase tracking-wide text-[#1b1c1b]">
+                  Product Details
+                </h2>
+                <ul className="flex flex-col gap-1.5 list-disc pl-5 text-[14px] leading-relaxed text-[#374151]">
+                  {details.map((d) => (
+                    <li key={d}>{d}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Material & Care */}
             <div className="flex flex-col gap-3 pt-2">
@@ -96,7 +79,7 @@ export default function ProductDetailInfo({ info }: { info: ProductInfo }) {
                 <div>
                   <span className="font-bold text-[#1b1c1b]">Material: </span>
                   <span className="text-[#4b5563]">
-                    {info.material || "Upper: Synthetic, Sole: Rubber"}
+                    {info.material || "See product specifications"}
                   </span>
                 </div>
                 <div>
@@ -105,7 +88,7 @@ export default function ProductDetailInfo({ info }: { info: ProductInfo }) {
                   </span>
                   <p className="mt-1 leading-relaxed text-[#4b5563]">
                     {info.careInstructions ||
-                      "Wipe with a clean, dry cloth to remove dust. Use a branded leather conditioner if needed. Avoid washing in a machine."}
+                      "Machine wash cold inside-out with like colours; do not bleach; tumble dry low; do not iron directly on the print."}
                   </p>
                 </div>
               </div>
@@ -125,7 +108,7 @@ export default function ProductDetailInfo({ info }: { info: ProductInfo }) {
                 <div className="flex flex-col gap-1">
                   <Stars rating={Math.round(info.rating)} />
                   <span className="text-[13px] font-medium text-[#6b7280]">
-                    54.3k Verified Buyers
+                    {info.ratingCount}
                   </span>
                 </div>
               </div>
@@ -190,6 +173,7 @@ export default function ProductDetailInfo({ info }: { info: ProductInfo }) {
           </div>
 
           {/* Column 2: Specifications */}
+          {specs.length > 0 && (
           <div className="flex flex-col gap-4">
             <h2 className="font-poppins text-[20px] font-bold uppercase tracking-wide text-[#1b1c1b]">
               SPECIFICATIONS
@@ -210,6 +194,7 @@ export default function ProductDetailInfo({ info }: { info: ProductInfo }) {
               ))}
             </div>
           </div>
+          )}
         </div>
       </div>
     </section>

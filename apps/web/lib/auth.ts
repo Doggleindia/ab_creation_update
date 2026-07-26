@@ -80,39 +80,16 @@ async function parseError(res: Response, fallback: string): Promise<string> {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  try {
-    const res = await fetch(`${BACKEND}/api/users/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (res.ok) {
-      const j = await res.json();
-      const session: Session = { token: j.token, user: j.data.user };
-      write(session);
-      return session.user;
-    }
-  } catch {
-    // network or backend connection fallback below
-  }
-
-  // Demo user credential handling
-  if (
-    email.toLowerCase().trim() === "demo@abcreation.com" &&
-    password === "Demo@1234"
-  ) {
-    const demoUser: AuthUser = {
-      id: "demo-user-123",
-      name: "Demo User",
-      email: "demo@abcreation.com",
-      accountType: "buyer",
-    };
-    const session: Session = { token: "demo-token-12345", user: demoUser };
-    write(session);
-    return demoUser;
-  }
-
-  throw new Error("Invalid email or password");
+  const res = await fetch(`${BACKEND}/api/users/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) throw new Error(await parseError(res, "Invalid credentials"));
+  const j = await res.json();
+  const session: Session = { token: j.token, user: j.data.user };
+  write(session);
+  return session.user;
 }
 
 export async function signup(
@@ -132,6 +109,7 @@ export async function logout(): Promise<void> {
   const token = getToken();
   write(null);
   if (!token) return;
+  // Best-effort server-side logout; the local session is already gone.
   try {
     await fetch(`${BACKEND}/api/users/logout`, {
       method: "POST",
@@ -142,6 +120,8 @@ export async function logout(): Promise<void> {
   }
 }
 
+// Authenticated fetch against the backend. Throws Error with a readable
+// message on non-2xx; returns the parsed JSON body otherwise.
 export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},

@@ -1,62 +1,37 @@
 "use client";
 
+// Lightweight client-side cart (localStorage). Server-cart wiring to
+// /api/cart is a follow-up; this makes the Cart/Checkout screens functional now.
 export type CartItem = {
-  id: string;
+  id: string; // unique line id
   slug: string;
   title: string;
-  variant: string;
+  variant: string; // display string, e.g. "White · Size L · DTF Print"
   image: string;
-  price: number;
+  price: number; // per unit, INR (display; server recomputes at checkout)
   quantity: number;
   seller?: string;
   custom?: boolean;
+  // Order-placement identity (POST /api/orders/checkout needs these)
   productId?: string;
   productType?: "ready" | "bulk";
   variantId?: string;
   color?: string;
   size?: string;
-  customDesign?: string;
-  artwork?: string;
-  designFiles?: string[];
+  customDesign?: string; // serialized design-studio state for custom items
+  artwork?: string; // data URL of the uploaded design (uploaded at checkout)
+  designFiles?: string[]; // already-hosted artwork URLs (reorders skip re-upload)
 };
 
 const KEY = "ab-cart";
 const EVENT = "ab-cart-updated";
 
-const INITIAL_DEMO_ITEMS: CartItem[] = [
-  {
-    id: "demo-1",
-    slug: "custom-round-neck-tshirt",
-    title: "Round Neck T-Shirt — Custom Design",
-    variant: "White · Size L · DTF Print",
-    image: "/images/home/cat-tshirt.png",
-    price: 497,
-    quantity: 1,
-    custom: true,
-  },
-  {
-    id: "demo-2",
-    slug: "geometric-wave-tee",
-    title: "Geometric Wave Tee",
-    seller: "Rahul's Store",
-    variant: "Black · Size M · DTF",
-    image: "/images/home/cat-polo.png",
-    price: 599,
-    quantity: 2,
-  },
-];
-
 export function getCart(): CartItem[] {
-  if (typeof window === "undefined") return INITIAL_DEMO_ITEMS;
+  if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) {
-      localStorage.setItem(KEY, JSON.stringify(INITIAL_DEMO_ITEMS));
-      return INITIAL_DEMO_ITEMS;
-    }
-    return JSON.parse(raw);
+    return JSON.parse(localStorage.getItem(KEY) || "[]");
   } catch {
-    return INITIAL_DEMO_ITEMS;
+    return [];
   }
 }
 

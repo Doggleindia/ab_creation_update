@@ -1,13 +1,26 @@
-"use client";
-
-import Image from "next/image";
+import { Printer, Leaf } from "lucide-react";
 import type { ProductMeasurement } from "@/lib/api";
 
+// Generic fallback used when the garment has no measurements configured yet.
 const CHART: ProductMeasurement[] = [
-  { size: "Small", chest: 38.0, length: 26.5, shoulder: 16.5 },
-  { size: "Medium", chest: 40.0, length: 27.5, shoulder: 17.5 },
-  { size: "Large", chest: 42.0, length: 28.5, shoulder: 18.5 },
-  { size: "XL", chest: 44.0, length: 29.5, shoulder: 19.5 },
+  { size: "XS", chest: 36, length: 26, sleeve: 7.5 },
+  { size: "S", chest: 38, length: 27, sleeve: 8 },
+  { size: "M", chest: 40, length: 28, sleeve: 8.5 },
+  { size: "L", chest: 42, length: 29, sleeve: 9 },
+  { size: "XL", chest: 44, length: 30, sleeve: 9.5 },
+];
+
+const METHODS = [
+  {
+    icon: Printer,
+    title: "DTF Excellence",
+    copy: "We use state-of-the-art Direct to Film printing which allows for photorealistic details and vibrant gold accents that won't crack or fade over time. The feel is soft and flexible on the garment.",
+  },
+  {
+    icon: Leaf,
+    title: "Eco-Friendly Inks",
+    copy: "Our inks are OEKO-TEX® certified, meaning they are safe for skin contact and environmentally conscious. We minimize water waste during our production process.",
+  },
 ];
 
 export default function SizeChartSection({
@@ -16,71 +29,76 @@ export default function SizeChartSection({
   measurements?: ProductMeasurement[];
 }) {
   const rows = measurements?.length ? measurements : CHART;
-
+  const hasShoulder = rows.some((r) => r.shoulder != null);
   return (
     <section
       id="size-chart"
       className="w-full scroll-mt-24 border-t border-[#e9e9e9] bg-white px-4 py-14 sm:px-8 lg:px-[86.5px]"
     >
-      <div className="mx-auto max-w-[1280px]">
-        <h2 className="pb-8 font-poppins text-[22px] font-bold text-[#1b1c1b]">
-          Size &amp; Fit Guide
-        </h2>
-
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
-          {/* Size table */}
+      <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-14 lg:grid-cols-2">
+        {/* Size chart */}
+        <div>
+          <h2 className="pb-8 font-poppins text-[24px] font-bold text-black">
+            Size Chart
+          </h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[380px] text-left text-[14px]">
               <thead>
-                <tr className="border-b border-[#e5e7eb] text-[11px] font-bold uppercase tracking-wider text-[#6b7280]">
-                  <th className="py-3 pr-4">SIZE (IN)</th>
-                  <th className="py-3 pr-4">CHEST</th>
-                  <th className="py-3 pr-4">LENGTH</th>
-                  <th className="py-3">SHOULDER</th>
+                <tr className="border-b-2 border-black text-[11px] font-bold uppercase tracking-[0.5px] text-[#374151]">
+                  <th className="py-3 pr-4">Size</th>
+                  <th className="py-3 pr-4">Chest (in)</th>
+                  <th className="py-3 pr-4">Length (in)</th>
+                  {hasShoulder && <th className="py-3 pr-4">Shoulder (in)</th>}
+                  <th className="py-3">Sleeve (in)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f3f4f6]">
-                {rows.map((r) => {
-                  const isHighlighted = r.size === "Medium";
-                  return (
-                    <tr
-                      key={r.size}
-                      className={`transition-colors ${
-                        isHighlighted ? "bg-[#f9fafb]" : ""
-                      }`}
-                    >
-                      <td className="py-4 pr-4 font-bold text-[#1b1c1b]">
-                        {r.size}
-                      </td>
-                      <td className="py-4 pr-4 text-[#4b5563]">
-                        {r.chest?.toFixed(1) ?? "—"}
-                      </td>
-                      <td className="py-4 pr-4 text-[#4b5563]">
-                        {r.length?.toFixed(1) ?? "—"}
-                      </td>
-                      <td className="py-4 text-[#4b5563]">
-                        {r.shoulder?.toFixed(1) ?? "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
+              <tbody>
+                {rows.map((r) => (
+                  <tr
+                    key={r.size}
+                    className={`border-b border-[#f3f4f6] ${
+                      r.size === "M" ? "bg-[#f9fafb]" : ""
+                    }`}
+                  >
+                    <td className="py-4 pr-4 font-bold text-black">{r.size}</td>
+                    <td className="py-4 pr-4 text-[#374151]">{r.chest ?? "—"}</td>
+                    <td className="py-4 pr-4 text-[#374151]">{r.length ?? "—"}</td>
+                    {hasShoulder && (
+                      <td className="py-4 pr-4 text-[#374151]">{r.shoulder ?? "—"}</td>
+                    )}
+                    <td className="py-4 text-[#374151]">{r.sleeve ?? "—"}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
+        </div>
 
-          {/* Right diagram illustration card */}
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e5e7eb] bg-[#fafafa] p-8 text-center">
-            <div className="relative h-44 w-56 overflow-hidden rounded-lg bg-white p-4 shadow-sm">
-              <Image
-                src="/images/home/cat-polo.png"
-                alt="Tee measurement guide"
-                fill
-                className="object-contain p-2 opacity-80"
-              />
-            </div>
-            <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-[#6b7280]">
-              Measure your favorite tee flat and compare for the best results.
-            </p>
+        {/* Printing methods */}
+        <div>
+          <h2 className="pb-8 font-poppins text-[24px] font-bold text-black">
+            Our Printing Methods
+          </h2>
+          <div className="flex flex-col gap-8">
+            {METHODS.map(({ icon: Icon, title, copy }) => (
+              <div key={title} className="flex gap-5">
+                <span
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] ${
+                    title === "DTF Excellence"
+                      ? "bg-black text-white"
+                      : "border border-[#c4c7c7] text-black"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="text-[16px] font-bold text-black">{title}</h3>
+                  <p className="pt-2 text-[14px] leading-6 text-[#6b7280]">
+                    {copy}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

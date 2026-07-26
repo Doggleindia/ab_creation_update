@@ -15,7 +15,7 @@ const STEPS = [
   },
   {
     title: "Mockup & Preview",
-    body: "Review photorealistic 3D mockups of your customized garment before finalizing your order. Verify placement, colors, and design scale.",
+    body: "Review a live preview of your customized garment in the Design Studio before finalizing your order. Verify placement, colors, and design scale.",
   },
   {
     title: "Order & Fast Shipping",

@@ -195,81 +195,6 @@ export type CollectionParams = {
   priceRange?: string;
 };
 
-const FALLBACK_PRODUCTS: CardProduct[] = [
-  {
-    slug: "classic-white-tee",
-    title: "Classic White Tee",
-    subtitle: "Premium Heavyweight Cotton",
-    price: 28.0,
-    badge: "EMBROIDERY",
-    image: "/images/home/cat-tshirt.png",
-    colors: ["#ffffff", "#000000"],
-  },
-  {
-    slug: "black-oversized-tee",
-    title: "Black Oversized Tee",
-    subtitle: "Urban Fit Tech Cotton",
-    price: 34.0,
-    badge: "ECO-FRIENDLY",
-    image: "/images/home/cat-polo.png",
-    colors: ["#000000", "#1e3a8a"],
-  },
-  {
-    slug: "navy-executive-polo",
-    title: "Navy Executive Polo",
-    subtitle: "Pique Organic Cotton",
-    price: 42.0,
-    badge: "BESTSELLER",
-    image: "/images/home/cat-polo.png",
-    colors: ["#15803d", "#1e3a8a"],
-  },
-  {
-    slug: "sustainable-gray-hoodie",
-    title: "Sustainable Gray Hoodie",
-    subtitle: "Recycled Polyester Blend",
-    price: 56.0,
-    badge: "HEAVYWEIGHT",
-    image: "/images/home/cat-hoodie.png",
-    colors: ["#6b7280", "#374151"],
-  },
-  {
-    slug: "essential-tank-top",
-    title: "Essential Tank Top",
-    subtitle: "Lightweight Sport Mesh",
-    price: 22.0,
-    badge: "ECO-FRIENDLY",
-    image: "/images/home/cat-tshirt.png",
-    colors: ["#ffffff", "#9ca3af"],
-  },
-  {
-    slug: "premium-crewneck",
-    title: "Premium Crewneck",
-    subtitle: "French Terry Finish",
-    price: 48.0,
-    badge: "HEAVYWEIGHT",
-    image: "/images/home/cat-sweatshirt.png",
-    colors: ["#fef3c7", "#e5e7eb"],
-  },
-  {
-    slug: "vintage-wash-tee",
-    title: "Vintage Wash Tee",
-    subtitle: "Pre-Shrunk Garment Dye",
-    price: 32.0,
-    badge: "DTG TRANSFER",
-    image: "/images/home/cat-tshirt.png",
-    colors: ["#064e3b", "#4d7c0f"],
-  },
-  {
-    slug: "raglan-baseball-tee",
-    title: "Raglan Baseball Tee",
-    subtitle: "Contrast Sleeve Cotton",
-    price: 26.0,
-    badge: "ECO-FRIENDLY",
-    image: "/images/home/cat-tshirt.png",
-    colors: ["#ffffff", "#b91c1c"],
-  },
-];
-
 export async function getProducts(
   params: CollectionParams,
 ): Promise<{ products: CardProduct[]; meta: ProductsMeta }> {
@@ -288,10 +213,10 @@ export async function getProducts(
     `/api/products?${qs.toString()}`,
   );
 
-  if (!json?.data || json.data.length === 0) {
+  if (!json?.data) {
     return {
-      products: FALLBACK_PRODUCTS,
-      meta: { page: 1, limit: 16, total: 86, totalPages: 6 },
+      products: [],
+      meta: { page: 1, limit: 16, total: 0, totalPages: 0 },
     };
   }
 

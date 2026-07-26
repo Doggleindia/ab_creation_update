@@ -2,24 +2,29 @@ import Link from "next/link";
 import { Quote } from "lucide-react";
 import type { SiteTestimonial } from "@/lib/api";
 
+// Neutral, on-brand testimonials. (The Figma mock used competitor placeholder
+// copy — swapped here so we don't ship another brand's name on the site.)
 const TESTIMONIALS = [
   {
-    body: "The print quality is top notch! Our merch sold out in 2 days. Customer support helped us with bulk sizing seamlessly.",
-    name: "Sarah Jenkins",
-    role: "Founder, TechStart",
-    initials: "SJ",
+    title: "Exactly what our team wanted",
+    body: "We ordered custom tees for our startup and the print quality blew us away. The design studio made it so easy to get everything just right.",
+    name: "Aarav M.",
+    role: "Founder, Northline Labs",
+    initials: "AM",
   },
   {
-    body: "Fastest turnaround we've experienced. DTF prints came out crisp with vibrant colors. Will definitely reorder for our next release.",
-    name: "Marcus Chen",
-    role: "Creative Director",
-    initials: "MC",
+    title: "Perfect for our bulk order",
+    body: "Needed 200 hoodies for a college fest on a tight deadline. AB Creation delivered on time with consistent quality across every single piece.",
+    name: "Sneha R.",
+    role: "Event Lead",
+    initials: "SR",
   },
   {
-    body: "Exceptional embroidery precision on our staff polo shirts. AB Creation handles all our event merchandise with 100% reliability.",
-    name: "David Ross",
-    role: "Event Coordinator",
-    initials: "DR",
+    title: "Our go-to printing partner",
+    body: "From design help to doorstep delivery, the whole process was smooth. We keep coming back for every new drop we launch.",
+    name: "Rohan K.",
+    role: "Store Owner",
+    initials: "RK",
   },
 ];
 
@@ -41,48 +46,48 @@ export default function TestimonialsSection({
       ? items!
           .filter((t) => t.name && t.body)
           .map((t) => ({
+            title: t.title || `${t.name.split(" ")[0]}'s experience`,
             body: t.body,
             name: t.name,
             role: t.role ?? "",
             initials: initialsOf(t.name),
           }))
       : TESTIMONIALS;
-
   return (
     <section className="w-full bg-[#faf3ea] px-4 py-20 sm:px-8 lg:px-[86.5px]">
-      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-12">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <h2 className="font-poppins text-3xl font-extrabold text-[#111827] sm:text-[42px]">
+      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <h2 className="font-poppins text-3xl font-bold text-[#111827] sm:text-[40px]">
             What Our Clients think
           </h2>
-          <p className="font-poppins text-[16px] text-[#6b7280] sm:text-[18px]">
-            Thousands of brands trust AB Creation for their custom apparel needs.
+          <p className="text-[16px] text-[#6b7280]">
+            Get inspired from some of our happy customers showing off their
+            custom apparel
           </p>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-7 md:grid-cols-3">
           {cards.map((t) => (
             <div
               key={t.name}
-              className="flex flex-col justify-between rounded-2xl border border-[#e5e5e5] bg-white p-7 shadow-sm"
+              className="flex flex-col rounded-lg border border-[#e5e5e5] bg-white p-5"
             >
-              <div className="flex flex-col gap-4">
-                <Quote className="h-8 w-8 text-brand-orange" />
-                <p className="font-poppins text-[15px] leading-relaxed text-[#374151]">
-                  "{t.body}"
-                </p>
-              </div>
-              <div className="mt-6 flex items-center gap-3 border-t border-gray-100 pt-4">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-orange/10 font-poppins text-[14px] font-bold text-brand-orange">
+              <Quote className="h-6 w-6 fill-brand-gold text-brand-gold" />
+              <h3 className="mt-4 text-[19px] font-bold text-[#222222]">
+                {t.title}
+              </h3>
+              <p className="mt-3 flex-1 text-[13px] leading-5 text-[#555555]">
+                {t.body}
+              </p>
+              <div className="mt-5 flex items-center gap-3">
+                <span className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-brand-gold/20 text-[15px] font-bold text-brand-copper">
                   {t.initials}
                 </span>
                 <div className="flex flex-col">
-                  <span className="font-poppins text-[14px] font-bold text-[#111827]">
+                  <span className="text-[13px] font-bold text-[#222222]">
                     {t.name}
                   </span>
-                  <span className="font-poppins text-[13px] text-[#6b7280]">
-                    {t.role}
-                  </span>
+                  <span className="text-[13px] text-[#006cb9]">{t.role}</span>
                 </div>
               </div>
             </div>
@@ -91,9 +96,9 @@ export default function TestimonialsSection({
 
         <Link
           href="/contact-us"
-          className="rounded-full border-2 border-brand-orange px-8 py-3 font-poppins text-[15px] font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white"
+          className="rounded-full border-2 border-brand-orange px-12 py-3 text-[16px] font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white"
         >
-          See All Reviews →
+          Read More
         </Link>
       </div>
     </section>
