@@ -25,6 +25,15 @@ const SELLER_LINKS = [
   { label: "Settings", href: "/seller/settings" },
 ];
 
+// Logged-in buyers: the acquisition pitches (Join as Seller, Bulk Order)
+// give way to their own dashboard.
+const BUYER_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Collection", href: "/collection", hasDropdown: true },
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Contact", href: "/contact-us" },
+];
+
 // Bulk accounts: their pipeline lives in the buyer dashboard, and new
 // requests go through the in-dashboard form rather than the public wizard.
 const BULK_LINKS = [
@@ -172,7 +181,9 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
       ? SELLER_LINKS
       : user?.accountType === "bulk"
         ? BULK_LINKS
-        : NAV_LINKS;
+        : user
+          ? BUYER_LINKS
+          : NAV_LINKS;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#f3f4f6] bg-white">
