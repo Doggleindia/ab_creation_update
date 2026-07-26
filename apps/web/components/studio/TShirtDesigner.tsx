@@ -492,6 +492,7 @@ export default function TShirtDesigner({
   // References
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentEditRef = useRef<HTMLTextAreaElement>(null);
 
   // Touch/Mouse Dragging and Transformations State
   const interactionRef = useRef<{
@@ -861,12 +862,12 @@ export default function TShirtDesigner({
     if (templateId === "badge") {
       newEls = [
         { ...base, type: "shape", content: "circle", shapeType: "circle", fillColor: "#ff5c00", x: 25, y: 20, width: 50, height: 50 },
-        { ...base, type: "text", content: "EST. 2024", fontFamily: "Bebas Neue", fontSize: 30, color: "#FFFFFF", align: "center", x: 20, y: 40, width: 60, height: 20, letterSpacing: 2 },
+        { ...base, type: "text", content: "EST. 2024", fontFamily: STUDIO_FONTS.bebas.stack, fontSize: 30, color: "#FFFFFF", align: "center", x: 20, y: 40, width: 60, height: 20, letterSpacing: 2 },
       ];
     } else if (templateId === "headline") {
       newEls = [
-        { ...base, type: "text", content: "YOUR", fontFamily: "Impact", fontSize: 48, color: "#FFFFFF", align: "center", x: 10, y: 22, width: 80, height: 22 },
-        { ...base, type: "text", content: "BRAND", fontFamily: "Impact", fontSize: 48, color: "#ff5c00", align: "center", x: 10, y: 48, width: 80, height: 22, strokeColor: "#FFFFFF", strokeWidth: 1 },
+        { ...base, type: "text", content: "YOUR", fontFamily: STUDIO_FONTS.anton.stack, fontSize: 48, color: "#FFFFFF", align: "center", x: 10, y: 22, width: 80, height: 22 },
+        { ...base, type: "text", content: "BRAND", fontFamily: STUDIO_FONTS.anton.stack, fontSize: 48, color: "#ff5c00", align: "center", x: 10, y: 48, width: 80, height: 22, strokeColor: "#FFFFFF", strokeWidth: 1 },
       ];
     } else if (templateId === "stacked") {
       newEls = [
@@ -905,6 +906,16 @@ export default function TShirtDesigner({
       zIndex: startZ + i + 1,
     }));
     updateElementsAndHistory([...elements[currentSide], ...built]);
+    // Every template layer is a normal editable element — select the first
+    // text line and open its editor so that is immediately obvious.
+    const firstText = built.find((e) => e.type === "text") ?? built[0];
+    setSelectedElementId(firstText.id);
+    if (firstText.type === "text") {
+      setTimeout(() => {
+        contentEditRef.current?.focus();
+        contentEditRef.current?.select();
+      }, 0);
+    }
   };
 
   // Reorder layers via drag in the Layer Manager (top of list = front-most).
@@ -2295,7 +2306,7 @@ export default function TShirtDesigner({
                       {/* CLIPART GALLERY */}
                       <div className="mt-2">
                         <h4 className="text-sm font-bold text-[#1a1c1c] mb-2">Clipart Gallery</h4>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-3 gap-2.5">
                           {Object.entries(SHAPE_DEFS)
                             .filter(([, d]) => d.category === "clipart")
                             .map(([key, def]) => (
@@ -2303,11 +2314,12 @@ export default function TShirtDesigner({
                                 key={key}
                                 onClick={() => handleAddShape(`glyph:${key}`)}
                                 title={def.label}
-                                className="aspect-square flex items-center justify-center rounded-xl border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] p-2.5 transition-all group"
+                                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] px-2 pt-3 pb-2 transition-all group"
                               >
-                                <svg viewBox="0 0 100 100" className="h-full w-full">
+                                <svg viewBox="0 0 100 100" className="h-11 w-11">
                                   <path d={def.path} fill="#6b7280" fillRule="evenodd" className="group-hover:fill-[#ff5c00]" />
                                 </svg>
+                                <span className="text-[10px] leading-tight text-[#6b7280] group-hover:text-[#1a1c1c] truncate w-full text-center">{def.label}</span>
                               </button>
                             ))}
                         </div>
@@ -2316,12 +2328,12 @@ export default function TShirtDesigner({
                       {/* STICKERS */}
                       <div className="mt-2">
                         <h4 className="text-sm font-bold text-[#1a1c1c] mb-2">Stickers</h4>
-                        <div className="grid grid-cols-8 gap-1.5">
+                        <div className="grid grid-cols-5 gap-2">
                           {STICKERS.map((emoji) => (
                             <button
                               key={emoji}
                               onClick={() => handleAddSticker(emoji)}
-                              className="aspect-square flex items-center justify-center rounded-lg border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] text-lg transition-all"
+                              className="aspect-square flex items-center justify-center rounded-lg border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] text-2xl leading-none transition-all"
                               title="Add sticker"
                             >
                               {emoji}
@@ -2594,6 +2606,16 @@ export default function TShirtDesigner({
                             }`}
                           onMouseDown={(e) => { if (!el.locked) handleInteractionStart(e, el, "drag"); }}
                           onTouchStart={(e) => { if (!el.locked) handleInteractionStart(e, el, "drag"); }}
+                          onDoubleClick={() => {
+                            // Double-click a text layer to edit its content directly
+                            if (el.type === "text" && !el.locked) {
+                              setSelectedElementId(el.id);
+                              setTimeout(() => {
+                                contentEditRef.current?.focus();
+                                contentEditRef.current?.select();
+                              }, 0);
+                            }
+                          }}
                         >
 
                           {/* ELEMENT INTERNAL CONTENT */}
@@ -2803,6 +2825,7 @@ export default function TShirtDesigner({
                           <div className="flex flex-col gap-2">
                             <label className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">Edit Text Value</label>
                             <textarea
+                              ref={contentEditRef}
                               rows={2}
                               value={activeElement.content}
                               onChange={(e) => updateElementProperties(activeElement.id, { content: e.target.value })}
