@@ -18,6 +18,13 @@ import {
   PenLine,
 } from "lucide-react";
 import { addToCart } from "@/lib/cart";
+import {
+  type El,
+  FONTS,
+  SHAPE_DEFS,
+  compositeDesign,
+  zoneCfg,
+} from "@/lib/studio";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
 const GARMENT_COST = 299;
@@ -28,6 +35,7 @@ const BULK_PRICE = 449;
 
 type DesignState = {
   image: string | null;
+  els?: El[];
   colorName: string;
   colorHex: string;
   colorDisplay: string;
@@ -57,13 +65,66 @@ const FALLBACK: DesignState = {
 
 type View = "front" | "back" | "artwork" | "fabric";
 
+// A single design element rendered inside its zone box (same math as the studio)
+function PreviewEl({ el }: { el: El }) {
+  const areaWPct = parseFloat(zoneCfg(el.zone).area.width) / 100;
+  const boxPx = 330 * areaWPct * 0.65 * el.scale; // ~330px preview tee width
+  let content: React.ReactNode = null;
+  if (el.kind === "image" && el.src) {
+    /* eslint-disable-next-line @next/next/no-img-element */
+    content = <img src={el.src} alt="" className="block w-full select-none" draggable={false} />;
+  } else if (el.kind === "text") {
+    content = (
+      <span
+        className="block whitespace-nowrap text-center leading-none"
+        style={{
+          fontFamily: FONTS[el.font ?? "sans"]?.stack,
+          fontWeight: el.bold ? 700 : 400,
+          color: el.textColor ?? "#111111",
+          fontSize: `${Math.max(8, boxPx / Math.max(4, (el.text ?? "").length * 0.62))}px`,
+        }}
+      >
+        {el.text}
+      </span>
+    );
+  } else if (el.kind === "shape" && el.shape && SHAPE_DEFS[el.shape]) {
+    content = (
+      <svg viewBox="0 0 100 100" className="block w-full">
+        <path d={SHAPE_DEFS[el.shape].path} fill={el.fill ?? "#111111"} fillRule="evenodd" />
+      </svg>
+    );
+  }
+  return (
+    <div
+      className="absolute -translate-x-1/2 -translate-y-1/2"
+      style={{ left: `${el.xPct}%`, top: `${el.yPct}%`, width: `${el.scale * 65}%` }}
+    >
+      <div
+        style={{
+          transform: `rotate(${el.rotation}deg) scaleX(${el.flipH ? -1 : 1}) scaleY(${el.flipV ? -1 : 1})`,
+          opacity: el.opacity / 100,
+        }}
+      >
+        {content}
+      </div>
+    </div>
+  );
+}
+
 function Tee({
   design,
-  showDesign,
+  side,
 }: {
   design: DesignState;
-  showDesign: boolean;
+  side: "front" | "back" | null;
 }) {
+  const els = design.els ?? [];
+  const zonesShown =
+    side === "front"
+      ? (["front", "left-sleeve", "right-chest"] as const)
+      : side === "back"
+        ? (["back"] as const)
+        : ([] as const);
   return (
     <div
       className="relative h-[76%] w-[64%]"
@@ -74,22 +135,34 @@ function Tee({
         boxShadow: "inset 0 4px 24px rgba(0,0,0,0.12)",
       }}
     >
-      {showDesign && design.image && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={design.image}
-          alt="Your design"
-          className="absolute -translate-x-1/2 -translate-y-1/2 select-none"
-          style={{
-            left: "50%",
-            top: "42%",
-            width: `${design.placement.scale * 30}%`,
-            opacity: design.opacity / 100,
-            transform: `translate(-50%, -50%) rotate(${design.placement.rotation}deg)`,
-          }}
-          draggable={false}
-        />
-      )}
+      {els.length > 0
+        ? zonesShown.map((zid) => (
+            <div key={zid} className="absolute" style={zoneCfg(zid).area}>
+              {els
+                .filter((e) => e.zone === zid && !e.hidden)
+                .map((e) => (
+                  <PreviewEl key={e.id} el={e} />
+                ))}
+            </div>
+          ))
+        : // Legacy single-image draft
+          side === "front" &&
+          design.image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={design.image}
+              alt="Your design"
+              className="absolute -translate-x-1/2 -translate-y-1/2 select-none"
+              style={{
+                left: "50%",
+                top: "42%",
+                width: `${design.placement.scale * 30}%`,
+                opacity: design.opacity / 100,
+                transform: `translate(-50%, -50%) rotate(${design.placement.rotation}deg)`,
+              }}
+              draggable={false}
+            />
+          )}
     </div>
   );
 }
@@ -101,6 +174,7 @@ export default function PreviewOrderPage() {
   const [qty, setQty] = useState(1);
   const [view, setView] = useState<View>("front");
   const [copied, setCopied] = useState(false);
+  const [composite, setComposite] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -112,20 +186,42 @@ export default function PreviewOrderPage() {
     }
   }, []);
 
+  // Flatten the design into the real print file (transparent PNG)
+  useEffect(() => {
+    let cancelled = false;
+    if (design.els?.length) {
+      compositeDesign(design.els).then((url) => {
+        if (!cancelled) setComposite(url);
+      });
+    } else {
+      setComposite(design.image);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [design]);
+
   const garmentCost = design.product?.price ?? GARMENT_COST;
   const fullUnit = garmentCost + PRINTING_COST + CUSTOMIZATION_FEE;
   const unit = qty >= BULK_QTY ? Math.min(BULK_PRICE, fullUnit) : fullUnit;
   const productTitle = design.product?.title ?? "Round Neck T-Shirt";
 
   function addAndCheckout() {
-    // Keep the serialized design (minus the heavy artwork data URL) so
-    // checkout can submit it as the order's customDesign payload.
-    const { image: artwork, ...designMeta } = design;
+    // customDesign carries the full element layout for production, minus the
+    // heavy uploaded-image data URLs — the flattened print file is uploaded
+    // as the order's artwork at checkout instead.
+    const designMeta = {
+      ...design,
+      image: undefined, // heavy data URL — the flattened file is uploaded instead
+      els: design.els?.map((e) =>
+        e.src?.startsWith("data:") ? { ...e, src: "[uploaded artwork]" } : e,
+      ),
+    };
     addToCart({
       id: `custom-${Date.now()}`,
       slug: design.product?.slug ?? "custom-design",
       title: `${productTitle} — Custom Design`,
-      variant: `${design.colorName} · Size ${size} · DTF Print`,
+      variant: `${design.colorName} · Size ${size} · ${design.printMethod.split(" ")[0]} Print`,
       image: "/images/home/hero-tee.png",
       price: unit,
       quantity: qty,
@@ -136,7 +232,7 @@ export default function PreviewOrderPage() {
       color: design.colorName,
       size,
       customDesign: JSON.stringify(designMeta),
-      artwork: artwork ?? undefined,
+      artwork: composite ?? design.image ?? undefined,
     });
     router.push("/cart");
   }
@@ -194,17 +290,17 @@ export default function PreviewOrderPage() {
           <div>
             <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[12px] bg-[#edeae5]">
               {view === "artwork" ? (
-                design.image ? (
+                composite ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={design.image}
+                    src={composite}
                     alt="Artwork"
                     className="max-h-[70%] max-w-[70%] select-none object-contain"
                     draggable={false}
                   />
                 ) : (
                   <p className="text-[14px] text-[#9ca3af]">
-                    No artwork uploaded yet
+                    Nothing designed yet
                   </p>
                 )
               ) : view === "fabric" ? (
@@ -213,7 +309,7 @@ export default function PreviewOrderPage() {
                   style={{ background: design.colorDisplay }}
                 />
               ) : (
-                <Tee design={design} showDesign={view === "front"} />
+                <Tee design={design} side={view === "front" ? "front" : "back"} />
               )}
               <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-medium text-black shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
                 <Eye className="h-4 w-4" /> Live Preview
@@ -233,10 +329,10 @@ export default function PreviewOrderPage() {
                   }`}
                 >
                   {t.id === "artwork" ? (
-                    design.image ? (
+                    composite ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={design.image}
+                        src={composite}
                         alt="Artwork thumbnail"
                         className="max-h-[70%] max-w-[70%] object-contain"
                         draggable={false}
@@ -264,15 +360,15 @@ export default function PreviewOrderPage() {
             </div>
 
             <a
-              href={design.image ?? undefined}
+              href={composite ?? undefined}
               download="ab-creation-design.png"
               className={`mt-6 flex w-fit items-center gap-2 text-[14px] font-medium ${
-                design.image
+                composite
                   ? "text-black hover:text-brand-orange"
                   : "pointer-events-none text-[#9ca3af]"
               }`}
             >
-              <Download className="h-4 w-4" /> Download Mockup
+              <Download className="h-4 w-4" /> Download Print File
             </a>
           </div>
 
@@ -317,7 +413,9 @@ export default function PreviewOrderPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-[#444748]">
                     Print Method
                   </p>
-                  <p className="mt-2 text-[15px] text-black">DTF Print</p>
+                  <p className="mt-2 text-[15px] text-black">
+                    {design.printMethod.split(" (")[0]}
+                  </p>
                 </div>
               </div>
             </div>
