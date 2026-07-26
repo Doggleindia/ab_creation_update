@@ -18,6 +18,14 @@ import {
   PenLine,
 } from "lucide-react";
 import { addToCart } from "@/lib/cart";
+import { studioFontClasses } from "@/lib/fonts";
+import {
+  type El,
+  FONTS,
+  SHAPE_DEFS,
+  compositeDesign,
+  zoneCfg,
+} from "@/lib/studio";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
 const GARMENT_COST = 299;
@@ -28,6 +36,8 @@ const BULK_PRICE = 449;
 
 type DesignState = {
   image: string | null;
+  els?: El[];
+  roster?: { name: string; number: string; size: string }[];
   colorName: string;
   colorHex: string;
   colorDisplay: string;
@@ -57,13 +67,73 @@ const FALLBACK: DesignState = {
 
 type View = "front" | "back" | "artwork" | "fabric";
 
+// A single design element rendered inside its zone box (same math as the studio)
+function PreviewEl({ el }: { el: El }) {
+  const areaWPct = parseFloat(zoneCfg(el.zone).area.width) / 100;
+  const boxPx = 330 * areaWPct * 0.65 * el.scale; // ~330px preview tee width
+  let content: React.ReactNode = null;
+  if (el.kind === "image" && el.src) {
+    /* eslint-disable-next-line @next/next/no-img-element */
+    content = <img src={el.src} alt="" className="block w-full select-none" draggable={false} />;
+  } else if (el.kind === "text") {
+    const raw = el.uppercase ? (el.text ?? "").toUpperCase() : (el.text ?? "");
+    const fontPx = Math.max(8, boxPx / Math.max(4, raw.length * 0.62));
+    content = (
+      <span
+        className="block whitespace-nowrap text-center leading-none"
+        style={{
+          fontFamily: FONTS[el.font ?? "sans"]?.stack,
+          fontWeight: el.bold ? 700 : 400,
+          color: el.textColor ?? "#111111",
+          fontSize: `${fontPx}px`,
+          letterSpacing: `${((el.letterSpacing ?? 0) * fontPx) / 40}px`,
+          WebkitTextStroke:
+            (el.strokeWidth ?? 0) > 0
+              ? `${Math.max(0.5, ((el.strokeWidth ?? 1) * fontPx) / 56)}px ${el.strokeColor ?? "#ffffff"}`
+              : undefined,
+        }}
+      >
+        {raw}
+      </span>
+    );
+  } else if (el.kind === "shape" && el.shape && SHAPE_DEFS[el.shape]) {
+    content = (
+      <svg viewBox="0 0 100 100" className="block w-full">
+        <path d={SHAPE_DEFS[el.shape].path} fill={el.fill ?? "#111111"} fillRule="evenodd" />
+      </svg>
+    );
+  }
+  return (
+    <div
+      className="absolute -translate-x-1/2 -translate-y-1/2"
+      style={{ left: `${el.xPct}%`, top: `${el.yPct}%`, width: `${el.scale * 65}%` }}
+    >
+      <div
+        style={{
+          transform: `rotate(${el.rotation}deg) scaleX(${el.flipH ? -1 : 1}) scaleY(${el.flipV ? -1 : 1})`,
+          opacity: el.opacity / 100,
+        }}
+      >
+        {content}
+      </div>
+    </div>
+  );
+}
+
 function Tee({
   design,
-  showDesign,
+  side,
 }: {
   design: DesignState;
-  showDesign: boolean;
+  side: "front" | "back" | null;
 }) {
+  const els = design.els ?? [];
+  const zonesShown =
+    side === "front"
+      ? (["front", "left-sleeve", "right-chest"] as const)
+      : side === "back"
+        ? (["back"] as const)
+        : ([] as const);
   return (
     <div
       className="relative h-[76%] w-[64%]"
@@ -74,22 +144,34 @@ function Tee({
         boxShadow: "inset 0 4px 24px rgba(0,0,0,0.12)",
       }}
     >
-      {showDesign && design.image && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={design.image}
-          alt="Your design"
-          className="absolute -translate-x-1/2 -translate-y-1/2 select-none"
-          style={{
-            left: "50%",
-            top: "42%",
-            width: `${design.placement.scale * 30}%`,
-            opacity: design.opacity / 100,
-            transform: `translate(-50%, -50%) rotate(${design.placement.rotation}deg)`,
-          }}
-          draggable={false}
-        />
-      )}
+      {els.length > 0
+        ? zonesShown.map((zid) => (
+            <div key={zid} className="absolute" style={zoneCfg(zid).area}>
+              {els
+                .filter((e) => e.zone === zid && !e.hidden)
+                .map((e) => (
+                  <PreviewEl key={e.id} el={e} />
+                ))}
+            </div>
+          ))
+        : // Legacy single-image draft
+          side === "front" &&
+          design.image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={design.image}
+              alt="Your design"
+              className="absolute -translate-x-1/2 -translate-y-1/2 select-none"
+              style={{
+                left: "50%",
+                top: "42%",
+                width: `${design.placement.scale * 30}%`,
+                opacity: design.opacity / 100,
+                transform: `translate(-50%, -50%) rotate(${design.placement.rotation}deg)`,
+              }}
+              draggable={false}
+            />
+          )}
     </div>
   );
 }
@@ -101,16 +183,37 @@ export default function PreviewOrderPage() {
   const [qty, setQty] = useState(1);
   const [view, setView] = useState<View>("front");
   const [copied, setCopied] = useState(false);
+  const [composite, setComposite] = useState<string | null>(null);
 
   useEffect(() => {
     try {
       const raw =
         localStorage.getItem("ab:design") ?? sessionStorage.getItem("ab:design");
-      if (raw) setDesign({ ...FALLBACK, ...JSON.parse(raw) });
+      if (raw) {
+        const d = { ...FALLBACK, ...JSON.parse(raw) } as DesignState;
+        setDesign(d);
+        // Team orders: one piece per roster entry
+        if (d.roster?.length) setQty(d.roster.length);
+      }
     } catch {
       // fall through to defaults
     }
   }, []);
+
+  // Flatten the design into the real print file (transparent PNG)
+  useEffect(() => {
+    let cancelled = false;
+    if (design.els?.length) {
+      compositeDesign(design.els).then((url) => {
+        if (!cancelled) setComposite(url);
+      });
+    } else {
+      setComposite(design.image);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [design]);
 
   const garmentCost = design.product?.price ?? GARMENT_COST;
   const fullUnit = garmentCost + PRINTING_COST + CUSTOMIZATION_FEE;
@@ -118,14 +221,30 @@ export default function PreviewOrderPage() {
   const productTitle = design.product?.title ?? "Round Neck T-Shirt";
 
   function addAndCheckout() {
-    // Keep the serialized design (minus the heavy artwork data URL) so
-    // checkout can submit it as the order's customDesign payload.
-    const { image: artwork, ...designMeta } = design;
+    // customDesign carries the full element layout for production, minus the
+    // heavy uploaded-image data URLs — the flattened print file is uploaded
+    // as the order's artwork at checkout instead.
+    const designMeta = {
+      ...design,
+      image: undefined, // heavy data URL — the flattened file is uploaded instead
+      els: design.els?.map((e) =>
+        e.src?.startsWith("data:") ? { ...e, src: "[uploaded artwork]" } : e,
+      ),
+    };
+    // Team orders: sizes come from the roster (a single common size, or Mixed)
+    const rosterSizes = [...new Set((design.roster ?? []).map((r) => r.size))];
+    const effectiveSize = design.roster?.length
+      ? rosterSizes.length === 1
+        ? rosterSizes[0]
+        : "Mixed"
+      : size;
     addToCart({
       id: `custom-${Date.now()}`,
       slug: design.product?.slug ?? "custom-design",
       title: `${productTitle} — Custom Design`,
-      variant: `${design.colorName} · Size ${size} · DTF Print`,
+      variant: design.roster?.length
+        ? `${design.colorName} · Team ×${design.roster.length} · ${design.printMethod.split(" ")[0]} Print`
+        : `${design.colorName} · Size ${size} · ${design.printMethod.split(" ")[0]} Print`,
       image: "/images/home/hero-tee.png",
       price: unit,
       quantity: qty,
@@ -134,9 +253,9 @@ export default function PreviewOrderPage() {
       productType: design.product ? "ready" : undefined,
       variantId: design.product?.variantId,
       color: design.colorName,
-      size,
+      size: effectiveSize,
       customDesign: JSON.stringify(designMeta),
-      artwork: artwork ?? undefined,
+      artwork: composite ?? design.image ?? undefined,
     });
     router.push("/cart");
   }
@@ -159,7 +278,7 @@ export default function PreviewOrderPage() {
   ];
 
   return (
-    <main className="min-h-[calc(100vh-113px)] bg-white">
+    <main className={`min-h-[calc(100vh-113px)] bg-white ${studioFontClasses}`}>
       {/* Editor bar */}
       <div className="flex h-16 items-center justify-between border-b border-[#c4c7c7] bg-white px-4 sm:px-8">
         <Link
@@ -194,17 +313,17 @@ export default function PreviewOrderPage() {
           <div>
             <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[12px] bg-[#edeae5]">
               {view === "artwork" ? (
-                design.image ? (
+                composite ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={design.image}
+                    src={composite}
                     alt="Artwork"
                     className="max-h-[70%] max-w-[70%] select-none object-contain"
                     draggable={false}
                   />
                 ) : (
                   <p className="text-[14px] text-[#9ca3af]">
-                    No artwork uploaded yet
+                    Nothing designed yet
                   </p>
                 )
               ) : view === "fabric" ? (
@@ -213,7 +332,7 @@ export default function PreviewOrderPage() {
                   style={{ background: design.colorDisplay }}
                 />
               ) : (
-                <Tee design={design} showDesign={view === "front"} />
+                <Tee design={design} side={view === "front" ? "front" : "back"} />
               )}
               <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-medium text-black shadow-[0px_1px_3px_rgba(0,0,0,0.15)]">
                 <Eye className="h-4 w-4" /> Live Preview
@@ -233,10 +352,10 @@ export default function PreviewOrderPage() {
                   }`}
                 >
                   {t.id === "artwork" ? (
-                    design.image ? (
+                    composite ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={design.image}
+                        src={composite}
                         alt="Artwork thumbnail"
                         className="max-h-[70%] max-w-[70%] object-contain"
                         draggable={false}
@@ -264,15 +383,15 @@ export default function PreviewOrderPage() {
             </div>
 
             <a
-              href={design.image ?? undefined}
+              href={composite ?? undefined}
               download="ab-creation-design.png"
               className={`mt-6 flex w-fit items-center gap-2 text-[14px] font-medium ${
-                design.image
+                composite
                   ? "text-black hover:text-brand-orange"
                   : "pointer-events-none text-[#9ca3af]"
               }`}
             >
-              <Download className="h-4 w-4" /> Download Mockup
+              <Download className="h-4 w-4" /> Download Print File
             </a>
           </div>
 
@@ -317,7 +436,9 @@ export default function PreviewOrderPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.6px] text-[#444748]">
                     Print Method
                   </p>
-                  <p className="mt-2 text-[15px] text-black">DTF Print</p>
+                  <p className="mt-2 text-[15px] text-black">
+                    {design.printMethod.split(" (")[0]}
+                  </p>
                 </div>
               </div>
             </div>
@@ -354,30 +475,62 @@ export default function PreviewOrderPage() {
               </div>
             </div>
 
+            {/* Team roster (names & numbers) */}
+            {(design.roster?.length ?? 0) > 0 && (
+              <div className="mt-8 rounded-[12px] border border-[#c4c7c7] p-5">
+                <p className="text-[12px] font-bold uppercase tracking-[0.6px] text-[#444748]">
+                  Team Roster — {design.roster!.length} piece{design.roster!.length === 1 ? "" : "s"}
+                </p>
+                <div className="mt-3 flex max-h-44 flex-col gap-1.5 overflow-y-auto">
+                  {design.roster!.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between text-[13.5px]">
+                      <span className="text-black">
+                        {r.name || "—"}
+                        {r.number ? (
+                          <span className="pl-2 font-bold text-brand-orange">#{r.number}</span>
+                        ) : null}
+                      </span>
+                      <span className="font-semibold text-[#444748]">{r.size}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="pt-3 text-[11.5px] leading-4 text-[#9ca3af]">
+                  Each entry prints one piece with that name &amp; number. Edit the
+                  list back in the studio&apos;s Team tab.
+                </p>
+              </div>
+            )}
+
             {/* Quantity */}
             <div className="mt-8">
               <p className="text-[12px] font-bold uppercase tracking-[0.6px] text-[#444748]">
                 Quantity
               </p>
-              <div className="mt-3 flex w-fit items-center rounded-[8px] border border-[#c4c7c7]">
-                <button
-                  aria-label="Decrease quantity"
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="flex h-10 w-10 items-center justify-center text-black"
-                >
-                  <Minus className="h-3.5 w-3.5" />
-                </button>
-                <span className="w-10 text-center text-[15px] font-medium text-black">
-                  {qty}
-                </span>
-                <button
-                  aria-label="Increase quantity"
-                  onClick={() => setQty((q) => q + 1)}
-                  className="flex h-10 w-10 items-center justify-center text-black"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                </button>
-              </div>
+              {design.roster?.length ? (
+                <p className="mt-3 w-fit rounded-[8px] border border-[#c4c7c7] bg-[#f3f3f4] px-5 py-2.5 text-[15px] font-bold text-black">
+                  {qty} — set by the team roster
+                </p>
+              ) : (
+                <div className="mt-3 flex w-fit items-center rounded-[8px] border border-[#c4c7c7]">
+                  <button
+                    aria-label="Decrease quantity"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    className="flex h-10 w-10 items-center justify-center text-black"
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="w-10 text-center text-[15px] font-medium text-black">
+                    {qty}
+                  </span>
+                  <button
+                    aria-label="Increase quantity"
+                    onClick={() => setQty((q) => q + 1)}
+                    className="flex h-10 w-10 items-center justify-center text-black"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Pricing */}
