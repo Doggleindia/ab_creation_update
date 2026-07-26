@@ -493,6 +493,7 @@ export default function TShirtDesigner({
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentEditRef = useRef<HTMLTextAreaElement>(null);
+  const suppressCanvasClickRef = useRef(false);
 
   // Touch/Mouse Dragging and Transformations State
   const interactionRef = useRef<{
@@ -1069,6 +1070,11 @@ export default function TShirtDesigner({
       const updatedElements = elements[currentSide];
       pushToHistory(updatedElements, currentSide);
       interactionRef.current = null;
+      // A drag/resize can release with the pointer off the element, which
+      // fires a click on the shirt container — swallow that one so the
+      // gesture doesn't end in an accidental deselect.
+      suppressCanvasClickRef.current = true;
+      setTimeout(() => { suppressCanvasClickRef.current = false; }, 0);
     }
     setSnapGuides({ x: false, y: false });
     document.removeEventListener("mousemove", handleInteractionMove);
@@ -2560,7 +2566,10 @@ export default function TShirtDesigner({
                 <motion.div
                   animate={{ scale: zoom }}
                   className="relative w-full max-w-[480px] aspect-square flex items-center justify-center select-none cursor-default"
-                  onClick={() => setSelectedElementId(null)}
+                  onClick={() => {
+                    if (suppressCanvasClickRef.current) return;
+                    setSelectedElementId(null);
+                  }}
                 >
 
                   {/* Backdrop T-Shirt Visual */}
@@ -2606,7 +2615,12 @@ export default function TShirtDesigner({
                             }`}
                           onMouseDown={(e) => { if (!el.locked) handleInteractionStart(e, el, "drag"); }}
                           onTouchStart={(e) => { if (!el.locked) handleInteractionStart(e, el, "drag"); }}
-                          onDoubleClick={() => {
+                          // The shirt container deselects on click; clicks that land on an
+                          // element (or its handles) must not bubble up to it, or the
+                          // selection — and the properties editor — vanish on release.
+                          onClick={(e) => e.stopPropagation()}
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
                             // Double-click a text layer to edit its content directly
                             if (el.type === "text" && !el.locked) {
                               setSelectedElementId(el.id);
