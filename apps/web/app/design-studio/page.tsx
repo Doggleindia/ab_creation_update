@@ -676,6 +676,13 @@ function DesignStudio() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/design-editor"
+            className="hidden rounded-full border border-[#c4c7c7] bg-white px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-[#f3f3f4] md:block"
+            title="Advanced multi-layer editor with curved text, filters and PDF spec sheets"
+          >
+            Pro Editor
+          </Link>
           <button
             onClick={saveDraft}
             className="rounded-full border border-[#c4c7c7] bg-white px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-[#f3f3f4]"
