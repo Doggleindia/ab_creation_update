@@ -32,6 +32,7 @@ const BUYER_LINKS = [
   { label: "Collection", href: "/collection", hasDropdown: true },
   { label: "Dashboard", href: "/dashboard" },
   { label: "Contact", href: "/contact-us" },
+  { label: "Settings", href: "/dashboard/settings" },
 ];
 
 // Bulk accounts: their pipeline lives in the buyer dashboard, and new
@@ -42,6 +43,7 @@ const BULK_LINKS = [
   { label: "Contact", href: "/contact-us" },
   { label: "Dashboard", href: "/dashboard" },
   { label: "Bulk Quotes", href: "/dashboard/quotes" },
+  { label: "Settings", href: "/dashboard/settings" },
 ];
 
 function AccountMenu({ user }: { user: AuthUser }) {
