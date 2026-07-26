@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star, Zap, ShieldCheck } from "lucide-react";
 import type { SiteContent } from "@/lib/api";
 
 const FEATURES = [
-  { icon: "💰", label: "Lowest Price Guaranteed" },
-  { icon: "🚚", label: "Pan India Delivery" },
-  { icon: "⚡", label: "Super Rush Delivery" },
+  { icon: <Star className="h-5 w-5 fill-amber-400 text-amber-400" />, label: "4.9/5 RATED BY 10,000+ CUSTOMERS" },
+  { icon: <Zap className="h-5 w-5 fill-amber-500 text-amber-500" />, label: "FAST 3-DAY EXPRESS DELIVERY" },
+  { icon: <ShieldCheck className="h-5 w-5 text-emerald-600" />, label: "100% SATISFACTION GUARANTEED" },
 ];
 
 export default function Hero({
@@ -20,108 +20,75 @@ export default function Hero({
   const heading2 = content?.heading2 || "Built for Your Brand.";
   const subheading =
     content?.subheading ||
-    "Shop ready-made printed tees or bring your own design. We print it exactly the way you want it.";
-  const cta1 = content?.cta1 || "Customize Product";
+    "Custom apparel and merchandise built for scale. Print on demand or bulk.";
+  const cta1 = content?.cta1 || "Start Customizing";
   const cta2 = content?.cta2 || "Explore Collection";
-  const badges =
-    trust?.items?.filter((i) => i.label?.trim()).length
-      ? trust.items!.filter((i) => i.label?.trim())
-      : FEATURES;
 
   return (
     <section className="w-full bg-white">
-      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-16 px-4 pb-16 pt-10 sm:px-8">
+      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-12 px-4 pb-12 pt-8 sm:px-8 lg:pt-12">
         {/* Hero row */}
-        <div className="flex w-full flex-col items-center gap-12 lg:flex-row lg:justify-between">
-          {/* Copy */}
-          <div className="flex w-full max-w-[694px] flex-col items-start gap-14">
+        <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-12">
+          {/* Copy (Left 6 cols) */}
+          <div className="flex flex-col items-start gap-8 lg:col-span-6">
             <div className="flex flex-col gap-4">
               {content?.badge && (
                 <span className="w-fit rounded-full bg-[#111827] px-4 py-1.5 text-[12px] font-bold uppercase tracking-[1px] text-white">
                   {content.badge}
                 </span>
               )}
-              <h1 className="font-poppins text-4xl font-semibold leading-[1.25] text-[#111827] sm:text-5xl lg:text-[60px]">
+              <h1 className="font-poppins text-4xl font-extrabold tracking-tight text-[#111827] sm:text-5xl lg:text-[56px] lg:leading-[1.15]">
                 {heading1}
                 <br />
                 {heading2}
               </h1>
-              <p className="max-w-[572px] text-[18px] font-medium leading-7 text-black sm:text-[20px]">
+              <p className="max-w-[540px] font-poppins text-[16px] leading-relaxed text-[#4b5563] sm:text-[18px]">
                 {subheading}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
+
+            <div className="flex flex-wrap items-center gap-4">
               <Link
                 href="/design-studio"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-[18px] font-bold text-white shadow-[0px_10px_15px_-3px_#fed7aa,0px_4px_6px_-4px_#fed7aa] transition-opacity hover:opacity-90"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange px-8 py-3.5 text-[16px] font-bold text-white shadow-md transition-all hover:bg-brand-orange/90 hover:shadow-lg"
               >
                 {cta1}
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <Link
                 href="/collection"
-                className="inline-flex items-center gap-2 rounded-full border border-black px-8 py-4 text-[18px] font-bold text-black transition-colors hover:bg-black hover:text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#111827] px-8 py-3.5 text-[16px] font-bold text-[#111827] transition-all hover:bg-[#111827] hover:text-white"
               >
                 {cta2}
-                <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
           </div>
 
-          {/* Collage */}
-          <div className="relative aspect-square w-full max-w-[554px] shrink-0">
+          {/* Collage (Right 6 cols) */}
+          <div className="relative mx-auto aspect-square w-full max-w-[520px] lg:col-span-6">
             <Image
               src="/images/home/hero-base.png"
               alt="Custom printed apparel"
               fill
               priority
               className="object-cover"
-              sizes="(max-width: 1024px) 90vw, 554px"
+              sizes="(max-width: 1024px) 90vw, 520px"
             />
-            {/* Top-left tee tile */}
-            <div className="absolute left-[7%] top-[11%] h-[32.8%] w-[27.1%] rounded-[2.3%] bg-[#add7dc]" />
-            <div className="absolute left-[8.3%] top-[6%] h-[37.8%] w-[24.3%] overflow-hidden rounded-[2.3%]">
-              {content?.image ? (
-                /* eslint-disable-next-line @next/next/no-img-element -- CMS media lives on S3, host not in next.config images */
-                <img
-                  src={content.image}
-                  alt="Printed tee"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <Image
-                  src="/images/home/hero-tee.png"
-                  alt="Printed tee"
-                  fill
-                  className="object-cover"
-                  sizes="150px"
-                />
-              )}
-            </div>
-            {/* Bottom-right jacket tile */}
-            <div className="absolute left-[48.1%] top-[62%] h-[32.5%] w-[44.6%] rounded-[4.7%] bg-[#10b981]" />
-            <div className="absolute left-[48%] top-[55%] h-[39.6%] w-[44.9%] overflow-hidden rounded-[4.7%]">
-              <Image
-                src="/images/home/hero-jacket.png"
-                alt="Printed jacket"
-                fill
-                className="object-cover"
-                sizes="250px"
-              />
-            </div>
           </div>
         </div>
 
-        {/* Feature banner */}
+        {/* Feature / Trust Badges banner */}
         {trust?.visible !== false && (
-          <div className="grid w-full grid-cols-1 gap-4 rounded-md border border-[#bfd6e4] bg-white p-3 shadow-[-1px_1px_3.5px_rgba(0,0,0,0.13)] sm:grid-cols-3">
-            {badges.map((f) => (
+          <div className="grid w-full grid-cols-1 gap-4 rounded-2xl border border-[#e5e7eb] bg-[#fafafa] p-3 shadow-sm sm:grid-cols-3">
+            {FEATURES.map((f, i) => (
               <div
-                key={f.label}
-                className="flex items-center justify-center gap-4 rounded-2xl bg-[#f9fafb] px-6 py-5"
+                key={i}
+                className="flex items-center justify-center gap-3 rounded-xl bg-white px-5 py-4 shadow-[0px_1px_3px_rgba(0,0,0,0.06)]"
               >
-                <span className="text-3xl leading-9">{f.icon ?? "✨"}</span>
-                <span className="text-[16px] font-bold text-[#111827]">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50">
+                  {f.icon}
+                </div>
+                <span className="font-poppins text-[13px] font-bold tracking-wider text-[#111827]">
                   {f.label}
                 </span>
               </div>

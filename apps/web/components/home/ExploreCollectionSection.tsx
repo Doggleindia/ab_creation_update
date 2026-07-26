@@ -62,15 +62,14 @@ const TILES = [
 
 export default function ExploreCollectionSection() {
   return (
-    <section className="w-full bg-white px-4 py-20 sm:px-8 lg:px-24 lg:py-24">
-      <div className="mx-auto flex max-w-[1280px] flex-col gap-16">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <h2 className="font-poppins text-3xl font-bold text-[#111827] sm:text-[40px]">
+    <section className="w-full bg-white px-4 py-20 sm:px-8 lg:px-[86.5px]">
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-12">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <h2 className="font-poppins text-3xl font-extrabold text-[#111827] sm:text-[42px]">
             Explore our Collection
           </h2>
-          <p className="text-[16px] text-[#6b7280]">
-            Get inspired from some of our happy customers showing off their
-            custom apparel
+          <p className="font-poppins text-[16px] text-[#6b7280] sm:text-[18px]">
+            Get inspired from some of our happy customers showing off their custom apparel.
           </p>
         </div>
 
@@ -88,9 +87,9 @@ export default function ExploreCollectionSection() {
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-6 left-6 flex flex-col gap-1">
-                <h3 className="text-[22px] font-bold text-white">{t.title}</h3>
+                <h3 className="font-poppins text-[22px] font-bold text-white">{t.title}</h3>
                 <p className="font-poppins text-[14px] text-[#e5e7eb]">{t.sub}</p>
               </div>
             </Link>

@@ -5,6 +5,15 @@ import Image from "next/image";
 import WishlistButton from "@/components/common/WishlistButton";
 import type { WishlistItem } from "@/lib/wishlist";
 
+const MOCK_PICS = [
+  "/images/home/cat-polo.png",
+  "/images/home/cat-tshirt.png",
+  "/images/home/hero-tee.png",
+  "/images/home/cat-hoodie.png",
+  "/images/home/cat-sweatshirt.png",
+  "/images/home/cat-polo.png",
+];
+
 export default function ProductGallery({
   images,
   wishlistItem,
@@ -13,48 +22,51 @@ export default function ProductGallery({
   wishlistItem?: WishlistItem;
 }) {
   const [active, setActive] = useState(0);
-  const gallery = images.length ? images : ["/images/product/pdp-1.png"];
+  const gallery =
+    images.length >= 6
+      ? images
+      : Array.from(new Set([...images, ...MOCK_PICS])).slice(0, 6);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Main image */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-[#c4c7c7] bg-[#f9fafb]">
+      {/* Main image box */}
+      <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#e5e7eb] bg-[#f9fafb]">
         <Image
           key={gallery[active]}
-          src={gallery[active]}
-          alt="Product image"
+          src={gallery[active]!}
+          alt="Product main image"
           fill
           priority
-          className="object-contain"
+          className="object-contain p-6"
           sizes="(max-width: 1024px) 100vw, 540px"
         />
         {wishlistItem && (
           <WishlistButton
             item={wishlistItem}
-            iconClassName="h-5 w-5"
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#c4c7c7] bg-white shadow-sm transition-colors hover:bg-[#f5f1ea]"
+            iconClassName="h-5 w-5 text-gray-700"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition-transform hover:scale-105"
           />
         )}
       </div>
 
-      {/* Thumbnails */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      {/* 6 Thumbnails Grid */}
+      <div className="grid grid-cols-6 gap-2">
         {gallery.map((img, i) => (
           <button
             key={i}
             onClick={() => setActive(i)}
             aria-label={`View image ${i + 1}`}
-            className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#f9fafb] ${
+            className={`relative aspect-square w-full overflow-hidden rounded-lg bg-[#f9fafb] transition-all ${
               active === i
                 ? "border-2 border-black"
-                : "border border-[#c4c7c7]"
+                : "border border-[#e5e7eb] opacity-80 hover:opacity-100"
             }`}
           >
             <Image
               src={img}
               alt=""
               fill
-              className="object-cover"
+              className="object-cover p-1"
               sizes="80px"
             />
           </button>

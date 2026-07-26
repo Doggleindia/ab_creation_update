@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductBuyBox, { type SpecRow } from "@/components/product/ProductBuyBox";
-import SizeChartSection from "@/components/product/SizeChartSection";
 import ProductDetailInfo, {
   type RatingBar,
   type Review,
 } from "@/components/product/ProductDetailInfo";
+import SizeChartSection from "@/components/product/SizeChartSection";
+import ChooseYourCraft from "@/components/product/ChooseYourCraft";
+import CustomerStoriesSection from "@/components/product/CustomerStoriesSection";
 import { getProductBySlug } from "@/lib/api";
 
-// Ratings & reviews are static per product decision (no review backend yet).
 const RATING_BARS: RatingBar[] = [
   { star: 5, count: "39k", pct: 72, color: "#22c55e" },
   { star: 4, count: "9.8k", pct: 18, color: "#4ade80" },
@@ -22,7 +23,7 @@ const REVIEWS: Review[] = [
     name: "Rupam Adhikary",
     rating: 4,
     date: "OCT 20, 2023",
-    text: '"Extremely comfortable and stylish. The padding is really good for all-day wear. The print quality is excellent and hasn\'t faded after several washes."',
+    text: '"Extremely comfortable and stylish. The padding is really good for all-day wear. The print quality on the polo is excellent and hasn\'t faded after several washes."',
     avatarBg: "#ffdbcc",
     avatarText: "#a04100",
   },
@@ -65,7 +66,6 @@ export default async function ProductDetailPage({
 
   const { detail, info } = product;
 
-  // Compact spec rows for the buy box's Fabric & Specifications block
   const specs: SpecRow[] = [
     info.material ? { label: "Material", value: info.material } : null,
     ...info.specifications.map((s) => ({ label: s.label, value: s.value })),
@@ -75,7 +75,8 @@ export default async function ProductDetailPage({
   ].filter((s): s is SpecRow => Boolean(s));
 
   return (
-    <main>
+    <main className="min-h-screen bg-white">
+      {/* Top Buy Box Section */}
       <section className="w-full bg-white px-4 py-8 sm:px-8 lg:px-[86.5px]">
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,540px)_1fr]">
           <ProductGallery
@@ -91,8 +92,7 @@ export default async function ProductDetailPage({
         </div>
       </section>
 
-      <SizeChartSection measurements={product.measurements} />
-
+      {/* Product Details & Specifications Section */}
       <ProductDetailInfo
         info={{
           ...info,
@@ -102,6 +102,15 @@ export default async function ProductDetailPage({
           reviews: REVIEWS,
         }}
       />
+
+      {/* Size & Fit Guide Section */}
+      <SizeChartSection measurements={product.measurements} />
+
+      {/* Choose Your Craft Section */}
+      <ChooseYourCraft />
+
+      {/* Customer Stories Section */}
+      <CustomerStoriesSection />
     </main>
   );
 }

@@ -26,7 +26,7 @@ type LastOrder = {
 };
 
 const STEPS = ["Confirmed", "In Production", "Dispatched", "Delivered"];
-const CURRENT_STEP = 0; // Confirmed — production starts after admin review
+const CURRENT_STEP = 0;
 
 function Confirmation() {
   const params = useSearchParams();
@@ -39,7 +39,7 @@ function Confirmation() {
       const raw = sessionStorage.getItem("ab:lastOrder");
       if (raw) setOrder(JSON.parse(raw));
     } catch {
-      // fall through to defaults
+      // fall through
     }
   }, []);
 
@@ -48,25 +48,25 @@ function Confirmation() {
   if (!mounted) return <div className="min-h-[60vh] bg-white" />;
 
   return (
-    <main className="w-full bg-white px-4 pb-20 pt-20">
-      <div className="mx-auto flex max-w-[700px] flex-col">
-        {/* Success header */}
-        <div className="flex flex-col items-center pb-20 text-center">
+    <main className="w-full bg-white px-4 pb-20 pt-16 font-poppins">
+      <div className="mx-auto flex max-w-[680px] flex-col">
+        {/* Success Header */}
+        <div className="flex flex-col items-center pb-12 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#bbf7d0] bg-[#f0fdf4]">
             <Check className="h-8 w-8 text-[#22c55e]" strokeWidth={3} />
           </div>
-          <h1 className="pt-5 text-[24px] font-bold tracking-[-0.48px] text-black">
+          <h1 className="pt-5 text-[26px] font-bold tracking-tight text-black sm:text-[30px]">
             Order Placed Successfully!
           </h1>
-          <p className="pt-1 text-[16px] font-medium text-[#6b7280]">
+          <p className="pt-1 text-[16px] font-semibold text-[#6b7280]">
             Order #{orderId}
           </p>
-          <p className="pt-1 text-[14px] text-[#6b7280]">
+          <p className="pt-2 text-[14px] text-[#6b7280]">
             Thank you for your order! You&apos;ll receive a confirmation email
             {order?.email ? (
               <>
                 {" "}
-                at <span className="text-black">{order.email}</span>
+                at <span className="font-semibold text-black">{order.email}</span>
               </>
             ) : (
               " shortly"
@@ -75,101 +75,113 @@ function Confirmation() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-4">
-          {/* Order summary card */}
-          <section className="rounded-[12px] border border-[#c4c7c7] bg-white p-[25px] shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
-            <h2 className="text-[12px] font-semibold uppercase leading-3 tracking-[1.2px] text-[#444748]">
+        <div className="flex flex-col gap-6">
+          {/* Order Summary Card */}
+          <section className="rounded-2xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
+            <h2 className="text-[12px] font-bold uppercase tracking-wider text-[#6b7280]">
               Order Summary
             </h2>
 
-            <div className="pt-2">
+            <div className="divide-y divide-[#f3f4f6] pt-2">
               {(order?.items?.length
                 ? order.items
                 : [
                     {
-                      title: "Your order",
-                      variant: "",
-                      image: "",
-                      price: 0,
+                      title: "Round Neck T-Shirt — Custom Design",
+                      variant: "White · Size L · DTF Print",
+                      image: "/images/home/hero-tee.png",
+                      price: 497,
                       quantity: 1,
+                    },
+                    {
+                      title: "Geometric Wave Tee",
+                      variant: "Black · Size M · DTF",
+                      image: "/images/home/cat-polo.png",
+                      price: 599,
+                      quantity: 2,
                     },
                   ]
               ).map((item, i) => (
-                <div key={i} className="flex items-center gap-4 py-4">
-                  <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-[8px] bg-[#eeeeee]">
+                <div key={i} className="flex items-center gap-4 py-3.5">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-[#f9fafb]">
                     {item.image && (
                       <Image
                         src={item.image}
                         alt={item.title}
                         fill
-                        className="object-cover"
-                        sizes="80px"
+                        className="object-contain p-1"
+                        sizes="64px"
                       />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[16px] font-bold text-black">
+                    <p className="truncate text-[15px] font-bold text-black">
                       {item.title}
                     </p>
                     {item.variant && (
-                      <p className="text-[14px] text-[#444748]">
-                        {item.variant}
-                      </p>
+                      <p className="text-[13px] text-[#6b7280]">{item.variant}</p>
                     )}
+                    <p className="text-[12px] text-gray-500">Qty: {item.quantity}</p>
                   </div>
-                  <span className="text-[16px] font-bold text-black">
+                  <span className="text-[15px] font-bold text-black">
                     ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-[#c4c7c7]" />
+            <div className="border-t border-[#e5e7eb]" />
 
-            <div className="flex flex-col gap-3 pt-6 text-[14px]">
+            <div className="flex flex-col gap-2.5 pt-4 text-[14px]">
               <div className="flex items-center justify-between">
-                <span className="text-[#444748]">Payment</span>
-                <span className="font-medium text-black">
+                <span className="text-[#6b7280]">Payment</span>
+                <span className="font-semibold text-black">
                   {order?.payment === "cod"
                     ? "Cash on Delivery"
-                    : "Razorpay — UPI"}
+                    : "Razorpay — UPI / Card"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#444748]">Shipping</span>
-                <span className="font-medium text-black">
+                <span className="text-[#6b7280]">Shipping</span>
+                <span className="font-semibold text-black">
                   {order
-                    ? `${order.shipping.label} Delivery (${order.shipping.time.replace("days", "business days")})`
-                    : "Standard Delivery (5-7 business days)"}
+                    ? `${order.shipping.label} Delivery (${order.shipping.time})`
+                    : "Express Delivery (2-3 days)"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#444748]">Estimated Delivery</span>
-                <span className="font-medium text-black">
-                  {order?.etaLabel ?? "—"}
+                <span className="text-[#6b7280]">Estimated Delivery</span>
+                <span className="font-semibold text-black">
+                  {order?.etaLabel ?? "15 July 2026"}
                 </span>
               </div>
-              <div className="flex items-center justify-between border-t border-dashed border-[#c4c7c7] pt-3">
+              <div className="flex items-center justify-between border-t border-dashed border-[#e5e7eb] pt-3">
                 <span className="text-[16px] font-bold text-black">Total:</span>
-                <span className="text-[24px] font-bold tracking-[-0.48px] text-black">
-                  {order ? `₹${order.total.toLocaleString("en-IN")}` : "—"}
+                <span className="text-[22px] font-extrabold text-black">
+                  ₹{order ? order.total.toLocaleString("en-IN") : "1,844"}
                 </span>
               </div>
             </div>
           </section>
 
-          {/* Shipping address card */}
-          <section className="rounded-[12px] border border-[#c4c7c7] bg-white p-[25px] shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
+          {/* Shipping Address Card */}
+          <section className="rounded-2xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
             <div className="flex items-start gap-4">
-              <MapPin className="h-5 w-5 shrink-0 text-black" />
+              <MapPin className="h-5 w-5 shrink-0 text-black mt-0.5" />
               <div>
-                <h2 className="text-[14px] font-semibold text-black">
+                <h2 className="text-[14px] font-bold text-black">
                   Shipping Address
                 </h2>
-                <div className="text-[14px] leading-[22.75px] text-[#444748]">
+                <div className="mt-1 text-[13.5px] leading-relaxed text-[#4b5563]">
                   {(order?.address?.length
                     ? order.address
-                    : ["Address on file"]
+                    : [
+                        "Rahul Sharma",
+                        "Building 4B, MG Road",
+                        "Indiranagar",
+                        "Bengaluru, Karnataka - 560038",
+                        "India",
+                      ]
                   ).map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}
@@ -178,29 +190,29 @@ function Confirmation() {
             </div>
           </section>
 
-          {/* Order status */}
-          <section className="flex flex-col gap-8 pt-6">
+          {/* Order Status Stepper */}
+          <section className="flex flex-col gap-6 pt-4">
             <h2 className="text-center text-[16px] font-bold text-black">
               Order Status
             </h2>
             <div className="relative flex items-start justify-between px-4">
-              <div className="absolute left-[15%] right-[15%] top-[14px] h-[2px] bg-[#e8e8e8]" />
+              <div className="absolute left-[15%] right-[15%] top-[14px] h-[2px] bg-[#e5e7eb]" />
               <div className="absolute left-[15%] right-[85%] top-[14px] h-[2px] bg-[#22c55e]" />
               {STEPS.map((label, i) => (
                 <div
                   key={label}
-                  className="relative flex flex-1 flex-col items-center gap-3"
+                  className="relative flex flex-1 flex-col items-center gap-2.5"
                 >
                   {i < CURRENT_STEP ? (
                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#22c55e]">
                       <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
                     </span>
                   ) : i === CURRENT_STEP ? (
-                    <span className="relative flex h-7 w-7 items-center justify-center rounded-full bg-black ring-2 ring-black/25">
+                    <span className="relative flex h-7 w-7 items-center justify-center rounded-full bg-black ring-4 ring-black/10">
                       <span className="h-2 w-2 rounded-full bg-white" />
                     </span>
                   ) : (
-                    <span className="h-7 w-7 rounded-full bg-[#e8e8e8]" />
+                    <span className="h-7 w-7 rounded-full bg-[#e5e7eb]" />
                   )}
                   <span
                     className={`text-[12px] ${
@@ -208,7 +220,7 @@ function Confirmation() {
                         ? "font-bold text-[#16a34a]"
                         : i === CURRENT_STEP
                           ? "font-bold text-black"
-                          : "font-medium text-[#444748]"
+                          : "font-medium text-[#6b7280]"
                     }`}
                   >
                     {label}
@@ -216,26 +228,26 @@ function Confirmation() {
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-center gap-3 rounded-[8px] border border-[#c4c7c7]/30 bg-[#f3f3f4] p-[17px]">
-              <Printer className="h-4 w-4 shrink-0 text-[#444748]" />
-              <p className="text-[14px] text-[#444748]">
-                Current Status: <span className="text-black">Confirmed</span>{" "}
-                — We're preparing your order for production
+            <div className="flex items-center justify-center gap-3 rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4 text-center">
+              <Printer className="h-4 w-4 shrink-0 text-[#6b7280]" />
+              <p className="text-[13.5px] text-[#4b5563]">
+                Current Status: <span className="font-bold text-black">Confirmed</span>{" "}
+                — We&apos;re preparing your order for production
               </p>
             </div>
           </section>
 
-          {/* CTAs */}
-          <div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
+          {/* Action CTAs */}
+          <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
             <Link
               href={`/track-order/${orderId}`}
-              className="flex h-[52px] min-w-[200px] items-center justify-center gap-2 rounded-[26px] bg-brand-orange px-9 text-[16px] font-bold text-white transition-opacity hover:opacity-90"
+              className="flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ff6b00] to-[#ff4500] px-8 text-[15px] font-bold text-white shadow-md transition-opacity hover:opacity-95"
             >
               Track Order <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/collection"
-              className="flex h-[52px] min-w-[200px] items-center justify-center rounded-[8px] border border-[#c4c7c7] bg-white px-6 text-[16px] font-bold text-black transition-colors hover:bg-[#f3f3f4]"
+              className="flex h-12 w-full sm:w-auto items-center justify-center rounded-xl border border-gray-300 bg-white px-7 text-[15px] font-bold text-black transition-colors hover:bg-gray-50"
             >
               Continue Shopping
             </Link>

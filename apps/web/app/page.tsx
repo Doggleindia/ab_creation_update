@@ -1,5 +1,6 @@
 import Hero from "@/components/home/Hero";
 import ShopTopCategories from "@/components/home/ShopTopCategories";
+import WhyChooseUsSection from "@/components/home/WhyChooseUsSection";
 import OrderingProcessSection from "@/components/home/OrderingProcessSection";
 import PrintingServicesSection from "@/components/home/PrintingServicesSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
@@ -17,6 +18,7 @@ export default async function Home() {
         <Hero content={content.hero} trust={content.trustBadges} />
       )}
       {visible(content.topCategories) && <ShopTopCategories />}
+      <WhyChooseUsSection />
       {visible(content.orderingProcess) && <OrderingProcessSection />}
       {visible(content.printingServices) && <PrintingServicesSection />}
       {visible(content.testimonials) && (
