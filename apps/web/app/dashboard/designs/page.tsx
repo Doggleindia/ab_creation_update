@@ -128,11 +128,7 @@ export default function SavedDesignsPage() {
                   <p className="truncate text-[13px] text-[#6b7280]">{subtitle(d)}</p>
                   <div className="flex gap-2.5 pt-3">
                     <Link
-                      href={
-                        (d.state as { proEditor?: unknown }).proEditor
-                          ? `/design-editor?draft=${d.id}`
-                          : `/design-studio?draft=${d.id}`
-                      }
+                      href={`/design-studio?draft=${d.id}`}
                       className="flex-1 rounded-[8px] border border-[#c4c7c7] py-2.5 text-center text-[12px] font-bold uppercase tracking-[0.5px] text-black hover:bg-[#f3f4f6]"
                     >
                       Edit
