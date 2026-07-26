@@ -37,6 +37,8 @@ import {
   Lock,
   Sliders
 } from "lucide-react";
+import { SHAPE_DEFS } from "@/lib/studio";
+import { STUDIO_FONTS } from "@/lib/fonts";
 
 // ==========================================
 // INTERFACES & TYPES
@@ -81,7 +83,8 @@ export interface CanvasElement {
   filter?: string; // CSS/canvas filter string, e.g. "grayscale(1)"
 
   // Shape specific
-  shapeType?: "rect" | "circle" | "star" | "triangle" | "heart" | "line" | "arrow" | "hexagon" | "diamond";
+  // Basic shapes plus "glyph:<key>" entries from the shared vector library
+  shapeType?: "rect" | "circle" | "star" | "triangle" | "heart" | "line" | "arrow" | "hexagon" | "diamond" | (string & {});
   fillColor?: string;
 }
 
@@ -113,6 +116,16 @@ const textLayerStyle = (el: CanvasElement): React.CSSProperties => {
 // Inline SVG for shapes shared between preview + interactive canvas.
 const ShapeSvg = ({ el }: { el: CanvasElement }) => {
   const fill = el.fillColor || "#ff5c00";
+  // Vector-library glyphs (shapes + clipart), shared with the print export
+  if (el.shapeType?.startsWith("glyph:")) {
+    const def = SHAPE_DEFS[el.shapeType.slice(6)];
+    if (!def) return null;
+    return (
+      <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+        <path d={def.path} fill={fill} fillRule="evenodd" />
+      </svg>
+    );
+  }
   switch (el.shapeType) {
     case "rect":
       return <div className="w-full h-full" style={{ backgroundColor: fill }} />;
@@ -243,23 +256,13 @@ const PRESET_COLORS = [
   { name: "Mustard Yellow", hex: "#CBAA75" }
 ];
 
-const FONTS = [
-  "Inter",
-  "Outfit",
-  "Roboto",
-  "Playfair Display",
-  "Impact",
-  "Comic Sans MS",
-  "Georgia",
-  "Courier New",
-  "Arial",
-  "Times New Roman",
-  "Verdana",
-  "Trebuchet MS",
-  "Oswald",
-  "Bebas Neue",
-  "Montserrat",
-  "Pacifico"
+// Loaded display faces (self-hosted, render 1:1 in exports) + system stacks.
+const FONTS: { label: string; family: string }[] = [
+  ...Object.values(STUDIO_FONTS).map((f) => ({ label: f.label, family: f.stack })),
+  { label: "Impact", family: "Impact, 'Arial Black', sans-serif" },
+  { label: "Comic Sans", family: "'Comic Sans MS', cursive" },
+  { label: "Verdana", family: "Verdana, sans-serif" },
+  { label: "Trebuchet", family: "'Trebuchet MS', sans-serif" },
 ];
 
 const FONT_WEIGHTS = [300, 400, 500, 600, 700, 800, 900];
@@ -740,7 +743,7 @@ export default function TShirtDesigner({
       content: "Customize Me",
       width: 40,
       height: 12,
-      fontFamily: "Outfit",
+      fontFamily: FONTS[1]?.family ?? "Arial",
       fontSize: 24,
       color: "#FFFFFF",
       bold: true,
@@ -765,22 +768,57 @@ export default function TShirtDesigner({
 
     files.forEach((file) => {
       if (!file.type.startsWith("image/")) return;
-      const url = URL.createObjectURL(file);
-
-      const img = new Image();
-      img.onload = () => {
-        const aspect = img.width / img.height;
-        const width = 35;
-        const height = width / aspect;
-        addElement({
-          type: "image",
-          content: url,
-          width,
-          height: Math.min(height, 50)
-        });
+      // Data URLs (not blob: URLs) so saved drafts survive reloads
+      const reader = new FileReader();
+      reader.onload = () => {
+        const url = reader.result as string;
+        const img = new Image();
+        img.onload = () => {
+          const aspect = img.width / img.height;
+          const width = 35;
+          const height = width / aspect;
+          addElement({
+            type: "image",
+            content: url,
+            width,
+            height: Math.min(height, 50)
+          });
+        };
+        img.src = url;
       };
-      img.src = url;
+      reader.readAsDataURL(file);
     });
+  };
+
+  // Make near-white pixels transparent — the classic logo-on-white-JPG fix
+  // every major design lab offers. Pure canvas, no service calls.
+  const removeWhiteBackground = (id: string, src: string, tolerance: number) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const c = document.createElement("canvas");
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        const cx = c.getContext("2d");
+        if (!cx) return;
+        cx.drawImage(img, 0, 0);
+        const data = cx.getImageData(0, 0, c.width, c.height);
+        const px = data.data;
+        for (let i = 0; i < px.length; i += 4) {
+          if (255 - px[i] <= tolerance && 255 - px[i + 1] <= tolerance && 255 - px[i + 2] <= tolerance) {
+            px[i + 3] = 0;
+          }
+        }
+        cx.putImageData(data, 0, 0);
+        updateElementProperties(id, { content: c.toDataURL("image/png") });
+      } catch (err) {
+        console.error("Background removal failed:", err);
+        alert("Couldn't process this image — try re-uploading it.");
+      }
+    };
+    img.onerror = () => alert("Couldn't load this image for processing.");
+    img.src = src;
   };
 
   // ==========================================
@@ -828,8 +866,30 @@ export default function TShirtDesigner({
     } else if (templateId === "stacked") {
       newEls = [
         { ...base, type: "shape", content: "rect", shapeType: "rect", fillColor: "#ff5c00", x: 15, y: 44, width: 70, height: 6 },
-        { ...base, type: "text", content: "Original", fontFamily: "Playfair Display", fontSize: 30, italic: true, color: "#FFFFFF", align: "center", x: 10, y: 28, width: 80, height: 16 },
-        { ...base, type: "text", content: "CLASSICS", fontFamily: "Oswald", fontSize: 26, color: "#FFFFFF", align: "center", x: 10, y: 54, width: 80, height: 16, letterSpacing: 4 },
+        { ...base, type: "text", content: "Original", fontFamily: STUDIO_FONTS.playfair.stack, fontSize: 30, italic: true, color: "#FFFFFF", align: "center", x: 10, y: 28, width: 80, height: 16 },
+        { ...base, type: "text", content: "CLASSICS", fontFamily: STUDIO_FONTS.oswald.stack, fontSize: 26, color: "#FFFFFF", align: "center", x: 10, y: 54, width: 80, height: 16, letterSpacing: 4 },
+      ];
+    } else if (templateId === "varsity") {
+      newEls = [
+        { ...base, type: "shape", content: "glyph:shield", shapeType: "glyph:shield", fillColor: "#1e3a8a", x: 25, y: 15, width: 50, height: 55 },
+        { ...base, type: "text", content: "VARSITY", fontFamily: STUDIO_FONTS.oswald.stack, fontSize: 26, color: "#FFFFFF", align: "center", x: 20, y: 30, width: 60, height: 14, letterSpacing: 3 },
+        { ...base, type: "text", content: "84", fontFamily: STUDIO_FONTS.anton.stack, fontSize: 40, color: "#FACC15", align: "center", x: 30, y: 44, width: 40, height: 18 },
+      ];
+    } else if (templateId === "retro") {
+      newEls = [
+        { ...base, type: "shape", content: "glyph:sun", shapeType: "glyph:sun", fillColor: "#ff5c00", x: 30, y: 14, width: 40, height: 34 },
+        { ...base, type: "text", content: "RETRO", fontFamily: STUDIO_FONTS.monoton.stack, fontSize: 34, color: "#171717", align: "center", x: 10, y: 52, width: 80, height: 18, letterSpacing: 2 },
+      ];
+    } else if (templateId === "outdoors") {
+      newEls = [
+        { ...base, type: "shape", content: "glyph:mountains", shapeType: "glyph:mountains", fillColor: "#14532D", x: 20, y: 18, width: 60, height: 34 },
+        { ...base, type: "text", content: "WILD OUTDOORS", fontFamily: STUDIO_FONTS.russo.stack, fontSize: 22, color: "#FFFFFF", align: "center", x: 10, y: 56, width: 80, height: 12, letterSpacing: 2 },
+        { ...base, type: "text", content: "explore more", fontFamily: STUDIO_FONTS.caveat.stack, fontSize: 22, color: "#CBAA75", align: "center", x: 20, y: 70, width: 60, height: 12 },
+      ];
+    } else if (templateId === "script") {
+      newEls = [
+        { ...base, type: "text", content: "good vibes", fontFamily: STUDIO_FONTS.lobster.stack, fontSize: 40, color: "#ff5c00", align: "center", x: 10, y: 30, width: 80, height: 22 },
+        { ...base, type: "text", content: "O N L Y", fontFamily: STUDIO_FONTS.bebas.stack, fontSize: 24, color: "#FFFFFF", align: "center", x: 20, y: 56, width: 60, height: 12, letterSpacing: 8 },
       ];
     }
     if (!newEls.length) return;
@@ -1005,6 +1065,12 @@ export default function TShirtDesigner({
   // CANVAS PREVIEW RENDERING & EXPORTS
   // ==========================================
   const renderCanvasToDataURL = async (side: DesignSide): Promise<string> => {
+    // Display faces must be loaded before canvas text draws with them
+    try {
+      await document.fonts.ready;
+    } catch {
+      // font API unavailable — system fallbacks still draw
+    }
     return new Promise((resolve) => {
       const canvas = document.createElement("canvas");
       canvas.width = 1024;
@@ -1219,7 +1285,14 @@ export default function TShirtDesigner({
             }
           } else if (el.type === "shape") {
             ctx.fillStyle = el.fillColor || "#ff5c00";
-            if (el.shapeType === "rect") {
+            if (el.shapeType?.startsWith("glyph:")) {
+              const def = SHAPE_DEFS[el.shapeType.slice(6)];
+              if (def) {
+                ctx.scale(elW / 100, elH / 100);
+                ctx.translate(-50, -50);
+                ctx.fill(new Path2D(def.path), "evenodd");
+              }
+            } else if (el.shapeType === "rect") {
               ctx.fillRect(-elW / 2, -elH / 2, elW, elH);
             } else if (el.shapeType === "circle") {
               ctx.beginPath();
@@ -2059,6 +2132,41 @@ export default function TShirtDesigner({
                             <span className="text-[10px] text-[#6b7280]">{label}</span>
                           </button>
                         ))}
+                        {Object.entries(SHAPE_DEFS)
+                          .filter(([key, d]) => d.category === "shape" && !["square", "circle", "triangle", "star", "heart", "hexagon", "diamond", "arrow"].includes(key))
+                          .map(([key, def]) => (
+                            <button
+                              key={key}
+                              onClick={() => handleAddShape(`glyph:${key}`)}
+                              className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
+                            >
+                              <svg viewBox="0 0 100 100" className="h-5 w-5">
+                                <path d={def.path} fill="#6b7280" fillRule="evenodd" className="group-hover:fill-[#1a1c1c]" />
+                              </svg>
+                              <span className="text-[10px] text-[#6b7280]">{def.label}</span>
+                            </button>
+                          ))}
+                      </div>
+
+                      {/* CLIPART GALLERY */}
+                      <div className="mt-2">
+                        <h4 className="text-sm font-bold text-[#1a1c1c] mb-2">Clipart Gallery</h4>
+                        <div className="grid grid-cols-4 gap-2">
+                          {Object.entries(SHAPE_DEFS)
+                            .filter(([, d]) => d.category === "clipart")
+                            .map(([key, def]) => (
+                              <button
+                                key={key}
+                                onClick={() => handleAddShape(`glyph:${key}`)}
+                                title={def.label}
+                                className="aspect-square flex items-center justify-center rounded-xl border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] p-2.5 transition-all group"
+                              >
+                                <svg viewBox="0 0 100 100" className="h-full w-full">
+                                  <path d={def.path} fill="#6b7280" fillRule="evenodd" className="group-hover:fill-[#ff5c00]" />
+                                </svg>
+                              </button>
+                            ))}
+                        </div>
                       </div>
 
                       {/* STICKERS */}
@@ -2086,6 +2194,10 @@ export default function TShirtDesigner({
                             ["headline", "YOUR BRAND headline"],
                             ["badge", "Circular badge"],
                             ["stacked", "Stacked classics"],
+                            ["varsity", "Varsity shield"],
+                            ["retro", "Retro sunrise"],
+                            ["outdoors", "Wild outdoors"],
+                            ["script", "Good vibes script"],
                           ] as [string, string][]).map(([id, label]) => (
                             <button
                               key={id}
@@ -2398,6 +2510,24 @@ export default function TShirtDesigner({
                               )}
                             </button>
                           ))}
+                          <label
+                            title="Custom garment colour"
+                            className="aspect-square rounded-full border-2 border-dashed border-[#c4c7c7] hover:border-[#ff5c00] transition-all relative cursor-pointer overflow-hidden flex items-center justify-center"
+                            style={{
+                              background: PRESET_COLORS.some((c) => c.hex.toLowerCase() === tshirtColor.toLowerCase())
+                                ? "#ffffff"
+                                : tshirtColor,
+                            }}
+                          >
+                            <Palette className="h-3.5 w-3.5 text-[#6b7280]" />
+                            <input
+                              type="color"
+                              aria-label="Custom garment colour"
+                              value={tshirtColor}
+                              onChange={(e) => setTshirtColor(e.target.value)}
+                              className="absolute inset-0 cursor-pointer opacity-0"
+                            />
+                          </label>
                         </div>
 
                         {/* Custom Hex Color Input */}
@@ -2481,8 +2611,8 @@ export default function TShirtDesigner({
                               className="w-full bg-white border border-[#e5e7eb] focus:border-[#ff5c00] rounded-lg px-2.5 py-2 text-xs font-medium text-[#1a1c1c] outline-none"
                             >
                               {FONTS.map((font) => (
-                                <option key={font} value={font}>
-                                  {font}
+                                <option key={font.label} value={font.family} style={{ fontFamily: font.family }}>
+                                  {font.label}
                                 </option>
                               ))}
                             </select>
@@ -2751,6 +2881,34 @@ export default function TShirtDesigner({
                             </div>
                           </div>
 
+                          {/* BACKGROUND REMOVAL */}
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">
+                              Remove White Background
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {([
+                                ["Light", 18],
+                                ["Medium", 42],
+                                ["Strong", 80],
+                              ] as [string, number][]).map(([label, tol]) => (
+                                <button
+                                  key={label}
+                                  onClick={() =>
+                                    removeWhiteBackground(activeElement.id, activeElement.content, tol)
+                                  }
+                                  className="py-1.5 rounded-lg border border-[#e5e7eb] text-[10px] font-semibold text-[#6b7280] hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all"
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                            <p className="text-[9.5px] leading-3.5 text-[#9ca3af]">
+                              Makes near-white pixels transparent — ideal for logos on
+                              white. Undo restores the original.
+                            </p>
+                          </div>
+
                         </div>
                       )}
 
@@ -2802,6 +2960,30 @@ export default function TShirtDesigner({
                           className={`flex-1 py-2 rounded-lg border text-xs font-semibold transition-all ${activeElement.flipY ? "border-[#ff5c00] text-[#ff5c00] bg-[#ff5c00]/10" : "border-[#e5e7eb] text-[#6b7280] hover:text-black"}`}
                         >
                           Flip V
+                        </button>
+                      </div>
+
+                      {/* Alignment */}
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          onClick={() =>
+                            updateElementProperties(activeElement.id, {
+                              x: Math.max(0, 50 - activeElement.width / 2),
+                            })
+                          }
+                          className="flex-1 py-2 rounded-lg border border-[#e5e7eb] text-xs font-semibold text-[#6b7280] hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all"
+                        >
+                          Center H
+                        </button>
+                        <button
+                          onClick={() =>
+                            updateElementProperties(activeElement.id, {
+                              y: Math.max(0, 50 - activeElement.height / 2),
+                            })
+                          }
+                          className="flex-1 py-2 rounded-lg border border-[#e5e7eb] text-xs font-semibold text-[#6b7280] hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all"
+                        >
+                          Center V
                         </button>
                       </div>
 

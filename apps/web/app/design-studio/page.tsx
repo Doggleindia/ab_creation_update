@@ -9,6 +9,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import TShirtDesigner from "@/components/studio/TShirtDesigner";
 import { getDesign, upsertDesign } from "@/lib/designs";
+import { studioFontClasses } from "@/lib/fonts";
 import { newId, type El } from "@/lib/studio";
 
 const BACKEND = (process.env.NEXT_PUBLIC_MAIN_BACKEND ?? "").replace(/\/$/, "");
@@ -144,7 +145,7 @@ function DesignStudio() {
   if (!ready) return <div className="min-h-[70vh] bg-[#eef0f2]" />;
 
   return (
-    <div className="min-h-[70vh] bg-[#eef0f2]">
+    <div className={`min-h-[70vh] bg-[#eef0f2] ${studioFontClasses}`}>
       <TShirtDesigner
         isOpen
         onClose={() => router.push("/collection")}
