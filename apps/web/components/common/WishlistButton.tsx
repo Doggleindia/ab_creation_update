@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   type WishlistItem,
   inWishlist,
@@ -27,7 +28,7 @@ export default function WishlistButton({
   }, [item.slug]);
 
   return (
-    <button
+    <Button
       aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
       onClick={(e) => {
         e.preventDefault();
@@ -40,6 +41,6 @@ export default function WishlistButton({
           saved ? "fill-[#dc2626] text-[#dc2626]" : "text-[#1b1c1b]"
         }`}
       />
-    </button>
+    </Button>
   );
 }

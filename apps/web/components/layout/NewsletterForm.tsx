@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const BACKEND = (process.env.NEXT_PUBLIC_MAIN_BACKEND ?? "").replace(/\/$/, "");
 
@@ -50,13 +51,13 @@ export default function NewsletterForm() {
           aria-label="Email address"
           className="w-[179px] rounded-md border border-[#e2bfb0] bg-[#eae8e6]/10 px-4 py-2 text-[15px] text-white placeholder:text-brand-muted focus:outline-none focus:ring-1 focus:ring-brand-orange"
         />
-        <button
+        <Button
           type="submit"
           disabled={status === "sending"}
           className="rounded-md bg-brand-rust px-4 py-2 text-[16px] text-white transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {status === "sending" ? "…" : "Join"}
-        </button>
+        </Button>
       </div>
       {status === "err" && (
         <p className="text-[12px] text-[#fca5a5]">

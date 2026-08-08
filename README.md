@@ -1,6 +1,6 @@
-# KT Adhesives
+# AB Creation
 
-Monorepo for the KT Adhesives platform — a custom apparel/printing e-commerce
+Monorepo for the AB Creation platform — a custom apparel/printing e-commerce
 storefront, its admin panel, and the shared backend API.
 
 ## Structure
@@ -11,11 +11,11 @@ apps/
 ├── web/       Next.js 16 customer storefront
 └── admin/     React + Vite admin dashboard
 packages/
-└── types/     @kt/types — shared TypeScript domain types
+└── types/     @ab-creation/types — shared TypeScript domain types
 ```
 
 This is an **npm workspaces** monorepo: a single `npm install` at the root
-installs every app and links the shared `@kt/types` package. Each app still has
+installs every app and links the shared `@ab-creation/types` package. Each app still has
 its own build and deploy config (Dockerfiles included) and deploys independently.
 
 ## Getting started

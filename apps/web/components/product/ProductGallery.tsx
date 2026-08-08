@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import WishlistButton from "@/components/common/WishlistButton";
 import type { WishlistItem } from "@/lib/wishlist";
+import { Button } from "@/components/ui/button";
 
 export default function ProductGallery({
   images,
@@ -42,7 +43,7 @@ export default function ProductGallery({
       {/* 6 Thumbnails Grid */}
       <div className="grid grid-cols-6 gap-2">
         {gallery.map((img, i) => (
-          <button
+          <Button
             key={i}
             onClick={() => setActive(i)}
             aria-label={`View image ${i + 1}`}
@@ -59,7 +60,7 @@ export default function ProductGallery({
               className="object-cover p-1"
               sizes="80px"
             />
-          </button>
+          </Button>
         ))}
       </div>
     </div>

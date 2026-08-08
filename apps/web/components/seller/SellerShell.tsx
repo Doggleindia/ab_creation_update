@@ -37,10 +37,12 @@ export default function SellerShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [state, setState] = useState<"checking" | "ok" | "not-seller">(
-    "checking",
-  );
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [state] = useState<"checking" | "ok" | "not-seller">(() => {
+    if (!getToken()) return "checking";
+    const u = getUser();
+    return u?.accountType === "seller" ? "ok" : "not-seller";
+  });
+  const [user] = useState<AuthUser | null>(() => getToken() ? getUser() : null);
   const [productCount, setProductCount] = useState<number | null>(null);
   const [query, setQuery] = useState("");
 
@@ -49,9 +51,6 @@ export default function SellerShell({
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
-    const u = getUser();
-    setUser(u);
-    setState(u?.accountType === "seller" ? "ok" : "not-seller");
   }, [router, pathname]);
 
   useEffect(() => {

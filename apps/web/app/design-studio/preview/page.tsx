@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { addToCart } from "@/lib/cart";
 import { studioFontClasses } from "@/lib/fonts";
+import { Button } from "@/components/ui/button";
 import {
   type El,
   FONTS,
@@ -178,42 +179,38 @@ function Tee({
 
 export default function PreviewOrderPage() {
   const router = useRouter();
-  const [design, setDesign] = useState<DesignState>(FALLBACK);
-  const [size, setSize] = useState("M");
-  const [qty, setQty] = useState(1);
-  const [view, setView] = useState<View>("front");
-  const [copied, setCopied] = useState(false);
-  const [composite, setComposite] = useState<string | null>(null);
-
-  useEffect(() => {
+  const [design] = useState<DesignState>(() => {
+    if (typeof window === "undefined") return FALLBACK;
     try {
       const raw =
         localStorage.getItem("ab:design") ?? sessionStorage.getItem("ab:design");
-      if (raw) {
-        const d = { ...FALLBACK, ...JSON.parse(raw) } as DesignState;
-        setDesign(d);
-        // Team orders: one piece per roster entry
-        if (d.roster?.length) setQty(d.roster.length);
-      }
+      if (raw) return { ...FALLBACK, ...JSON.parse(raw) } as DesignState;
     } catch {
       // fall through to defaults
     }
-  }, []);
+    return FALLBACK;
+  });
+  const [size, setSize] = useState("M");
+  const [qty, setQty] = useState(() => design.roster?.length || 1);
+  const [view, setView] = useState<View>("front");
+  const [copied, setCopied] = useState(false);
+  const [compositeUrl, setCompositeUrl] = useState<string | null>(null);
 
   // Flatten the design into the real print file (transparent PNG)
   useEffect(() => {
     let cancelled = false;
     if (design.els?.length) {
       compositeDesign(design.els).then((url) => {
-        if (!cancelled) setComposite(url);
+        if (!cancelled) setCompositeUrl(url);
       });
-    } else {
-      setComposite(design.image);
     }
     return () => {
       cancelled = true;
     };
   }, [design]);
+
+  // Derive composite: async result when elements exist, otherwise design.image
+  const composite = design.els?.length ? compositeUrl : (design.image ?? null);
 
   const garmentCost = design.product?.price ?? GARMENT_COST;
   const fullUnit = garmentCost + PRINTING_COST + CUSTOMIZATION_FEE;
@@ -298,12 +295,12 @@ export default function PreviewOrderPage() {
           >
             <HelpCircle className="h-5 w-5" />
           </Link>
-          <button
+          <Button
             onClick={addAndCheckout}
             className="rounded-full bg-brand-orange px-5 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
           >
             Add to Cart
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -341,7 +338,7 @@ export default function PreviewOrderPage() {
 
             <div className="mt-4 flex gap-4">
               {THUMBS.map((t) => (
-                <button
+                <Button
                   key={t.id}
                   onClick={() => setView(t.id)}
                   title={t.label}
@@ -378,7 +375,7 @@ export default function PreviewOrderPage() {
                       }}
                     />
                   )}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -460,7 +457,7 @@ export default function PreviewOrderPage() {
               </div>
               <div className="mt-3 flex flex-wrap gap-3">
                 {SIZES.map((s) => (
-                  <button
+                  <Button
                     key={s}
                     onClick={() => setSize(s)}
                     className={`flex h-12 w-12 items-center justify-center rounded-[8px] text-[14px] font-semibold ${
@@ -470,7 +467,7 @@ export default function PreviewOrderPage() {
                     }`}
                   >
                     {s}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -512,23 +509,23 @@ export default function PreviewOrderPage() {
                 </p>
               ) : (
                 <div className="mt-3 flex w-fit items-center rounded-[8px] border border-[#c4c7c7]">
-                  <button
+                  <Button
                     aria-label="Decrease quantity"
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
                     className="flex h-10 w-10 items-center justify-center text-black"
                   >
                     <Minus className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                   <span className="w-10 text-center text-[15px] font-medium text-black">
                     {qty}
                   </span>
-                  <button
+                  <Button
                     aria-label="Increase quantity"
                     onClick={() => setQty((q) => q + 1)}
                     className="flex h-10 w-10 items-center justify-center text-black"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -569,12 +566,12 @@ export default function PreviewOrderPage() {
             </div>
 
             {/* CTA */}
-            <button
+            <Button
               onClick={addAndCheckout}
               className="mt-8 w-full rounded-full bg-brand-orange py-4 text-[18px] font-bold text-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.05)] transition-opacity hover:opacity-90"
             >
               Add to Cart
-            </button>
+            </Button>
 
             {/* Share */}
             <div className="mt-10 flex flex-col items-center gap-4">
@@ -582,14 +579,14 @@ export default function PreviewOrderPage() {
                 Share this design
               </p>
               <div className="flex gap-4">
-                <button
+                <Button
                   aria-label="Copy link"
                   onClick={copyLink}
                   title={copied ? "Copied!" : "Copy link"}
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-[#c4c7c7] text-black hover:bg-[#f3f3f4]"
                 >
                   <Copy className="h-4 w-4" />
-                </button>
+                </Button>
                 <a
                   aria-label="Share on WhatsApp"
                   href={`https://wa.me/?text=${encodeURIComponent(`Check out my custom ${productTitle} design on AB Creation!`)}`}

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export type FilterOption = { label: string; value: string };
 
@@ -48,7 +49,7 @@ export default function FilterDropdown({
 
   return (
     <div className="relative" ref={ref}>
-      <button
+      <Button
         onClick={() => setOpen((v) => !v)}
         className={`flex h-[38px] items-center gap-1.5 rounded-full border px-4 font-poppins text-[14px] tracking-[0.14px] transition-colors ${
           current
@@ -58,11 +59,11 @@ export default function FilterDropdown({
       >
         {activeLabel ?? label}
         <ChevronDown className="h-3 w-3" />
-      </button>
+      </Button>
       {open && (
         <div className="absolute left-0 top-11 z-50 min-w-[180px] rounded-lg border border-[#e9e9e9] bg-white py-1 shadow-lg">
           {options.map((o) => (
-            <button
+            <Button
               key={o.value}
               onClick={() => select(o.value)}
               className="flex w-full items-center justify-between px-4 py-2 text-left text-[14px] text-[#1b1c1b] hover:bg-[#f5f1ea]"
@@ -71,7 +72,7 @@ export default function FilterDropdown({
               {current === o.value && (
                 <Check className="h-4 w-4 text-[#a04100]" />
               )}
-            </button>
+            </Button>
           ))}
         </div>
       )}

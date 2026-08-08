@@ -1,10 +1,10 @@
 /**
- * Shared domain types for the KT Adhesives platform.
+ * Shared domain types for the AB Creation platform.
  *
  * These describe the core entities exchanged between the backend API, the
  * storefront (web), and the admin panel. Import them as TYPES only, e.g.:
  *
- *   import type { Order, Product } from "@kt/types";
+ *   import type { Order, Product } from "@ab-creation/types";
  */
 
 // ---- Enums / unions ----

@@ -37,12 +37,19 @@ function DesignStudio() {
   const params = useSearchParams();
   const draftParam = params.get("draft");
   const productSlug = params.get("product");
-  const [draftId, setDraftId] = useState<string | null>(null);
-  const [initialState, setInitialState] = useState<unknown>(undefined);
+  const [draftId, setDraftId] = useState<string | null>(() => {
+    if (typeof window === "undefined" || !draftParam) return null;
+    const saved = getDesign(draftParam);
+    const pro = (saved?.state as { proEditor?: unknown } | undefined)?.proEditor;
+    return saved && pro ? saved.id : null;
+  });
+  const [initialState] = useState<Record<string, unknown> | undefined>(() => {
+    if (typeof window === "undefined" || !draftParam) return undefined;
+    const saved = getDesign(draftParam);
+    return (saved?.state as { proEditor?: Record<string, unknown> } | undefined)?.proEditor ?? undefined;
+  });
   const [product, setProduct] = useState<ProductContext | null>(null);
-  const [ready, setReady] = useState(false);
-
-  // Product context (?product=<slug>) so the order carries the real garment
+  const ready = true;
   useEffect(() => {
     if (!productSlug || !BACKEND) return;
     let cancelled = false;
@@ -72,18 +79,7 @@ function DesignStudio() {
     };
   }, [productSlug]);
 
-  // Draft re-editing (?draft=<id>): restore the exact editor state
-  useEffect(() => {
-    if (draftParam) {
-      const saved = getDesign(draftParam);
-      const pro = (saved?.state as { proEditor?: unknown } | undefined)?.proEditor;
-      if (saved && pro) {
-        setDraftId(saved.id);
-        setInitialState(pro);
-      }
-    }
-    setReady(true);
-  }, [draftParam]);
+
 
   async function handleSave(previews: Previews, editorState: unknown) {
     // Each exported side becomes a full-bleed image layer, so the order

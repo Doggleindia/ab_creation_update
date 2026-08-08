@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const FAQS = [
   {
@@ -41,7 +42,7 @@ export default function FaqSection() {
               key={f.q}
               className="rounded-[8px] border border-[#e5e7eb] bg-white"
             >
-              <button
+              <Button
                 onClick={() => setOpen(open === i ? null : i)}
                 className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               >
@@ -53,7 +54,7 @@ export default function FaqSection() {
                 ) : (
                   <Plus className="h-4 w-4 shrink-0 text-[#6b7280]" />
                 )}
-              </button>
+              </Button>
               {open === i && (
                 <p className="px-6 pb-5 text-[14px] leading-6 text-[#6b7280]">
                   {f.a}

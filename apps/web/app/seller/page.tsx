@@ -75,7 +75,7 @@ export default function SellerOverviewPage() {
   const inReview = subs.filter((s) => s.status !== "approved").length;
 
   // Top performers over the last 30 days
-  const cutoff = Date.now() - 30 * 86400000;
+  const [cutoff] = useState(() => Date.now() - 30 * 86400000);
   const perf = new Map<string, { title: string; image?: string; sales: number; revenue: number }>();
   for (const o of paid) {
     if (!o.createdAt || new Date(o.createdAt).getTime() < cutoff) continue;

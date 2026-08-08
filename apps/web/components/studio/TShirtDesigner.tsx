@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,7 +15,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  Download,
+
   Save,
   Trash2,
   Copy,
@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { SHAPE_DEFS } from "@/lib/studio";
 import { STUDIO_FONTS } from "@/lib/fonts";
+import { Button } from "@/components/ui/button";
 
 // ==========================================
 // INTERFACES & TYPES
@@ -241,8 +242,8 @@ export type DesignSide = "front" | "back";
 interface TShirtDesignerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (previews: { front?: string; back?: string }, editorState: any) => void;
-  initialState?: any;
+  onSave: (previews: { front?: string; back?: string }, editorState: Record<string, unknown>) => void;
+  initialState?: Record<string, unknown>;
 }
 
 const PRESET_COLORS = [
@@ -513,11 +514,11 @@ export default function TShirtDesigner({
   // ==========================================
   useEffect(() => {
     if (initialState) {
-      if (initialState.elements) setElements(initialState.elements);
-      if (initialState.color) setTshirtColor(initialState.color);
+      if (initialState.elements) setElements(initialState.elements as { front: CanvasElement[]; back: CanvasElement[]; });
+      if (initialState.color) setTshirtColor(initialState.color as string);
       if (Array.isArray(initialState.roster)) setRoster(initialState.roster);
       if (initialState.designerSide) {
-        setDesignerSide(initialState.designerSide);
+        setDesignerSide(initialState.designerSide as "front" | "back");
         setCurrentSide(initialState.designerSide === "back" ? "back" : "front");
         setShowSelector(false);
       }
@@ -947,7 +948,7 @@ export default function TShirtDesigner({
     e: React.MouseEvent | React.TouchEvent,
     element: CanvasElement,
     type: "drag" | "resize" | "rotate",
-    handle?: string
+    _handle?: string
   ) => {
     e.stopPropagation();
     setSelectedElementId(element.id);
@@ -1065,7 +1066,7 @@ export default function TShirtDesigner({
 
   const handleInteractionEnd = () => {
     if (interactionRef.current) {
-      const inter = interactionRef.current;
+      const _inter = interactionRef.current;
       // Commit final values into react history
       const updatedElements = elements[currentSide];
       pushToHistory(updatedElements, currentSide);
@@ -1462,8 +1463,8 @@ export default function TShirtDesigner({
       const doc = new jsPDF("p", "mm", "a4");
 
       // Colors
-      const orangeColor = "#ff5c00";
-      const slate900 = "#171717";
+      const _orangeColor = "#ff5c00";
+      const _slate900 = "#171717";
 
       // 1. BRANDING HEADER
       doc.setFillColor(15, 23, 42); // Slate 900
@@ -1572,7 +1573,7 @@ export default function TShirtDesigner({
       const hasFront = elements.front.length > 0 || designerSide === "front" || designerSide === "both";
       const hasBack = elements.back.length > 0 || designerSide === "back" || designerSide === "both";
 
-      let finalMockupHeight = 90;
+      const _finalMockupHeight = 90;
       let visualEndY = 191;
 
       if (hasFront && hasBack) {
@@ -1704,7 +1705,7 @@ export default function TShirtDesigner({
       // Collect assets from both sides
       const allElements: { side: string; type: string; specs: string }[] = [];
 
-      elements.front.forEach((el, index) => {
+      elements.front.forEach((el, _index) => {
         let specs = "";
         if (el.type === "text") {
           specs = `Content: "${el.content}" | Font: ${el.fontFamily || "Outfit"} | Color: ${el.color} | Size: ${el.fontSize || 24}pt`;
@@ -1716,7 +1717,7 @@ export default function TShirtDesigner({
         allElements.push({ side: "FRONT (CHEST)", type: el.type.toUpperCase(), specs });
       });
 
-      elements.back.forEach((el, index) => {
+      elements.back.forEach((el, _index) => {
         let specs = "";
         if (el.type === "text") {
           specs = `Content: "${el.content}" | Font: ${el.fontFamily || "Outfit"} | Color: ${el.color} | Size: ${el.fontSize || 24}pt`;
@@ -1939,12 +1940,12 @@ export default function TShirtDesigner({
             className="flex min-h-screen items-center justify-center p-4 bg-white/80 backdrop-blur-md"
           >
             <div className="relative w-full max-w-4xl rounded-3xl border border-[#e5e7eb] bg-[#eef0f2] p-8 shadow-2xl md:p-12">
-              <button
+              <Button
                 onClick={onClose}
                 className="absolute top-6 right-6 rounded-full p-2 text-[#6b7280] hover:bg-[#eeeff1] hover:text-[#1a1c1c] transition-all"
               >
                 <X className="h-6 w-6" />
-              </button>
+              </Button>
 
               <div className="text-center mb-10">
                 <span className="text-xs font-semibold uppercase tracking-widest text-[#ff5c00]">Custom Playground</span>
@@ -2016,12 +2017,12 @@ export default function TShirtDesigner({
             {/* 1. TOP TOOLBAR WITH GLASSMORPHISM */}
             <header className="flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white/80 px-6 backdrop-blur-md sticky top-0 z-50">
               <div className="flex items-center gap-4">
-                <button
+                <Button
                   onClick={() => setShowSelector(true)}
                   className="flex items-center gap-1.5 text-xs text-[#6b7280] hover:text-[#1a1c1c] transition-all font-medium"
                 >
                   <Palette className="h-4 w-4" /> Reset Sides
-                </button>
+                </Button>
                 <div className="h-4 w-[1px] bg-[#eeeff1]" />
                 <span className="text-sm font-semibold tracking-wide text-[#1a1c1c]">
                   Custom T-Shirt Studio
@@ -2031,7 +2032,7 @@ export default function TShirtDesigner({
               {/* Side toggling switcher (front/back) if Front & Back was selected */}
               {designerSide === "both" && (
                 <div className="flex items-center rounded-lg bg-white p-1 border border-[#e5e7eb]">
-                  <button
+                  <Button
                     onClick={() => {
                       setCurrentSide("front");
                       setSelectedElementId(null);
@@ -2040,8 +2041,8 @@ export default function TShirtDesigner({
                       }`}
                   >
                     Front Design
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {
                       setCurrentSide("back");
                       setSelectedElementId(null);
@@ -2050,7 +2051,7 @@ export default function TShirtDesigner({
                       }`}
                   >
                     Back Design
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -2058,64 +2059,64 @@ export default function TShirtDesigner({
               <div className="flex items-center gap-3">
                 {/* Undo / Redo */}
                 <div className="flex items-center rounded-lg bg-white border border-[#e5e7eb] p-0.5">
-                  <button
+                  <Button
                     onClick={handleUndo}
                     disabled={historyIndex[currentSide] <= 0}
                     className="p-1.5 rounded text-[#6b7280] hover:text-[#1a1c1c] hover:bg-[#eeeff1] disabled:opacity-30 disabled:pointer-events-none transition-all"
                     title="Undo"
                   >
                     <Undo2 className="h-4 w-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleRedo}
                     disabled={historyIndex[currentSide] >= history[currentSide].length - 1}
                     className="p-1.5 rounded text-[#6b7280] hover:text-[#1a1c1c] hover:bg-[#eeeff1] disabled:opacity-30 disabled:pointer-events-none transition-all"
                     title="Redo"
                   >
                     <Redo2 className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Preview */}
-                <button
+                <Button
                   onClick={() => setIsPreviewModalOpen(true)}
                   className="flex items-center gap-1.5 rounded-lg border border-[#ff5c00]/40 bg-[#ff5c00]/10 px-3.5 py-1.5 text-xs font-semibold text-[#ff5c00] hover:bg-[#ff5c00]/20 hover:border-[#ff5c00] transition-all shadow-md shadow-[#ff5c00]/5"
                 >
                   <Eye className="h-3.5 w-3.5" /> Preview Design
-                </button>
+                </Button>
 
                 {/* Export PDF */}
-                <button
+                <Button
                   onClick={handleExportPDF}
                   className="flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#374151] hover:border-[#c4c7c7] hover:text-[#1a1c1c] hover:bg-[#eeeff1] transition-all shadow-md"
                   title="Export High-Fidelity Design PDF Sheet"
                 >
                   <FileDown className="h-3.5 w-3.5 text-[#ff5c00]" /> Export PDF Spec
-                </button>
+                </Button>
 
                 {/* Export SVG */}
-                <button
+                <Button
                   onClick={handleExportSVG}
                   className="flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#374151] hover:border-[#c4c7c7] hover:text-[#1a1c1c] hover:bg-[#eeeff1] transition-all shadow-md"
                   title="Export the current side's print layers as vector SVG"
                 >
                   <FileDown className="h-3.5 w-3.5 text-[#ff5c00]" /> SVG
-                </button>
+                </Button>
 
                 {/* Finish & Save */}
-                <button
+                <Button
                   onClick={handleSaveDesign}
                   className="flex items-center gap-1.5 rounded-lg bg-[#ff5c00] px-4 py-1.5 text-xs font-bold text-white hover:bg-[#ff5c00] transition-all shadow-lg shadow-[#ff5c00]/20"
                 >
                   <Save className="h-3.5 w-3.5" /> Save Design
-                </button>
+                </Button>
 
-                <button
+                <Button
                   onClick={onClose}
                   className="rounded-full p-1.5 text-[#6b7280] hover:bg-[#eeeff1] hover:text-[#1a1c1c] transition-all ml-1"
                 >
                   <X className="h-5 w-5" />
-                </button>
+                </Button>
               </div>
             </header>
 
@@ -2126,43 +2127,43 @@ export default function TShirtDesigner({
               <aside className="w-[84px] md:w-[300px] flex flex-col md:flex-row border-r border-[#e5e7eb] bg-[#eef0f2]">
                 {/* Mini icon navigation */}
                 <div className="flex flex-col gap-4 border-b md:border-b-0 md:border-r border-[#e5e7eb] p-3 items-center w-full md:w-[72px]">
-                  <button
+                  <Button
                     onClick={() => setActiveTab("upload")}
                     className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "upload" ? "bg-[#ff5c00]/10 text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                       }`}
                   >
                     <Upload className="h-5 w-5" />
                     <span className="text-[10px] font-medium hidden md:block">Upload</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     onClick={() => setActiveTab("text")}
                     className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "text" ? "bg-[#ff5c00]/10 text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                       }`}
                   >
                     <Type className="h-5 w-5" />
                     <span className="text-[10px] font-medium hidden md:block">Text</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     onClick={() => setActiveTab("shapes")}
                     className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "shapes" ? "bg-[#ff5c00]/10 text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                       }`}
                   >
                     <Square className="h-5 w-5" />
                     <span className="text-[10px] font-medium hidden md:block">Shapes</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     onClick={() => setActiveTab("layers")}
                     className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "layers" ? "bg-[#ff5c00]/10 text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                       }`}
                   >
                     <Layers className="h-5 w-5" />
                     <span className="text-[10px] font-medium hidden md:block">Layers</span>
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     onClick={() => setActiveTab("team")}
                     className={`flex flex-col items-center gap-1 p-2 rounded-xl w-full text-center transition-all ${activeTab === "team" ? "bg-[#ff5c00]/10 text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                       }`}
@@ -2171,7 +2172,7 @@ export default function TShirtDesigner({
                     <span className="text-[10px] font-medium hidden md:block">
                       Team{roster.length > 0 ? ` (${roster.length})` : ""}
                     </span>
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Sub Panel Details */}
@@ -2226,12 +2227,12 @@ export default function TShirtDesigner({
                   {activeTab === "text" && (
                     <div className="flex flex-col gap-4">
                       <h4 className="text-sm font-bold text-[#1a1c1c]">Typography Tools</h4>
-                      <button
+                      <Button
                         onClick={handleAddText}
                         className="w-full py-2.5 rounded-lg bg-white border border-[#e5e7eb] text-[#1a1c1c] font-bold hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all text-xs flex items-center justify-center gap-1.5"
                       >
                         <Plus className="h-4 w-4" /> Add Text Layer
-                      </button>
+                      </Button>
                       <p className="text-[10px] text-[#9ca3af] leading-normal">
                         Clicking the button inserts a customizable typography layer to your active canvas side. Use the right settings panel to control formatting.
                       </p>
@@ -2243,60 +2244,60 @@ export default function TShirtDesigner({
                     <div className="flex flex-col gap-4">
                       <h4 className="text-sm font-bold text-[#1a1c1c]">Shapes Suite</h4>
                       <div className="grid grid-cols-2 gap-2.5">
-                        <button
+                        <Button
                           onClick={() => handleAddShape("rect")}
                           className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Square className="h-5 w-5 text-[#6b7280] group-hover:text-[#1a1c1c]" />
                           <span className="text-[10px] text-[#6b7280]">Rectangle</span>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleAddShape("circle")}
                           className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Circle className="h-5 w-5 text-[#6b7280] group-hover:text-[#1a1c1c]" />
                           <span className="text-[10px] text-[#6b7280]">Circle</span>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleAddShape("star")}
                           className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Star className="h-5 w-5 text-[#6b7280] group-hover:text-[#1a1c1c]" />
                           <span className="text-[10px] text-[#6b7280]">Star</span>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleAddShape("triangle")}
                           className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <TriangleIcon className="h-5 w-5 text-[#6b7280] group-hover:text-[#1a1c1c]" />
                           <span className="text-[10px] text-[#6b7280]">Triangle</span>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleAddShape("heart")}
                           className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
                         >
                           <Heart className="h-5 w-5 text-[#6b7280] group-hover:text-[#1a1c1c]" />
                           <span className="text-[10px] text-[#6b7280]">Heart</span>
-                        </button>
+                        </Button>
                         {([
                           ["diamond", "◆", "Diamond"],
                           ["hexagon", "⬢", "Hexagon"],
                           ["line", "▬", "Line"],
                           ["arrow", "➜", "Arrow"],
                         ] as [NonNullable<CanvasElement["shapeType"]>, string, string][]).map(([type, glyph, label]) => (
-                          <button
+                          <Button
                             key={type}
                             onClick={() => handleAddShape(type)}
                             className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
                           >
                             <span className="text-lg leading-none text-[#6b7280] group-hover:text-[#1a1c1c]">{glyph}</span>
                             <span className="text-[10px] text-[#6b7280]">{label}</span>
-                          </button>
+                          </Button>
                         ))}
                         {Object.entries(SHAPE_DEFS)
                           .filter(([key, d]) => d.category === "shape" && !["square", "circle", "triangle", "star", "heart", "hexagon", "diamond", "arrow"].includes(key))
                           .map(([key, def]) => (
-                            <button
+                            <Button
                               key={key}
                               onClick={() => handleAddShape(`glyph:${key}`)}
                               className="flex flex-col items-center justify-center border border-[#e5e7eb] hover:border-[#ff5c00] bg-white/70 rounded-xl p-3.5 gap-2 transition-all group"
@@ -2305,7 +2306,7 @@ export default function TShirtDesigner({
                                 <path d={def.path} fill="#6b7280" fillRule="evenodd" className="group-hover:fill-[#1a1c1c]" />
                               </svg>
                               <span className="text-[10px] text-[#6b7280]">{def.label}</span>
-                            </button>
+                            </Button>
                           ))}
                       </div>
 
@@ -2316,7 +2317,7 @@ export default function TShirtDesigner({
                           {Object.entries(SHAPE_DEFS)
                             .filter(([, d]) => d.category === "clipart")
                             .map(([key, def]) => (
-                              <button
+                              <Button
                                 key={key}
                                 onClick={() => handleAddShape(`glyph:${key}`)}
                                 title={def.label}
@@ -2326,7 +2327,7 @@ export default function TShirtDesigner({
                                   <path d={def.path} fill="#6b7280" fillRule="evenodd" className="group-hover:fill-[#ff5c00]" />
                                 </svg>
                                 <span className="text-[10px] leading-tight text-[#6b7280] group-hover:text-[#1a1c1c] truncate w-full text-center">{def.label}</span>
-                              </button>
+                              </Button>
                             ))}
                         </div>
                       </div>
@@ -2336,14 +2337,14 @@ export default function TShirtDesigner({
                         <h4 className="text-sm font-bold text-[#1a1c1c] mb-2">Stickers</h4>
                         <div className="grid grid-cols-4 gap-2">
                           {STICKERS.map((emoji) => (
-                            <button
+                            <Button
                               key={emoji}
                               onClick={() => handleAddSticker(emoji)}
                               className="aspect-square flex items-center justify-center rounded-lg border border-[#e5e7eb] bg-white/70 hover:border-[#ff5c00] text-2xl leading-none transition-all"
                               title="Add sticker"
                             >
                               {emoji}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       </div>
@@ -2361,13 +2362,13 @@ export default function TShirtDesigner({
                             ["outdoors", "Wild outdoors"],
                             ["script", "Good vibes script"],
                           ] as [string, string][]).map(([id, label]) => (
-                            <button
+                            <Button
                               key={id}
                               onClick={() => applyTemplate(id)}
                               className="w-full py-2 rounded-lg bg-white border border-[#e5e7eb] text-[#374151] hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all text-xs"
                             >
                               {label}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       </div>
@@ -2422,7 +2423,7 @@ export default function TShirtDesigner({
                                 )}
                               </div>
                               <div className="flex items-center gap-1">
-                                <button
+                                <Button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     updateElementProperties(el.id, { hidden: !el.hidden });
@@ -2431,8 +2432,8 @@ export default function TShirtDesigner({
                                   title={el.hidden ? "Show" : "Hide"}
                                 >
                                   <Eye className="h-3 w-3" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     updateElementProperties(el.id, { locked: !el.locked });
@@ -2441,8 +2442,8 @@ export default function TShirtDesigner({
                                   title={el.locked ? "Unlock" : "Lock"}
                                 >
                                   <Lock className="h-3 w-3" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     deleteElement(el.id);
@@ -2450,7 +2451,7 @@ export default function TShirtDesigner({
                                   className="p-1 hover:text-red-500 rounded text-[#9ca3af]"
                                 >
                                   <Trash2 className="h-3 w-3" />
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           ))}
@@ -2498,22 +2499,22 @@ export default function TShirtDesigner({
                                 <option key={s}>{s}</option>
                               ))}
                             </select>
-                            <button
+                            <Button
                               aria-label="Remove row"
                               onClick={() => setRoster((rows) => rows.filter((_, j) => j !== i))}
                               className="p-1 rounded text-[#9ca3af] hover:text-red-500"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
-                            </button>
+                            </Button>
                           </div>
                         ))}
                       </div>
-                      <button
+                      <Button
                         onClick={() => setRoster((rows) => [...rows, { name: "", number: "", size: "M" }])}
                         className="flex items-center gap-1.5 w-fit text-xs font-bold text-[#ff5c00] hover:underline"
                       >
                         <Plus className="h-3.5 w-3.5" /> Add person
-                      </button>
+                      </Button>
                       {roster.length > 0 && (
                         <p className="text-[10.5px] leading-4 text-[#9ca3af]">
                           Tip: put a sample name &amp; number on the canvas so the
@@ -2531,23 +2532,23 @@ export default function TShirtDesigner({
 
                 {/* Zoom indicator / scale buttons overlay */}
                 <div className="absolute bottom-6 left-6 flex items-center rounded-xl bg-[#eef0f2] border border-[#e5e7eb] shadow-xl p-1 z-35 gap-1">
-                  <button
+                  <Button
                     onClick={() => setZoom(Math.max(0.6, zoom - 0.15))}
                     className="p-2 text-[#6b7280] hover:text-[#1a1c1c] rounded-lg hover:bg-white transition-all"
                   >
                     <ZoomOut className="h-4 w-4" />
-                  </button>
+                  </Button>
                   <span className="text-xs font-bold text-[#374151] w-12 text-center select-none">
                     {Math.round(zoom * 100)}%
                   </span>
-                  <button
+                  <Button
                     onClick={() => setZoom(Math.min(1.8, zoom + 0.15))}
                     className="p-2 text-[#6b7280] hover:text-[#1a1c1c] rounded-lg hover:bg-white transition-all"
                   >
                     <ZoomIn className="h-4 w-4" />
-                  </button>
+                  </Button>
                   <div className="h-4 w-[1px] bg-[#eeeff1]" />
-                  <button
+                  <Button
                     onClick={() => {
                       setZoom(1);
                       setElements((prev) => ({ ...prev, [currentSide]: [] }));
@@ -2559,7 +2560,7 @@ export default function TShirtDesigner({
                     title="Reset Canvas Elements"
                   >
                     <RotateCcw className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
 
                 {/* THE T-SHIRT INTERACTIVE CONTAINER */}
@@ -2677,35 +2678,35 @@ export default function TShirtDesigner({
                                 className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex items-center bg-[#eef0f2] border border-[#e5e7eb] rounded-md shadow-2xl p-0.5 z-[99] gap-0.5 text-[10px]"
                                 onMouseDown={(e) => e.stopPropagation()} // stop canvas select trigger
                               >
-                                <button
+                                <Button
                                   onClick={() => duplicateElement(el.id)}
                                   className="p-1 text-[#6b7280] hover:text-[#1a1c1c] rounded"
                                   title="Duplicate"
                                 >
                                   <Copy className="h-3 w-3" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   onClick={() => changeLayerOrder("forward", el.id)}
                                   className="p-1 text-[#6b7280] hover:text-[#1a1c1c] rounded"
                                   title="Bring Forward"
                                 >
                                   <ChevronUp className="h-3 w-3" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   onClick={() => changeLayerOrder("backward", el.id)}
                                   className="p-1 text-[#6b7280] hover:text-[#1a1c1c] rounded"
                                   title="Send Backward"
                                 >
                                   <ChevronDown className="h-3 w-3" />
-                                </button>
+                                </Button>
                                 <div className="w-[1px] h-3 bg-[#eeeff1] mx-0.5" />
-                                <button
+                                <Button
                                   onClick={() => deleteElement(el.id)}
                                   className="p-1 text-red-400 hover:text-red-300 rounded"
                                   title="Delete"
                                 >
                                   <Trash2 className="h-3 w-3" />
-                                </button>
+                                </Button>
                               </div>
                             </>
                           )}
@@ -2747,7 +2748,7 @@ export default function TShirtDesigner({
 
                         <div className="grid grid-cols-5 gap-2 mt-1">
                           {PRESET_COLORS.map((c) => (
-                            <button
+                            <Button
                               key={c.hex}
                               onClick={() => setTshirtColor(c.hex)}
                               style={{ backgroundColor: c.hex }}
@@ -2763,7 +2764,7 @@ export default function TShirtDesigner({
                                     }`}
                                 />
                               )}
-                            </button>
+                            </Button>
                           ))}
                           <label
                             title="Custom garment colour"
@@ -2833,12 +2834,12 @@ export default function TShirtDesigner({
                         <span className="text-xs font-bold text-[#6b7280] uppercase tracking-widest">
                           {activeElement.type} Selected
                         </span>
-                        <button
+                        <Button
                           onClick={() => setSelectedElementId(null)}
                           className="text-[10px] font-semibold text-[#ff5c00] hover:underline"
                         >
                           Deselect
-                        </button>
+                        </Button>
                       </div>
 
                       {/* TEXT FORM LAYERS SETTINGS */}
@@ -2881,7 +2882,7 @@ export default function TShirtDesigner({
                             <div className="flex flex-col gap-2">
                               <label className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">Font Size</label>
                               <div className="flex items-center gap-1.5 bg-white border border-[#e5e7eb] rounded-lg px-2 py-1">
-                                <button
+                                <Button
                                   onClick={() =>
                                     updateElementProperties(activeElement.id, {
                                       fontSize: Math.max(10, (activeElement.fontSize || 24) - 2)
@@ -2890,11 +2891,11 @@ export default function TShirtDesigner({
                                   className="text-xs text-[#6b7280] hover:text-[#1a1c1c] font-extrabold w-4"
                                 >
                                   -
-                                </button>
+                                </Button>
                                 <span className="text-xs font-bold text-[#1a1c1c] w-full text-center">
                                   {activeElement.fontSize || 24}
                                 </span>
-                                <button
+                                <Button
                                   onClick={() =>
                                     updateElementProperties(activeElement.id, {
                                       fontSize: Math.min(80, (activeElement.fontSize || 24) + 2)
@@ -2903,7 +2904,7 @@ export default function TShirtDesigner({
                                   className="text-xs text-[#6b7280] hover:text-[#1a1c1c] font-extrabold w-4"
                                 >
                                   +
-                                </button>
+                                </Button>
                               </div>
                             </div>
 
@@ -2911,27 +2912,27 @@ export default function TShirtDesigner({
                             <div className="flex flex-col gap-2">
                               <label className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">Text Align</label>
                               <div className="flex items-center bg-white border border-[#e5e7eb] rounded-lg p-0.5">
-                                <button
+                                <Button
                                   onClick={() => updateElementProperties(activeElement.id, { align: "left" })}
                                   className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "left" ? "bg-[#eeeff1] text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                                     }`}
                                 >
                                   <AlignLeft className="h-3.5 w-3.5" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   onClick={() => updateElementProperties(activeElement.id, { align: "center" })}
                                   className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "center" ? "bg-[#eeeff1] text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                                     }`}
                                 >
                                   <AlignCenter className="h-3.5 w-3.5" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   onClick={() => updateElementProperties(activeElement.id, { align: "right" })}
                                   className={`flex-1 flex justify-center py-1 rounded ${activeElement.align === "right" ? "bg-[#eeeff1] text-[#ff5c00]" : "text-[#6b7280] hover:text-black"
                                     }`}
                                 >
                                   <AlignRight className="h-3.5 w-3.5" />
-                                </button>
+                                </Button>
                               </div>
                             </div>
 
@@ -2941,7 +2942,7 @@ export default function TShirtDesigner({
                           <div className="flex flex-col gap-2">
                             <label className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">Formatting</label>
                             <div className="flex gap-2">
-                              <button
+                              <Button
                                 onClick={() => updateElementProperties(activeElement.id, { bold: !activeElement.bold })}
                                 className={`flex-1 flex justify-center py-2.5 border rounded-lg transition-all ${activeElement.bold
                                   ? "border-[#ff5c00] bg-[#ff5c00]/5 text-[#ff5c00] font-bold"
@@ -2949,8 +2950,8 @@ export default function TShirtDesigner({
                                   }`}
                               >
                                 <Bold className="h-4 w-4" />
-                              </button>
-                              <button
+                              </Button>
+                              <Button
                                 onClick={() => updateElementProperties(activeElement.id, { italic: !activeElement.italic })}
                                 className={`flex-1 flex justify-center py-2.5 border rounded-lg transition-all ${activeElement.italic
                                   ? "border-[#ff5c00] bg-[#ff5c00]/5 text-[#ff5c00]"
@@ -2958,8 +2959,8 @@ export default function TShirtDesigner({
                                   }`}
                               >
                                 <Italic className="h-4 w-4" />
-                              </button>
-                              <button
+                              </Button>
+                              <Button
                                 onClick={() => updateElementProperties(activeElement.id, { underline: !activeElement.underline })}
                                 className={`flex-1 flex justify-center py-2.5 border rounded-lg transition-all ${activeElement.underline
                                   ? "border-[#ff5c00] bg-[#ff5c00]/5 text-[#ff5c00]"
@@ -2967,7 +2968,7 @@ export default function TShirtDesigner({
                                   }`}
                               >
                                 <Underline className="h-4 w-4" />
-                              </button>
+                              </Button>
                             </div>
                           </div>
 
@@ -3075,12 +3076,12 @@ export default function TShirtDesigner({
                           </div>
 
                           {/* Drop shadow */}
-                          <button
+                          <Button
                             onClick={() => updateElementProperties(activeElement.id, { shadow: !activeElement.shadow })}
                             className={`py-2 rounded-lg border text-xs font-semibold transition-all ${activeElement.shadow ? "border-[#ff5c00] text-[#ff5c00] bg-[#ff5c00]/10" : "border-[#e5e7eb] text-[#6b7280] hover:text-black"}`}
                           >
                             {activeElement.shadow ? "Drop Shadow: On" : "Drop Shadow: Off"}
-                          </button>
+                          </Button>
 
                         </div>
                       )}
@@ -3126,13 +3127,13 @@ export default function TShirtDesigner({
                             <label className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">Filter</label>
                             <div className="grid grid-cols-3 gap-2">
                               {IMAGE_FILTERS.map((f) => (
-                                <button
+                                <Button
                                   key={f.label}
                                   onClick={() => updateElementProperties(activeElement.id, { filter: f.value })}
                                   className={`py-1.5 rounded-lg border text-[10px] font-semibold transition-all ${(activeElement.filter || "") === f.value ? "border-[#ff5c00] text-[#ff5c00] bg-[#ff5c00]/10" : "border-[#e5e7eb] text-[#6b7280] hover:text-black"}`}
                                 >
                                   {f.label}
-                                </button>
+                                </Button>
                               ))}
                             </div>
                           </div>
@@ -3148,7 +3149,7 @@ export default function TShirtDesigner({
                                 ["Medium", 42],
                                 ["Strong", 80],
                               ] as [string, number][]).map(([label, tol]) => (
-                                <button
+                                <Button
                                   key={label}
                                   onClick={() =>
                                     removeWhiteBackground(activeElement.id, activeElement.content, tol)
@@ -3156,7 +3157,7 @@ export default function TShirtDesigner({
                                   className="py-1.5 rounded-lg border border-[#e5e7eb] text-[10px] font-semibold text-[#6b7280] hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all"
                                 >
                                   {label}
-                                </button>
+                                </Button>
                               ))}
                             </div>
                             <p className="text-[9.5px] leading-3.5 text-[#9ca3af]">
@@ -3205,23 +3206,23 @@ export default function TShirtDesigner({
 
                       {/* Flip */}
                       <div className="flex items-center gap-2 mt-3">
-                        <button
+                        <Button
                           onClick={() => updateElementProperties(activeElement.id, { flipX: !activeElement.flipX })}
                           className={`flex-1 py-2 rounded-lg border text-xs font-semibold transition-all ${activeElement.flipX ? "border-[#ff5c00] text-[#ff5c00] bg-[#ff5c00]/10" : "border-[#e5e7eb] text-[#6b7280] hover:text-black"}`}
                         >
                           Flip H
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => updateElementProperties(activeElement.id, { flipY: !activeElement.flipY })}
                           className={`flex-1 py-2 rounded-lg border text-xs font-semibold transition-all ${activeElement.flipY ? "border-[#ff5c00] text-[#ff5c00] bg-[#ff5c00]/10" : "border-[#e5e7eb] text-[#6b7280] hover:text-black"}`}
                         >
                           Flip V
-                        </button>
+                        </Button>
                       </div>
 
                       {/* Alignment */}
                       <div className="flex items-center gap-2 mt-2">
-                        <button
+                        <Button
                           onClick={() =>
                             updateElementProperties(activeElement.id, {
                               x: Math.max(0, 50 - activeElement.width / 2),
@@ -3230,8 +3231,8 @@ export default function TShirtDesigner({
                           className="flex-1 py-2 rounded-lg border border-[#e5e7eb] text-xs font-semibold text-[#6b7280] hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all"
                         >
                           Center H
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() =>
                             updateElementProperties(activeElement.id, {
                               y: Math.max(0, 50 - activeElement.height / 2),
@@ -3240,7 +3241,7 @@ export default function TShirtDesigner({
                           className="flex-1 py-2 rounded-lg border border-[#e5e7eb] text-xs font-semibold text-[#6b7280] hover:border-[#ff5c00] hover:text-[#ff5c00] transition-all"
                         >
                           Center V
-                        </button>
+                        </Button>
                       </div>
 
                     </div>
@@ -3274,12 +3275,12 @@ export default function TShirtDesigner({
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Close Button */}
-                <button
+                <Button
                   onClick={() => setIsPreviewModalOpen(false)}
                   className="absolute top-5 right-5 rounded-full p-2 text-[#6b7280] hover:bg-[#eeeff1] hover:text-[#1a1c1c] transition-all z-[100002]"
                 >
                   <X className="h-5 w-5" />
-                </button>
+                </Button>
 
                 {/* Header Info */}
                 <div className="text-center mb-6">
@@ -3295,27 +3296,27 @@ export default function TShirtDesigner({
                 {/* Preview View Selector */}
                 <div className="flex justify-center mb-6">
                   <div className="flex items-center rounded-xl bg-white p-1 border border-[#e5e7eb] shadow-inner">
-                    <button
+                    <Button
                       onClick={() => setPreviewSide("front")}
                       className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "front" ? "bg-[#ff5c00] text-white shadow-md" : "text-[#6b7280] hover:text-black"
                         }`}
                     >
                       Front View
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => setPreviewSide("back")}
                       className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "back" ? "bg-[#ff5c00] text-white shadow-md" : "text-[#6b7280] hover:text-black"
                         }`}
                     >
                       Back View
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => setPreviewSide("both")}
                       className={`rounded-lg px-5 py-2 text-xs font-bold transition-all ${previewSide === "both" ? "bg-[#ff5c00] text-white shadow-md" : "text-[#6b7280] hover:text-black"
                         }`}
                     >
                       Front & Back
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -3356,12 +3357,12 @@ export default function TShirtDesigner({
                     </span>
                   </div>
                   <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <button
+                    <Button
                       onClick={() => setIsPreviewModalOpen(false)}
                       className="w-full sm:w-auto rounded-xl bg-white border border-[#e5e7eb] hover:border-[#c4c7c7] text-[#374151] hover:text-[#1a1c1c] px-6 py-2.5 text-xs font-bold transition-all"
                     >
                       Back to Editing
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -3436,20 +3437,20 @@ export default function TShirtDesigner({
                     {/* Toggle if both sides are designed */}
                     {elements.front.length > 0 && elements.back.length > 0 && (
                       <div className="mt-6 flex items-center rounded-xl bg-[#eef0f2] p-1 border border-[#e5e7eb] shadow-inner z-10">
-                        <button
+                        <Button
                           onClick={() => setInspectSide("front")}
                           className={`rounded-lg px-4 py-1.5 text-[10px] font-extrabold uppercase transition-all ${inspectSide === "front" ? "bg-[#ff5c00] text-white shadow-md" : "text-[#6b7280] hover:text-black"
                             }`}
                         >
                           Inspect Front
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => setInspectSide("back")}
                           className={`rounded-lg px-4 py-1.5 text-[10px] font-extrabold uppercase transition-all ${inspectSide === "back" ? "bg-[#ff5c00] text-white shadow-md" : "text-[#6b7280] hover:text-black"
                             }`}
                         >
                           Inspect Back
-                        </button>
+                        </Button>
                       </div>
                     )}
 
@@ -3521,18 +3522,18 @@ export default function TShirtDesigner({
 
                 {/* Footer confirmation buttons */}
                 <div className="mt-6 flex flex-col sm:flex-row items-center justify-end border-t border-[#e5e7eb] pt-4 gap-4">
-                  <button
+                  <Button
                     onClick={() => setShowSaveConfirm(false)}
                     className="w-full sm:w-auto rounded-xl bg-white border border-[#e5e7eb] hover:border-[#c4c7c7] text-[#6b7280] hover:text-[#1a1c1c] px-6 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                   >
                     Back to Editor
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleFinalSave}
                     className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-[#ff5c00] to-[#ff5c00] text-white px-7 py-2.5 text-xs font-bold transition-all hover:scale-[1.02] shadow-lg shadow-[#ff5c00]/30 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Check className="h-4 w-4" /> Yes, Confirm & Save
-                  </button>
+                  </Button>
                 </div>
 
               </motion.div>

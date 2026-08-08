@@ -13,6 +13,7 @@ import {
   Truck,
 } from "lucide-react";
 import SellerShell from "@/components/seller/SellerShell";
+import { Button } from "@/components/ui/button";
 import {
   ORDER_CHIP,
   type SellerOrder,
@@ -266,7 +267,7 @@ function SellerOrdersView() {
       <div className="flex flex-wrap items-center justify-between gap-3 pt-6">
         <div className="flex flex-wrap gap-1.5">
           {TABS.map((t) => (
-            <button
+            <Button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`rounded-full px-3.5 py-2 text-[12.5px] font-bold ${
@@ -279,7 +280,7 @@ function SellerOrdersView() {
               <span className={tab === t.id ? "pl-1.5 text-white/60" : "pl-1.5 text-[#9ca3af]"}>
                 {counts[t.id] ?? 0}
               </span>
-            </button>
+            </Button>
           ))}
         </div>
         <div className="flex items-center gap-2.5">
@@ -292,13 +293,13 @@ function SellerOrdersView() {
               className="h-10 w-[230px] rounded-full border border-[#e5e7eb] bg-white pl-10 pr-4 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
             />
           </span>
-          <button
+          <Button
             onClick={exportCsv}
             disabled={rows.length === 0}
             className="flex h-10 items-center gap-1.5 rounded-full border border-[#e5e7eb] bg-white px-4 text-[12.5px] font-bold text-black hover:border-black disabled:opacity-40"
           >
             <Download className="h-3.5 w-3.5" /> CSV
-          </button>
+          </Button>
         </div>
       </div>
 

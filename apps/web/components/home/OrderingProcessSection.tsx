@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const STEPS = [
   {
@@ -61,7 +62,7 @@ export default function OrderingProcessSection() {
                     isActive ? "border-brand-orange shadow-md" : "border-[#e5e7eb]"
                   }`}
                 >
-                  <button
+                  <Button
                     onClick={() => setActive(i)}
                     aria-expanded={isActive}
                     className={`flex w-full items-center justify-between p-6 text-left font-poppins transition-colors ${
@@ -82,7 +83,7 @@ export default function OrderingProcessSection() {
                     >
                       <ChevronDown className="h-5 w-5" />
                     </span>
-                  </button>
+                  </Button>
                   {isActive && (
                     <div className="bg-white p-6 pt-4">
                       <p className="font-poppins text-[15px] leading-relaxed text-[#4b5563]">

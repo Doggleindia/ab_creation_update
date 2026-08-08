@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { apiFetch, getToken } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 type LastOrder = {
   orderId: string;
@@ -473,12 +474,12 @@ export default function TrackOrderPage() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <button
+                  <Button
                     onClick={() => void downloadInvoice()}
                     className="flex w-full items-center justify-center gap-2 rounded-[8px] border border-[#747878] py-[13px] text-[16px] font-semibold text-black transition-colors hover:bg-[#f3f3f4]"
                   >
                     <Download className="h-4 w-4" /> Download Invoice
-                  </button>
+                  </Button>
                   <Link
                     href="/contact-us"
                     className="text-center text-[16px] font-bold text-black underline hover:text-brand-orange"

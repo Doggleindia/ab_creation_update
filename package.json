@@ -2,7 +2,7 @@
   "name": "ab-creations",
   "version": "1.0.0",
   "private": true,
-  "description": "KT Adhesives monorepo — storefront (web), admin panel, and backend API",
+  "description": "AB Creation monorepo — storefront (web), admin panel, and backend API",
   "workspaces": [
     "apps/*",
     "packages/*"

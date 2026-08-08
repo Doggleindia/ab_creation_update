@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import {
   clearCart,
 } from "@/lib/cart";
 import { apiFetch, getToken } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 const SHIPPING = [
   { id: "standard", label: "Standard", time: "5-7 days", price: 0, days: 7 },
@@ -19,7 +20,7 @@ const SHIPPING = [
   { id: "rush", label: "Super Rush", time: "24-48 hrs", price: 299, days: 2 },
 ];
 
-const COD_FEE = 49;
+
 
 const STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -68,8 +69,14 @@ function RadioDot({ selected, size = 18 }: { selected: boolean; size?: number })
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [items] = useState<CartItem[]>(() =>
+    typeof window !== "undefined" ? getCart() : []
+  );
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [shipping, setShipping] = useState("standard");
   const [payment, setPayment] = useState<"razorpay" | "cod">("razorpay");
   const [placing, setPlacing] = useState(false);
@@ -85,8 +92,6 @@ export default function CheckoutPage() {
   } | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-    setItems(getCart());
     // Purchases require login (wallet payment) — send guests to log in first.
     if (!getToken()) {
       router.replace("/login?next=/checkout");
@@ -489,13 +494,13 @@ export default function CheckoutPage() {
                   {error}
                 </p>
               )}
-              <button
+              <Button
                 type="submit"
                 disabled={items.length === 0 || placing}
                 className="w-full rounded-full bg-brand-orange py-4 text-[18px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {placing ? "Placing order…" : "Place Order"}
-              </button>
+              </Button>
               <p className="mt-6 text-center text-[14px] text-[#444748]">
                 By placing an order, you agree to our{" "}
                 <Link href="/terms-and-conditions" className="underline hover:text-black">

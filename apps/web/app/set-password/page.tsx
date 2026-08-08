@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KeyRound } from "lucide-react";
 import { apiFetch, getUser, getToken, updateCachedUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 const inputCls =
   "h-12 w-full rounded-[6px] border border-[#c4c7c7] bg-white px-4 text-[15px] text-black placeholder:text-[#9ca3af] focus:border-brand-orange focus:outline-none";
@@ -113,13 +114,13 @@ function SetPasswordForm() {
               {error}
             </p>
           )}
-          <button
+          <Button
             type="submit"
             disabled={busy}
-            className="mt-1 h-12 rounded-[6px] bg-brand-orange text-[15px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="mt-1 h-12 w-full rounded-[6px] bg-brand-orange text-[15px] font-semibold text-white hover:bg-brand-orange/90"
           >
             {busy ? "Saving…" : "Save & Continue"}
-          </button>
+          </Button>
           <p className="text-center text-[13px] text-[#9ca3af]">
             Forgot the temporary password?{" "}
             <Link href="/forgot-password" className="font-semibold text-black underline">

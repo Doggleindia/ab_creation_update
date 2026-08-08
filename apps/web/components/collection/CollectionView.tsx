@@ -7,6 +7,7 @@ import CollectionFilterBar from "./CollectionFilterBar";
 import ProductCard, { type Product } from "./ProductCard";
 import type { FilterOption } from "./FilterDropdown";
 import type { ProductsMeta } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
 const FILTER_KEYS = [
   "category",
@@ -83,20 +84,20 @@ export default function CollectionView({
                 className="flex items-center gap-1.5 rounded-full bg-[#f0edeb] px-3 py-1 text-[13px] text-[#1b1c1b]"
               >
                 {chip.label}
-                <button
+                <Button
                   aria-label={`Remove ${chip.label}`}
                   onClick={() => removeFilter(chip.key)}
                 >
                   <X className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </span>
             ))}
-            <button
+            <Button
               onClick={clearAll}
               className="text-[13px] font-medium text-brand-orange underline"
             >
               Clear All
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -108,12 +109,12 @@ export default function CollectionView({
               No products match your selection.
             </p>
             {activeChips.length > 0 && (
-              <button
+              <Button
                 onClick={clearAll}
                 className="mt-3 text-[14px] font-medium text-brand-orange underline"
               >
                 Clear filters
-              </button>
+              </Button>
             )}
           </div>
         ) : (

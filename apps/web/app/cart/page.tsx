@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Minus,
   Plus,
@@ -28,15 +29,19 @@ const TRUST_BADGES = [
 ];
 
 export default function CartPage() {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [items, setItems] = useState<CartItem[]>(() => 
+    typeof window !== "undefined" ? getCart() : []
+  );
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [promo, setPromo] = useState("");
   const [promoMsg, setPromoMsg] = useState("");
 
   useEffect(() => {
-    setMounted(true);
     const sync = () => setItems(getCart());
-    sync();
     return subscribeCart(sync);
   }, []);
 
@@ -135,30 +140,30 @@ export default function CartPage() {
 
                     <div className="flex items-center gap-4 sm:flex-col sm:items-end sm:gap-2">
                       <div className="flex h-9 items-center rounded-lg border border-[#d1d5db] bg-white">
-                        <button
+                        <Button
                           aria-label="Decrease quantity"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="flex h-full w-8 items-center justify-center text-[#374151] hover:bg-gray-100"
                         >
                           <Minus className="h-3 w-3" />
-                        </button>
+                        </Button>
                         <span className="w-8 text-center text-[14px] font-semibold text-black">
                           {item.quantity}
                         </span>
-                        <button
+                        <Button
                           aria-label="Increase quantity"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="flex h-full w-8 items-center justify-center text-[#374151] hover:bg-gray-100"
                         >
                           <Plus className="h-3 w-3" />
-                        </button>
+                        </Button>
                       </div>
-                      <button
+                      <Button
                         onClick={() => removeItem(item.id)}
                         className="text-[13px] font-medium text-[#dc2626] hover:underline"
                       >
                         Remove
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -196,7 +201,7 @@ export default function CartPage() {
                   placeholder="Promo code"
                   className="h-11 min-w-0 flex-1 rounded-lg border border-[#d1d5db] bg-[#f9fafb] px-3.5 text-[14px] text-black placeholder:text-[#9ca3af] focus:border-brand-orange focus:outline-none"
                 />
-                <button
+                <Button
                   onClick={() =>
                     setPromoMsg(
                       promo.trim()
@@ -207,7 +212,7 @@ export default function CartPage() {
                   className="h-11 rounded-lg border border-[#d1d5db] bg-[#f3f4f6] px-5 text-[14px] font-bold text-black transition-colors hover:bg-gray-200"
                 >
                   Apply
-                </button>
+                </Button>
               </div>
 
               {promoMsg && (

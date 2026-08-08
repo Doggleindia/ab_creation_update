@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { CloudUpload, Plus, Trash2, X } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
 import { BACKEND, apiFetch, getUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 type Line = { item: string; qty: string; sizes: string };
 
@@ -182,7 +183,7 @@ export default function NewBulkRequestPage() {
                     placeholder="Qty"
                     className={inputCls}
                   />
-                  <button
+                  <Button
                     type="button"
                     aria-label="Remove line"
                     onClick={() => setLines((r) => r.filter((_, j) => j !== i))}
@@ -190,7 +191,7 @@ export default function NewBulkRequestPage() {
                     className="flex justify-center text-[#dc2626] hover:opacity-70 disabled:opacity-30"
                   >
                     <Trash2 className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
                 <input
                   value={l.sizes}
@@ -202,13 +203,13 @@ export default function NewBulkRequestPage() {
                 />
               </div>
             ))}
-            <button
+            <Button
               type="button"
               onClick={() => setLines((r) => [...r, { item: "", qty: "", sizes: "" }])}
               className="flex w-fit items-center gap-1.5 text-[13.5px] font-bold text-black hover:underline"
             >
               <Plus className="h-4 w-4" /> Add another product
-            </button>
+            </Button>
             {totalQty > 0 && (
               <p className="text-[13px] text-[#6b7280]">
                 Total quantity: <span className="font-bold text-black">{totalQty} pieces</span>
@@ -236,7 +237,7 @@ export default function NewBulkRequestPage() {
 
         <section className="mt-5 rounded-[12px] border border-[#e5e7eb] bg-white p-6">
           <h2 className="text-[17px] font-bold text-black">Artwork (optional)</h2>
-          <button
+          <Button
             type="button"
             onClick={() => fileRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
@@ -253,7 +254,7 @@ export default function NewBulkRequestPage() {
             <span className="pt-1 text-[12px] text-[#9ca3af]">
               PNG, JPG, SVG or PDF · up to 5 files · 25MB each
             </span>
-          </button>
+          </Button>
           <input
             ref={fileRef}
             type="file"
@@ -277,14 +278,14 @@ export default function NewBulkRequestPage() {
                       {f.name.split(".").pop()?.toUpperCase()}
                     </span>
                   )}
-                  <button
+                  <Button
                     type="button"
                     aria-label={`Remove ${f.name}`}
                     onClick={() => setFiles((xs) => xs.filter((_, jj) => jj !== i))}
                     className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white"
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 </span>
               ))}
             </div>
@@ -297,13 +298,13 @@ export default function NewBulkRequestPage() {
           </p>
         )}
         <div className="flex items-center gap-3 pt-5">
-          <button
+          <Button
             type="submit"
             disabled={busy}
             className="rounded-[10px] bg-black px-8 py-3.5 text-[14.5px] font-bold text-white hover:opacity-85 disabled:opacity-40"
           >
             {busy ? "Submitting…" : "Submit Request"}
-          </button>
+          </Button>
           <Link
             href="/dashboard/quotes"
             className="rounded-[10px] border border-[#c4c7c7] px-8 py-3.5 text-[14.5px] font-bold text-black hover:bg-[#f3f4f6]"

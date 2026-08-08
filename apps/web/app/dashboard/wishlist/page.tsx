@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Heart } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
 import { BACKEND } from "@/lib/auth";
 import { addToCart } from "@/lib/cart";
+import { Button } from "@/components/ui/button";
 import {
   type WishlistItem,
   getWishlist,
@@ -35,15 +36,19 @@ type LiveProduct = {
 
 export default function WishlistPage() {
   const router = useRouter();
-  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [items, setItems] = useState<WishlistItem[]>(() =>
+    typeof window !== "undefined" ? getWishlist() : []
+  );
   const [live, setLive] = useState<Map<string, LiveProduct>>(new Map());
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [toast, setToast] = useState("");
 
   useEffect(() => {
     const sync = () => setItems(getWishlist());
-    sync();
-    setMounted(true);
     return subscribeWishlist(sync);
   }, []);
 
@@ -75,7 +80,7 @@ export default function WishlistPage() {
       (p.variants ?? []).find((v) => (v.availableStock ?? 0) > 0) ?? p.variants?.[0];
     const size = p.sizes?.[0] ?? "M";
     addToCart({
-      id: `wl-${p._id}-${Date.now()}`,
+      id: `wl-${p._id}-${crypto.randomUUID()}`,
       slug: p.slug,
       title: p.title,
       variant: [variant?.color, `Size ${size}`].filter(Boolean).join(" · "),
@@ -197,21 +202,21 @@ export default function WishlistPage() {
                   </p>
                   <div className="mt-auto pt-3">
                     {gone ? (
-                      <button
+                      <Button
                         disabled
                         className="w-full cursor-not-allowed rounded-[8px] bg-[#e5e7eb] py-3 text-[12.5px] font-bold uppercase tracking-[0.5px] text-[#9ca3af]"
                       >
                         Unavailable
-                      </button>
+                      </Button>
                     ) : customizable ? (
-                      <button
+                      <Button
                         onClick={() => router.push(`/design-studio?product=${item.slug}`)}
                         className="w-full rounded-[8px] bg-black py-3 text-[12.5px] font-bold uppercase tracking-[0.5px] text-white hover:opacity-85"
                       >
                         Customize
-                      </button>
+                      </Button>
                     ) : (
-                      <button
+                      <Button
                         onClick={() => product && addItem(item, product)}
                         disabled={!product || !stocked}
                         className={`w-full rounded-[8px] py-3 text-[12.5px] font-bold uppercase tracking-[0.5px] ${
@@ -221,15 +226,15 @@ export default function WishlistPage() {
                         }`}
                       >
                         Add to Cart
-                      </button>
+                      </Button>
                     )}
                   </div>
-                  <button
+                  <Button
                     onClick={() => remove(item.slug)}
                     className="pt-3 text-center text-[11.5px] font-bold uppercase tracking-[1px] text-[#6b7280] hover:text-[#dc2626]"
                   >
                     Remove
-                  </button>
+                  </Button>
                 </div>
               </div>
             );

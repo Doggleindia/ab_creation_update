@@ -15,6 +15,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { BACKEND, getToken } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 type Quote = {
   amount?: number;
@@ -548,7 +549,7 @@ export default function BulkQuotePage() {
                   <div className="flex flex-col gap-3 pt-4">
                     {getToken() && (quote.advancePct ?? 0) > 0 ? (
                       <>
-                        <button
+                        <Button
                           onClick={() => void payAdvance()}
                           disabled={busy}
                           className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand-orange text-[15px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
@@ -556,7 +557,7 @@ export default function BulkQuotePage() {
                           <BadgeCheck className="h-4 w-4" /> Accept &amp; Pay Advance (₹
                           {Math.round(((quote.amount ?? 0) * (quote.advancePct ?? 0)) / 100).toLocaleString("en-IN")}
                           )
-                        </button>
+                        </Button>
                         <p className="-mt-1 text-center text-[11.5px] text-[#9ca3af]">
                           Paid from your wallet ·{" "}
                           <Link href="/dashboard/wallet" className="underline">
@@ -566,21 +567,21 @@ export default function BulkQuotePage() {
                         </p>
                       </>
                     ) : (
-                      <button
+                      <Button
                         onClick={() => void respond("accepted")}
                         disabled={busy}
                         className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand-orange text-[15px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                       >
                         <BadgeCheck className="h-4 w-4" /> Accept Quote
-                      </button>
+                      </Button>
                     )}
-                    <button
+                    <Button
                       onClick={() => setChangesOpen((v) => !v)}
                       disabled={busy}
                       className="flex h-12 items-center justify-center gap-2 rounded-full border border-[#c4c7c7] text-[15px] font-bold text-black transition-colors hover:border-black disabled:opacity-50"
                     >
                       <MessageSquare className="h-4 w-4" /> Request Changes
-                    </button>
+                    </Button>
                     {changesOpen && (
                       <div className="rounded-[10px] border border-[#e5e7eb] p-3">
                         <textarea
@@ -590,22 +591,22 @@ export default function BulkQuotePage() {
                           placeholder="What should we change? (quantities, pricing, timeline…)"
                           className="w-full rounded-[8px] border border-[#e5e7eb] p-3 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none"
                         />
-                        <button
+                        <Button
                           onClick={() => void respond("changes")}
                           disabled={busy || !changeNote.trim()}
                           className="mt-2 w-full rounded-[8px] bg-black py-2.5 text-[13px] font-bold text-white hover:opacity-85 disabled:opacity-40"
                         >
                           {busy ? "Sending…" : "Send Change Request"}
-                        </button>
+                        </Button>
                       </div>
                     )}
-                    <button
+                    <Button
                       onClick={() => void respond("declined")}
                       disabled={busy}
                       className="py-1 text-[13.5px] font-bold text-[#dc2626] hover:underline disabled:opacity-50"
                     >
                       Decline Quote
-                    </button>
+                    </Button>
                     {quote.validUntil && (
                       <p className="flex items-center justify-between border-t border-[#f3f4f6] pt-3 text-[13px]">
                         <span className="font-semibold text-[#b45309]">⏱ Quote valid until:</span>
@@ -691,12 +692,12 @@ export default function BulkQuotePage() {
               </section>
 
               {quote && (
-                <button
+                <Button
                   onClick={() => void downloadPdf()}
                   className="flex items-center justify-center gap-2 rounded-[12px] border border-[#e5e7eb] bg-white py-3 text-[13.5px] font-bold text-black hover:border-black"
                 >
                   <Download className="h-4 w-4" /> Download Proposal as PDF
-                </button>
+                </Button>
               )}
             </div>
           </div>

@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { addToCart } from "@/lib/cart";
+import { Button } from "@/components/ui/button";
 
 export type ProductColor = { name: string; hex: string; variantId?: string };
 
@@ -142,7 +143,7 @@ export default function ProductBuyBox({
         </span>
         <div className="flex flex-wrap gap-2">
           {product.sizes.map((s) => (
-            <button
+            <Button
               key={s}
               onClick={() => setSize(s)}
               className={`flex h-11 min-w-[44px] items-center justify-center rounded-md border px-3 text-[14px] font-medium transition-colors ${
@@ -152,7 +153,7 @@ export default function ProductBuyBox({
               }`}
             >
               {s}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -164,7 +165,7 @@ export default function ProductBuyBox({
         </span>
         <div className="flex flex-wrap gap-2">
           {product.colors.map((c) => (
-            <button
+            <Button
               key={c.name}
               onClick={() => setColor(c.name)}
               aria-label={c.name}
@@ -183,21 +184,21 @@ export default function ProductBuyBox({
       <div className="flex flex-col gap-2">
         <span className="text-[14px] font-semibold text-[#1b1c1b]">Quantity</span>
         <div className="flex h-11 w-fit items-center rounded-md border border-[#d1d5db]">
-          <button
+          <Button
             onClick={() => setQty((q) => Math.max(1, q - 1))}
             className="flex h-full w-11 items-center justify-center text-[18px] text-[#1b1c1b]"
             aria-label="Decrease quantity"
           >
             −
-          </button>
+          </Button>
           <span className="w-10 text-center text-[15px] font-medium">{qty}</span>
-          <button
+          <Button
             onClick={() => setQty((q) => q + 1)}
             className="flex h-full w-11 items-center justify-center text-[18px] text-[#1b1c1b]"
             aria-label="Increase quantity"
           >
             +
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -210,7 +211,7 @@ export default function ProductBuyBox({
           <Palette className="h-5 w-5" />
           Customize Design Online
         </Link>
-        <button
+        <Button
           onClick={onAddToCart}
           disabled={added}
           className="flex items-center justify-center gap-2 rounded-lg bg-[#1b1c1b] py-3.5 text-[16px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-80"
@@ -224,13 +225,13 @@ export default function ProductBuyBox({
               <ShoppingCart className="h-5 w-5" /> Add to Cart
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Fabric & specifications */}
       {specs.length > 0 && (
         <div className="border-t border-[#e5e7eb] pt-4">
-          <button
+          <Button
             onClick={() => setSpecsOpen((v) => !v)}
             className="flex w-full items-center justify-between text-[12px] font-bold uppercase tracking-[0.6px] text-[#374151]"
           >
@@ -238,7 +239,7 @@ export default function ProductBuyBox({
             <ChevronUp
               className={`h-4 w-4 transition-transform ${specsOpen ? "" : "rotate-180"}`}
             />
-          </button>
+          </Button>
           {specsOpen && (
             <dl className="grid grid-cols-1 gap-x-8 gap-y-2 pt-4 sm:grid-cols-2">
               {specs.map((s) => (

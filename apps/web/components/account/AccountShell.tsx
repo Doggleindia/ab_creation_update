@@ -18,6 +18,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { type AuthUser, getToken, getUser, logout, subscribeAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 const NAV = [
   { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
@@ -50,8 +51,7 @@ export default function AccountShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [ready, setReady] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(() => getToken() ? getUser() : null);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -59,13 +59,10 @@ export default function AccountShell({
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
-    const sync = () => setUser(getUser());
-    sync();
-    setReady(true);
-    return subscribeAuth(sync);
+    return subscribeAuth(() => setUser(getUser()));
   }, [router, pathname]);
 
-  if (!ready) return <div className="min-h-[70vh] bg-white" />;
+  if (!user) return <div className="min-h-[70vh] bg-white" />;
 
   const initial = (user?.name || user?.email || "?").charAt(0).toUpperCase();
   const crumb = CRUMBS[pathname] ?? "My account";
@@ -130,7 +127,7 @@ export default function AccountShell({
           </nav>
 
           <div className="px-5 pb-8 pt-2">
-            <button
+            <Button
               onClick={() => {
                 if (window.confirm("Sign out of your account?")) {
                   void logout().then(() => router.push("/"));
@@ -139,7 +136,7 @@ export default function AccountShell({
               className="mb-4 flex w-full items-center gap-3 rounded-[8px] px-4 py-2.5 text-[13.5px] font-bold text-[#444748] hover:bg-[#f9fafb] hover:text-black"
             >
               <LogOut className="h-4 w-4" /> Sign Out
-            </button>
+            </Button>
             <Link
               href="/design-studio"
               className="block rounded-[8px] bg-black py-3.5 text-center text-[13px] font-bold tracking-[0.5px] text-white hover:opacity-85"

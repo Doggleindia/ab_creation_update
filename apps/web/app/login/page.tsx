@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { login } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 const underlineInput =
   "w-full border-b border-[#9ca3af] bg-transparent pb-3 text-[16px] text-black placeholder:text-[#9ca3af] focus:border-black focus:outline-none";
@@ -120,13 +121,13 @@ function LoginForm() {
               </p>
             )}
 
-            <button
+            <Button
               type="submit"
               disabled={busy}
-              className="mt-9 h-[62px] w-full max-w-[277px] rounded-[6px] bg-brand-orange text-[15px] font-semibold uppercase tracking-[1px] text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="mt-9 h-[62px] w-full max-w-[277px] bg-brand-orange text-[15px] font-semibold uppercase tracking-[1px] text-white hover:bg-brand-orange/90 rounded-[6px]"
             >
               {busy ? "Logging in…" : "Log In"}
-            </button>
+            </Button>
 
             <p className="pt-9 text-[14px] text-[#6b7280]">
               Don&apos;t have an account?{" "}

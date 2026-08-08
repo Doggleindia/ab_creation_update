@@ -37,7 +37,7 @@ const sendOtp = async (email, role = "User") => {
     await account.save();
 
     // ✅ Email content
-    const subject = `Password Reset OTP - KT Adhesives (${role})`;
+    const subject = `Password Reset OTP - AB Creation (${role})`;
     const text = `
 Hello ${account.name},
 
@@ -50,7 +50,7 @@ This OTP is valid for 10 minutes.
 If you didn't request this, ignore this email.
 
 Thanks,
-KT Adhesives Team
+AB Creation Team
 `;
 
     await EmailTransporter.sendEmail(email, subject, text);

@@ -17,7 +17,7 @@ class EmailTransporter {
   async sendEmail(to, subject, text) {
     try {
       const mailOptions = {
-        from: `"KT Adhesives" <${process.env.EMAIL_USER}>`,
+        from: `"AB Creation" <${process.env.EMAIL_USER}>`,
         to,
         subject,
         text,

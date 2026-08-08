@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { apiFetch, getToken, getUser, BACKEND } from "@/lib/auth";
 import { inr } from "@/lib/seller";
+import { Button } from "@/components/ui/button";
 
 const STEPS = ["Select Garment", "Upload Design", "Position & Preview", "Set Pricing", "Submit"];
 const DRAFT_KEY = "ab:seller-product-draft";
@@ -441,12 +442,12 @@ function NewProductWizard() {
             </span>
           </div>
           <div className="mt-8 flex w-full max-w-[480px] flex-col gap-3">
-            <button
+            <Button
               onClick={resetAll}
               className="rounded-full bg-brand-orange py-3.5 text-[15px] font-bold text-white hover:opacity-90"
             >
               Create Another Product
-            </button>
+            </Button>
             <Link
               href="/seller"
               className="rounded-full border border-[#c4c7c7] py-3.5 text-center text-[15px] font-bold text-brand-orange hover:border-brand-orange"
@@ -478,7 +479,7 @@ function NewProductWizard() {
             <nav className="flex items-center gap-3 overflow-x-auto">
               {STEPS.map((label, i) => (
                 <span key={label} className="flex shrink-0 items-center gap-3">
-                  <button
+                  <Button
                     onClick={() => i < step && setStep(i)}
                     disabled={i > step}
                     className={`flex items-center gap-1.5 text-[12.5px] ${
@@ -501,19 +502,19 @@ function NewProductWizard() {
                       </span>
                     )}
                     {label}
-                  </button>
+                  </Button>
                   {i < STEPS.length - 1 && <span className="h-px w-5 bg-[#d1d5db]" />}
                 </span>
               ))}
             </nav>
           </div>
           <div className="flex shrink-0 items-center gap-2.5">
-            <button
+            <Button
               onClick={saveDraft}
               className="rounded-lg border border-[#c4c7c7] px-4 py-2 text-[13px] font-bold text-black hover:border-black"
             >
               Save Draft
-            </button>
+            </Button>
             <Link href="/seller/products" aria-label="Close wizard" className="p-1.5 text-[#374151] hover:text-black">
               <X className="h-5 w-5" />
             </Link>
@@ -539,7 +540,7 @@ function NewProductWizard() {
             </p>
             <div className="flex flex-wrap gap-2 pt-5">
               {["all", ...Array.from(new Set(garments.map(catOf)))].map((c) => (
-                <button
+                <Button
                   key={c}
                   onClick={() => setCatFilter(c)}
                   className={`rounded-full px-4 py-2 text-[13px] font-bold capitalize ${
@@ -549,7 +550,7 @@ function NewProductWizard() {
                   }`}
                 >
                   {c === "all" ? "All" : c}
-                </button>
+                </Button>
               ))}
             </div>
             {garments.length === 0 && (
@@ -601,7 +602,7 @@ function NewProductWizard() {
                             />
                           ))}
                         </div>
-                        <button
+                        <Button
                           onClick={() => setGarment(selected ? null : g)}
                           className={`mt-3.5 w-full rounded-[8px] border py-2.5 text-[14px] font-bold ${
                             selected
@@ -610,7 +611,7 @@ function NewProductWizard() {
                           }`}
                         >
                           {selected ? "Selected ✓" : "Select"}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   );
@@ -629,7 +630,7 @@ function NewProductWizard() {
               <p className="pt-1 text-[14.5px] text-[#6b7280]">
                 Your design will be printed on the {garment.title}
               </p>
-              <button
+              <Button
                 onClick={() => fileRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
@@ -649,7 +650,7 @@ function NewProductWizard() {
                   PNG, JPG or SVG · Transparent background recommended
                 </span>
                 <span className="text-[12.5px] text-[#6b7280]">Min 300 DPI · Max 25MB · Up to 5 files</span>
-              </button>
+              </Button>
               <input
                 ref={fileRef}
                 type="file"
@@ -667,26 +668,26 @@ function NewProductWizard() {
                     <span key={url} className="relative h-20 w-20 overflow-hidden rounded-[8px] border border-[#e5e7eb]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={url} alt="" className="h-full w-full object-cover" />
-                      <button
+                      <Button
                         aria-label="Remove image"
                         onClick={() => setExistingImages((xs) => xs.filter((x) => x !== url))}
                         className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white"
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </span>
                   ))}
                   {files.map((f, i) => (
                     <span key={f.preview} className="relative h-20 w-20 overflow-hidden rounded-[8px] border border-[#e5e7eb]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={f.preview} alt={f.name} className="h-full w-full object-cover" />
-                      <button
+                      <Button
                         aria-label="Remove file"
                         onClick={() => setFiles((xs) => xs.filter((_, j) => j !== i))}
                         className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white"
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </span>
                   ))}
                 </div>
@@ -733,7 +734,7 @@ function NewProductWizard() {
                 {(garment.colors ?? []).map((c) => {
                   const active = c.toLowerCase() === color.toLowerCase();
                   return (
-                    <button
+                    <Button
                       key={c}
                       title={c}
                       aria-label={`Colour ${c}`}
@@ -749,14 +750,14 @@ function NewProductWizard() {
                           strokeWidth={3}
                         />
                       )}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
               <p className="pt-6 text-[14px] font-bold text-black">Select Print Method</p>
               <div className="flex flex-col gap-2.5 pt-2.5">
                 {METHODS.map((m) => (
-                  <button
+                  <Button
                     key={m.id}
                     onClick={() => setMethod(m.id)}
                     className={`flex items-start gap-3 rounded-[12px] border bg-white p-4 text-left ${
@@ -774,7 +775,7 @@ function NewProductWizard() {
                       <span className="block text-[14.5px] font-bold text-black">{m.title}</span>
                       <span className="block text-[12.5px] text-[#6b7280]">{m.desc}</span>
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -815,14 +816,14 @@ function NewProductWizard() {
               <div className="mt-5 rounded-[12px] border border-[#e5e7eb] bg-white p-5">
                 <div className="flex items-center justify-between">
                   <p className="text-[14px] font-bold text-black">Design Placement</p>
-                  <button
+                  <Button
                     onClick={() =>
                       setPos((p) => ({ ...p, xCm: 0, yCm: Math.round(Math.max(0, (zone.heightCm - p.heightCm) / 2) * 10) / 10 }))
                     }
                     className="flex items-center gap-1.5 rounded-full border border-[#c4c7c7] px-3.5 py-1.5 text-[12.5px] font-bold text-black hover:border-black"
                   >
                     <Crosshair className="h-3.5 w-3.5" /> Center design
-                  </button>
+                  </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-3.5 pt-4">
                   <label className="flex flex-col gap-1.5">
@@ -924,13 +925,13 @@ function NewProductWizard() {
                   </div>
                 )}
 
-                <button
+                <Button
                   onClick={() => setMockupOpen(true)}
                   disabled={!designUrl}
                   className="mt-5 flex w-full items-center justify-center gap-2 rounded-full border-2 border-brand-orange py-3 text-[14.5px] font-bold text-brand-orange hover:bg-[#fff7ed] disabled:opacity-40"
                 >
                   <Sparkles className="h-4 w-4" /> Generate Mockup Preview
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -1069,19 +1070,19 @@ function NewProductWizard() {
                 </p>
               )}
               <div className="flex items-center gap-3 pt-6">
-                <button
+                <Button
                   onClick={() => setStep(2)}
                   className="flex items-center gap-2 rounded-full border-2 border-brand-orange px-6 py-3 text-[14.5px] font-bold text-brand-orange hover:bg-[#fff7ed]"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => void submit()}
                   disabled={busy || !canContinue || sizes.length === 0}
                   className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-orange py-3 text-[15px] font-bold text-white hover:opacity-90 disabled:opacity-40"
                 >
                   {busy ? "Submitting…" : editId ? "Resubmit for Review 🚀" : "Submit for Review 🚀"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -1093,24 +1094,24 @@ function NewProductWizard() {
         <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#e5e7eb] bg-white">
           <div className="flex w-full items-center justify-between px-4 py-3.5 sm:px-8">
             {step > 0 ? (
-              <button
+              <Button
                 onClick={() => setStep((s) => s - 1)}
                 className="flex items-center gap-2 rounded-[8px] border border-[#c4c7c7] px-6 py-2.5 text-[14px] font-bold text-black hover:border-black"
               >
                 <ArrowLeft className="h-4 w-4" /> Back
-              </button>
+              </Button>
             ) : (
               <span className="text-[13px] text-[#6b7280]">
                 {garment ? `Selected: ${garment.title}` : "Select a garment to continue"}
               </span>
             )}
-            <button
+            <Button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canContinue}
               className="flex items-center gap-2 rounded-full bg-brand-orange px-8 py-3 text-[15px] font-bold text-white hover:opacity-90 disabled:opacity-40"
             >
               {step === 2 ? "Continue to Pricing" : "Continue"} <ArrowRight className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1125,13 +1126,13 @@ function NewProductWizard() {
             className="relative max-h-[92vh] w-full max-w-[560px] overflow-y-auto rounded-[16px] bg-white p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
+            <Button
               aria-label="Close preview"
               onClick={() => setMockupOpen(false)}
               className="absolute right-4 top-4 text-[#6b7280] hover:text-black"
             >
               <X className="h-5 w-5" />
-            </button>
+            </Button>
             <h3 className="text-[16px] font-bold text-black">Mockup Preview</h3>
             <p className="text-[12.5px] text-[#6b7280]">
               {garment?.title} · {color} · {zone.name} · {pos.widthCm}×{pos.heightCm}cm

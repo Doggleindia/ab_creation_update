@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Check,
   ChevronDown,
@@ -352,12 +353,12 @@ export default function BulkQuotePage() {
                 Track Your Request
               </Link>
             )}
-            <button
+            <Button
               onClick={reset}
               className="rounded-full border border-[#c4c7c7] bg-white px-8 py-3.5 text-[15px] font-bold text-black transition-colors hover:bg-[#f3f4f6]"
             >
               Submit Another Request
-            </button>
+            </Button>
           </div>
         </div>
       </main>
@@ -497,12 +498,12 @@ export default function BulkQuotePage() {
                   </label>
                 </div>
                 <div className="flex justify-end pt-10">
-                  <button
+                  <Button
                     type="submit"
                     className="rounded-full bg-brand-orange px-10 py-3 text-[15px] font-bold text-white transition-opacity hover:opacity-90"
                   >
                     Continue
-                  </button>
+                  </Button>
                 </div>
               </form>
             )}
@@ -515,7 +516,7 @@ export default function BulkQuotePage() {
                 </h1>
                 <div className="grid grid-cols-3 gap-3 pt-6 sm:grid-cols-6">
                   {GARMENTS.map((g) => (
-                    <button
+                    <Button
                       key={g.id}
                       onClick={() => setGarmentId(g.id)}
                       className={`flex flex-col items-center gap-2 rounded-[8px] px-2 py-4 text-[13px] font-medium ${
@@ -534,7 +535,7 @@ export default function BulkQuotePage() {
                         />
                       </span>
                       {g.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
 
@@ -565,7 +566,7 @@ export default function BulkQuotePage() {
                         <p className={labelCls}>Select Color</p>
                         <div className="flex flex-wrap gap-2 pt-2">
                           {COLORS.map((c) => (
-                            <button
+                            <Button
                               key={c.name}
                               title={c.name}
                               onClick={() => setColor(c.name)}
@@ -631,19 +632,19 @@ export default function BulkQuotePage() {
                 </div>
 
                 <div className="flex items-center justify-between pt-8">
-                  <button
+                  <Button
                     onClick={() => setStep(0)}
                     className="rounded-[8px] border border-black px-8 py-3 text-[15px] font-semibold text-black transition-colors hover:bg-[#f3f4f6]"
                   >
                     Back
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => totalQty >= MIN_QTY && setStep(2)}
                     disabled={totalQty < MIN_QTY}
                     className="rounded-full bg-brand-orange px-10 py-3 text-[15px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Continue
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -660,7 +661,7 @@ export default function BulkQuotePage() {
                     where they should be placed.
                   </p>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => fileRef.current?.click()}
                     onDragOver={(e) => e.preventDefault()}
@@ -679,7 +680,7 @@ export default function BulkQuotePage() {
                     <span className="text-[14px] text-[#6b7280]">
                       PDF, AI, PNG or JPG (Max 50MB)
                     </span>
-                  </button>
+                  </Button>
                   <input
                     ref={fileRef}
                     type="file"
@@ -706,14 +707,14 @@ export default function BulkQuotePage() {
                             <ClipboardList className="h-4 w-4" />
                           )}
                           {f.name}
-                          <button
+                          <Button
                             aria-label={`Remove ${f.name}`}
                             onClick={() =>
                               setFiles((fs) => fs.filter((_, j) => j !== i))
                             }
                           >
                             <X className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                         </span>
                       ))}
                     </div>
@@ -782,18 +783,18 @@ export default function BulkQuotePage() {
                   </label>
 
                   <div className="flex items-center justify-between border-t border-[#e5e7eb] pt-8 mt-8">
-                    <button
+                    <Button
                       onClick={() => setStep(1)}
                       className="flex items-center gap-2 rounded-[8px] border border-black px-8 py-3 text-[15px] font-semibold text-black transition-colors hover:bg-[#f3f4f6]"
                     >
                       ← Back
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => setStep(3)}
                       className="rounded-full bg-brand-orange px-10 py-3 text-[15px] font-bold text-white transition-opacity hover:opacity-90"
                     >
                       Continue
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 <div className="mt-6 flex gap-3 rounded-[12px] bg-[#eef2f7] p-5">
@@ -954,20 +955,20 @@ export default function BulkQuotePage() {
                   </p>
                 )}
 
-                <button
+                <Button
                   type="submit"
                   disabled={!agreed || busy}
                   className="mt-6 w-full rounded-[8px] bg-black py-4 text-[17px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {busy ? "Submitting…" : "Submit Quote Request →"}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => setStep(2)}
                   className="mt-3 w-full py-2 text-center text-[14px] font-semibold text-[#6b7280] hover:text-black"
                 >
                   Back
-                </button>
+                </Button>
               </form>
             )}
           </div>

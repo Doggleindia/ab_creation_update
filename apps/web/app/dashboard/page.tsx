@@ -13,6 +13,7 @@ import {
   subscribeDesigns,
 } from "@/lib/designs";
 import { getWishlist, subscribeWishlist } from "@/lib/wishlist";
+import { Button } from "@/components/ui/button";
 
 type ApiOrder = {
   _id: string;
@@ -286,7 +287,7 @@ export default function DashboardPage() {
                     >
                       Edit
                     </Link>
-                    <button
+                    <Button
                       onClick={() => {
                         activateDesign(d);
                         window.location.href = "/design-studio/preview";
@@ -294,7 +295,7 @@ export default function DashboardPage() {
                       className="flex-1 rounded-[6px] bg-black py-2 text-center text-[11.5px] font-bold uppercase tracking-[0.5px] text-white hover:opacity-85"
                     >
                       Order
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

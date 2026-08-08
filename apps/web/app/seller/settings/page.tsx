@@ -5,6 +5,7 @@ import Link from "next/link";
 import { KeyRound, Landmark, UserRound } from "lucide-react";
 import SellerShell from "@/components/seller/SellerShell";
 import { apiFetch, updateCachedUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 type Flash = { kind: "ok" | "err"; text: string } | null;
 
@@ -151,13 +152,13 @@ export default function SellerSettingsPage() {
               </label>
             </div>
             {renderFlash(profileFlash)}
-            <button
+            <Button
               type="submit"
               disabled={savingProfile || loadingProfile}
               className="h-11 w-fit rounded-full bg-black px-8 text-[14px] font-bold text-white hover:opacity-85 disabled:opacity-40"
             >
               {savingProfile ? "Saving…" : "Save Changes"}
-            </button>
+            </Button>
           </form>
         </section>
 
@@ -203,13 +204,13 @@ export default function SellerSettingsPage() {
                 </label>
               </div>
               {renderFlash(pwFlash)}
-              <button
+              <Button
                 type="submit"
                 disabled={savingPw}
                 className="h-11 w-fit rounded-full border border-black px-8 text-[14px] font-bold text-black hover:bg-[#f3f4f6] disabled:opacity-40"
               >
                 {savingPw ? "Updating…" : "Update Password"}
-              </button>
+              </Button>
             </form>
           </section>
 

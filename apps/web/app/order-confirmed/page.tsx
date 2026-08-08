@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -28,20 +28,23 @@ type LastOrder = {
 const STEPS = ["Confirmed", "In Production", "Dispatched", "Delivered"];
 const CURRENT_STEP = 0;
 
+// React-blessed SSR hydration guard — no setState in effects needed
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 function Confirmation() {
   const params = useSearchParams();
-  const [order, setOrder] = useState<LastOrder | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
+  const [order] = useState<LastOrder | null>(() => {
+    if (typeof window === "undefined") return null;
     try {
       const raw = sessionStorage.getItem("ab:lastOrder");
-      if (raw) setOrder(JSON.parse(raw));
+      return raw ? JSON.parse(raw) : null;
     } catch {
-      // fall through
+      return null;
     }
-  }, []);
+  });
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const orderId = order?.orderId || params.get("orderId") || "ABC-20260710-0047";
 

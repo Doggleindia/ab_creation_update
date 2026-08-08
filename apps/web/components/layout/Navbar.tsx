@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Search, User, Menu, X, LogOut, Store } from "lucide-react";
 import { type AuthUser, getUser, logout, subscribeAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { label: "Customize Design", href: "/design-studio" },
@@ -63,7 +64,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
 
   return (
     <div className="relative">
-      <button
+      <Button
         aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
         className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-ink text-[14px] font-bold text-white"
@@ -74,7 +75,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
         ) : (
           initial
         )}
-      </button>
+      </Button>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
@@ -101,7 +102,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
                 <Store className="h-4 w-4" /> Seller Studio
               </Link>
             )}
-            <button
+            <Button
               onClick={() => {
                 setOpen(false);
                 setConfirming(true);
@@ -109,7 +110,7 @@ function AccountMenu({ user }: { user: AuthUser }) {
               className="mt-1 flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-left text-[14px] text-[#ba1a1a] hover:bg-[#fef2f2]"
             >
               <LogOut className="h-4 w-4" /> Log out
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -117,12 +118,12 @@ function AccountMenu({ user }: { user: AuthUser }) {
       {/* Logout confirmation (Figma frame: beige backdrop, white banner) */}
       {confirming && (
         <div className="fixed inset-0 z-[100] bg-[#f1efe9]">
-          <button
+          <Button
             onClick={() => setConfirming(false)}
             className="absolute right-8 top-8 flex items-center gap-2 text-[15px] font-bold text-black hover:opacity-70 sm:right-16 sm:top-16"
           >
             <X className="h-5 w-5" /> Close
-          </button>
+          </Button>
           <div className="flex h-full items-center justify-center px-4">
             <div className="grid w-full max-w-[1140px] grid-cols-1 overflow-hidden bg-white md:grid-cols-2">
               <div className="flex flex-col items-center justify-center gap-4 px-8 py-14 text-center">
@@ -132,13 +133,13 @@ function AccountMenu({ user }: { user: AuthUser }) {
                 <p className="text-[24px] leading-snug text-black sm:text-[26px]">
                   Are you sure you want to log out?
                 </p>
-                <button
+                <Button
                   onClick={() => void confirmLogout()}
                   disabled={loggingOut}
                   className="mt-2 rounded-[4px] bg-brand-orange px-14 py-2.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {loggingOut ? "Logging out…" : "Log out"}
-                </button>
+                </Button>
               </div>
               <div className="relative hidden h-[305px] md:block">
                 <Image
@@ -239,22 +240,22 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
                 placeholder="Search products…"
                 className="h-9 w-[180px] rounded-full border border-[#c4c7c7] px-4 text-[13px] text-black placeholder:text-[#9ca3af] focus:border-brand-orange focus:outline-none"
               />
-              <button
+              <Button
                 type="submit"
                 aria-label="Search"
                 className="p-2 text-brand-ink transition-colors hover:text-brand-orange"
               >
                 <Search className="h-5 w-5" />
-              </button>
+              </Button>
             </form>
           ) : (
-            <button
+            <Button
               aria-label="Open search"
               onClick={() => setSearchOpen(true)}
               className="p-2 text-brand-ink transition-colors hover:text-brand-orange"
             >
               <Search className="h-5 w-5" />
-            </button>
+            </Button>
           )}
           {user ? (
             <AccountMenu user={user} />
@@ -273,13 +274,13 @@ export default function Navbar({ logoUrl }: { logoUrl?: string }) {
           >
             Design Now
           </Link>
-          <button
+          <Button
             aria-label="Menu"
             className="p-2 text-brand-ink lg:hidden"
             onClick={() => setMobileOpen((v) => !v)}
           >
             {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          </Button>
         </div>
       </nav>
 

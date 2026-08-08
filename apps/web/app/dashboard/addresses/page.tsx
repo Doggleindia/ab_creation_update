@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronDown, Pencil, Plus, Trash2, X } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
 import { apiFetch, getUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 type Address = {
   _id: string;
@@ -155,14 +156,14 @@ export default function AddressesPage() {
           <h3 className="text-[22px] font-bold text-black">
             {editing === "new" ? "Add new address" : "Edit address"}
           </h3>
-          <button
+          <Button
             type="button"
             aria-label="Close"
             onClick={() => setEditing(null)}
             className="p-1 text-[#6b7280] hover:text-black"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         <p className="pt-5 text-[14px] font-semibold text-[#374151]">Save address as</p>
@@ -170,7 +171,7 @@ export default function AddressesPage() {
           {LABELS.map((l) => {
             const active = l === "Other" ? !knownLabel || form.label === "Other" : form.label === l;
             return (
-              <button
+              <Button
                 key={l}
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, label: l }))}
@@ -179,7 +180,7 @@ export default function AddressesPage() {
                 }`}
               >
                 {l}
-              </button>
+              </Button>
             );
           })}
           {(!knownLabel || form.label === "Other") && (
@@ -289,13 +290,13 @@ export default function AddressesPage() {
               {formError}
             </p>
           )}
-          <button
+          <Button
             type="submit"
             disabled={busy}
             className="mt-1 w-full rounded-[10px] bg-black py-4 text-[15px] font-bold uppercase tracking-[1px] text-white hover:opacity-85 disabled:opacity-40"
           >
             {busy ? "Saving…" : "Save Address"}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
@@ -307,12 +308,12 @@ export default function AddressesPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-[32px] font-bold tracking-[-0.6px] text-black">Saved Addresses</h1>
-        <button
+        <Button
           onClick={openNew}
           className="flex items-center gap-2 rounded-[10px] bg-black px-5 py-3 text-[14px] font-bold text-white hover:opacity-85"
         >
           <Plus className="h-4 w-4" /> Add New Address
-        </button>
+        </Button>
       </div>
 
       {flash && (
@@ -342,20 +343,20 @@ export default function AddressesPage() {
                     )}
                   </p>
                   <span className="flex items-center gap-1">
-                    <button
+                    <Button
                       onClick={() => openEdit(a)}
                       aria-label={`Edit ${a.label} address`}
                       className="p-1.5 text-[#6b7280] hover:text-black"
                     >
                       <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => void remove(a)}
                       aria-label={`Delete ${a.label} address`}
                       className="p-1.5 text-[#6b7280] hover:text-[#dc2626]"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </span>
                 </div>
                 <div className="pt-3 text-[15px] leading-7">
@@ -374,17 +375,17 @@ export default function AddressesPage() {
                   )}
                 </div>
                 {!a.isDefault && (
-                  <button
+                  <Button
                     onClick={() => void makeDefault(a)}
                     className="mt-3 border-t border-dashed border-[#e5e7eb] pt-3 text-[14px] font-bold text-black underline underline-offset-4 hover:text-brand-orange"
                   >
                     Set as Default
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}
 
-            <button
+            <Button
               onClick={openNew}
               className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[#c4c7c7] text-[#9ca3af] hover:border-black hover:text-black"
             >
@@ -392,7 +393,7 @@ export default function AddressesPage() {
                 <Plus className="h-5 w-5" />
               </span>
               <span className="text-[15px] font-semibold">Add New Address</span>
-            </button>
+            </Button>
           </div>
         )}
       </div>

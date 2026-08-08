@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { Wallet, Plus } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
 import { apiFetch, getToken, getUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
 
@@ -161,7 +161,7 @@ export default function WalletPage() {
             <h2 className="text-[16px] font-bold text-black">Add Money</h2>
             <div className="flex flex-wrap gap-2 pt-4">
               {QUICK_AMOUNTS.map((a) => (
-                <button
+                <Button
                   key={a}
                   onClick={() => setAmount(String(a))}
                   className={`rounded-full px-4 py-1.5 text-[13px] font-bold ${
@@ -171,7 +171,7 @@ export default function WalletPage() {
                   }`}
                 >
                   ₹{a.toLocaleString("en-IN")}
-                </button>
+                </Button>
               ))}
             </div>
             <div className="flex gap-2 pt-4">
@@ -186,14 +186,14 @@ export default function WalletPage() {
                   className="w-full text-[15px] text-black focus:outline-none"
                 />
               </div>
-              <button
+              <Button
                 onClick={() => void recharge()}
                 disabled={busy}
                 className="flex h-11 items-center gap-1.5 rounded-[8px] bg-brand-orange px-5 text-[14px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
                 {busy ? "Opening…" : "Recharge"}
-              </button>
+              </Button>
             </div>
             {flash && (
               <p

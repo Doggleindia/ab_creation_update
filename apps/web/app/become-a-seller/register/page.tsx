@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 import {
   BadgeCheck,
   Banknote,
@@ -385,14 +386,14 @@ export default function SellerRegistrationPage() {
                           placeholder="Min. 8 characters"
                           className={`${inputCls} pr-11`}
                         />
-                        <button
+                        <Button
                           type="button"
                           aria-label={showPw ? "Hide password" : "Show password"}
                           onClick={() => setShowPw((v) => !v)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-black"
                         >
                           {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
+                        </Button>
                       </div>
                     </label>
                     <label className="flex flex-col gap-2">
@@ -407,14 +408,14 @@ export default function SellerRegistrationPage() {
                           placeholder="Repeat password"
                           className={`${inputCls} pr-11`}
                         />
-                        <button
+                        <Button
                           type="button"
                           aria-label={showPw2 ? "Hide password" : "Show password"}
                           onClick={() => setShowPw2((v) => !v)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-black"
                         >
                           {showPw2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
+                        </Button>
                       </div>
                     </label>
                   </div>
@@ -427,12 +428,12 @@ export default function SellerRegistrationPage() {
                       {error}
                     </p>
                   )}
-                  <button
+                  <Button
                     type="submit"
                     className="mt-2 rounded-full bg-brand-orange py-3.5 text-[16px] font-bold text-white transition-opacity hover:opacity-90"
                   >
                     Continue
-                  </button>
+                  </Button>
                   <p className="text-center text-[14px] text-[#444748]">
                     Already have an account?{" "}
                     <Link
@@ -612,19 +613,19 @@ export default function SellerRegistrationPage() {
                     </p>
                   </div>
                   <div className="flex items-center justify-between pt-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setStep(0)}
                       className="rounded-[8px] border border-[#c4c7c7] px-8 py-3 text-[15px] font-semibold text-black transition-colors hover:bg-[#f3f3f4]"
                     >
                       Back
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="submit"
                       className="rounded-full bg-brand-orange px-10 py-3 text-[15px] font-bold text-white transition-opacity hover:opacity-90"
                     >
                       Continue
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}
@@ -649,7 +650,7 @@ export default function SellerRegistrationPage() {
                     </p>
                   </div>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => fileRef.current?.click()}
                     onDragOver={(e) => e.preventDefault()}
@@ -670,7 +671,7 @@ export default function SellerRegistrationPage() {
                     <span className="pt-1 text-[12px] text-[#9ca3af]">
                       PNG, JPG, SVG — max 10MB each
                     </span>
-                  </button>
+                  </Button>
                   <input
                     ref={fileRef}
                     type="file"
@@ -692,7 +693,7 @@ export default function SellerRegistrationPage() {
                           alt={f.name}
                           className="h-full w-full object-cover"
                         />
-                        <button
+                        <Button
                           type="button"
                           aria-label={`Remove ${f.name}`}
                           onClick={() =>
@@ -701,19 +702,19 @@ export default function SellerRegistrationPage() {
                           className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white"
                         >
                           <X className="h-3 w-3" />
-                        </button>
+                        </Button>
                       </div>
                     ))}
                     {Array.from({ length: Math.max(0, 5 - files.length) }).map(
                       (_, i) => (
-                        <button
+                        <Button
                           key={i}
                           type="button"
                           onClick={() => fileRef.current?.click()}
                           className="flex h-20 w-20 items-center justify-center rounded-[8px] bg-[#f3f4f6] text-[#9ca3af] transition-colors hover:bg-[#e5e7eb]"
                         >
                           <Plus className="h-4 w-4" />
-                        </button>
+                        </Button>
                       ),
                     )}
                   </div>
@@ -760,20 +761,20 @@ export default function SellerRegistrationPage() {
                     </p>
                   )}
 
-                  <button
+                  <Button
                     type="submit"
                     disabled={!agreed || busy}
                     className="rounded-full bg-brand-orange py-3.5 text-[16px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {busy ? "Submitting…" : "Submit Application"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => setStep(1)}
                     className="rounded-[8px] border border-[#c4c7c7] py-3 text-[15px] font-semibold text-black transition-colors hover:bg-[#f3f3f4]"
                   >
                     Back
-                  </button>
+                  </Button>
                 </form>
               )}
             </div>

@@ -28,25 +28,24 @@ import siteContentRoutes from "./src/routes/siteContentRoutes.js";
 
 dotenv.config();
 
-// Allowed CORS origins. Set CORS_ORIGINS to a comma-separated list of your KT
-// Adhesives storefront/admin domains to override these. The defaults are kept
-// as a fallback so existing deployments keep working until CORS_ORIGINS is set.
-// NOTE: several defaults below are inherited from the forked project and should
-// be replaced with the real KT domains via CORS_ORIGINS.
+// Allowed CORS origins for local development only. Set CORS_ORIGINS (comma-
+// separated) to the real AB Creation storefront/admin domains in production —
+// see the check below, which fails closed instead of trusting these.
 const defaultOrigins = [
-    "https://rrumidiamond.co",
-    "https://rrumidiamond.pages.dev",
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://adminrumidaimond.pages.dev",
-    "https://stunning-potato-7vppr956gxwxfxrpg-3000.app.github.dev",
-    "https://main.db1c87cyyeizo.amplifyapp.com",
-    "https://www.rrumidiamond.co",
+    "http://localhost:3000", // apps/web (Next.js dev server)
+    "http://localhost:3001", // apps/admin (Vite dev server)
 ];
+
+if (process.env.NODE_ENV === "production" && !process.env.CORS_ORIGINS) {
+    console.error("CRITICAL WARNING: CORS_ORIGINS environment variable is NOT set in production!");
+    console.error("The backend will reject all cross-origin requests by default.");
+    // Optionally we could throw an error here to prevent server start:
+    // throw new Error("CORS_ORIGINS must be set in production");
+}
 const corsOptions = {
     origin: process.env.CORS_ORIGINS
         ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean)
-        : defaultOrigins,
+        : process.env.NODE_ENV === "production" ? [] : defaultOrigins,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
 };

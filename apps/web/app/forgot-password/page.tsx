@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { X, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const BACKEND = (process.env.NEXT_PUBLIC_MAIN_BACKEND ?? "").replace(/\/$/, "");
 
@@ -66,13 +67,13 @@ export default function ForgotPasswordPage() {
   return (
     <main className="flex min-h-[75vh] w-full items-start justify-center bg-[#f8f9fb] px-4 py-16">
       <div className="relative w-full max-w-[540px]">
-        <button
+        <Button
           aria-label="Close"
           onClick={() => router.push("/login")}
           className="absolute -top-10 right-0 flex items-center gap-2 text-[14px] text-[#6b7280] hover:text-black"
         >
           <X className="h-5 w-5" /> Close
-        </button>
+        </Button>
 
         <div className="rounded-[12px] bg-white p-8 shadow-[0px_4px_16px_rgba(0,0,0,0.06)] sm:p-[60px] sm:pb-10">
           {phase === "done" ? (
@@ -125,13 +126,13 @@ export default function ForgotPasswordPage() {
                       {error}
                     </p>
                   )}
-                  <button
+                  <Button
                     type="submit"
                     disabled={busy}
-                    className="mt-6 h-12 w-full rounded-[6px] bg-brand-orange text-[15px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                    className="mt-6 h-12 w-full rounded-[6px] bg-brand-orange text-[15px] font-semibold text-white hover:bg-brand-orange/90"
                   >
                     {busy ? "Sending…" : "Send Reset Code"}
-                  </button>
+                  </Button>
                 </form>
               ) : (
                 <form onSubmit={resetPassword} className="flex flex-col gap-5 pt-8">
@@ -165,20 +166,20 @@ export default function ForgotPasswordPage() {
                       {error}
                     </p>
                   )}
-                  <button
+                  <Button
                     type="submit"
                     disabled={busy}
-                    className="h-12 w-full rounded-[6px] bg-brand-orange text-[15px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                    className="h-12 w-full rounded-[6px] bg-brand-orange text-[15px] font-semibold text-white hover:bg-brand-orange/90"
                   >
                     {busy ? "Resetting…" : "Reset Password"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => setPhase("request")}
                     className="text-[13px] font-semibold text-[#6b7280] hover:text-black"
                   >
                     Didn&apos;t get a code? Send again
-                  </button>
+                  </Button>
                 </form>
               )}
 

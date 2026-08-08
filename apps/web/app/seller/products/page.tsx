@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Copy, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import SellerShell from "@/components/seller/SellerShell";
 import { apiFetch } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 import {
   STATUS_CHIP,
   type SellerOrder,
@@ -104,7 +105,7 @@ export default function SellerProductsPage() {
       {/* Tabs */}
       <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-[#eeeff1] p-1">
         {TABS.map((t) => (
-          <button
+          <Button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-bold ${
@@ -112,7 +113,7 @@ export default function SellerProductsPage() {
             }`}
           >
             {t.label} ({count(t.key)})
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -221,24 +222,24 @@ export default function SellerProductsPage() {
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     ) : null}
-                    <button
+                    <Button
                       onClick={() => void duplicate(s)}
                       disabled={busy}
                       aria-label={`Duplicate ${s.title}`}
                       className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e5e7eb] text-[#374151] hover:border-black disabled:opacity-40"
                     >
                       <Copy className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </span>
                   {s.status !== "approved" && (
-                    <button
+                    <Button
                       onClick={() => void remove(s)}
                       disabled={busy}
                       aria-label={`Delete ${s.title}`}
                       className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e5e7eb] text-[#dc2626] hover:border-[#dc2626] disabled:opacity-40"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -250,15 +251,15 @@ export default function SellerProductsPage() {
       {/* Pagination */}
       {pages > 1 && (
         <div className="flex items-center justify-center gap-2 pt-8">
-          <button
+          <Button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e5e7eb] text-[#374151] hover:border-black disabled:opacity-40"
           >
             ‹
-          </button>
+          </Button>
           {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-            <button
+            <Button
               key={n}
               onClick={() => setPage(n)}
               className={`h-9 w-9 rounded-full text-[13px] font-bold ${
@@ -266,15 +267,15 @@ export default function SellerProductsPage() {
               }`}
             >
               {n}
-            </button>
+            </Button>
           ))}
-          <button
+          <Button
             onClick={() => setPage((p) => Math.min(pages, p + 1))}
             disabled={page === pages}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e5e7eb] text-[#374151] hover:border-black disabled:opacity-40"
           >
             ›
-          </button>
+          </Button>
         </div>
       )}
     </SellerShell>

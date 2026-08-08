@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Pencil, Plus } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
+import { Button } from "@/components/ui/button";
 import {
   type DesignDraft,
   activateDesign,
@@ -21,14 +22,18 @@ const dt = (d: string) =>
 
 export default function SavedDesignsPage() {
   const router = useRouter();
-  const [drafts, setDrafts] = useState<DesignDraft[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [drafts, setDrafts] = useState<DesignDraft[]>(() =>
+    typeof window !== "undefined" ? getDesigns() : []
+  );
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     const sync = () => setDrafts(getDesigns());
-    sync();
-    setMounted(true);
     return subscribeDesigns(sync);
   }, []);
 
@@ -116,13 +121,13 @@ export default function SavedDesignsPage() {
                   </div>
                   <div className="flex items-center justify-between pt-3">
                     <p className="truncate text-[16px] font-bold text-black">{d.name}</p>
-                    <button
+                    <Button
                       onClick={() => rename(d)}
                       aria-label={`Rename ${d.name}`}
                       className="p-1 text-[#9ca3af] hover:text-black"
                     >
                       <Pencil className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </div>
                   <p className="text-[13px] text-[#6b7280]">Saved {dt(d.savedAt)}</p>
                   <p className="truncate text-[13px] text-[#6b7280]">{subtitle(d)}</p>
@@ -133,19 +138,19 @@ export default function SavedDesignsPage() {
                     >
                       Edit
                     </Link>
-                    <button
+                    <Button
                       onClick={() => order(d)}
                       className="flex-1 rounded-[8px] bg-black py-2.5 text-[12px] font-bold uppercase tracking-[0.5px] text-white hover:opacity-85"
                     >
                       Order
-                    </button>
+                    </Button>
                   </div>
-                  <button
+                  <Button
                     onClick={() => remove(d)}
                     className="pt-2.5 text-center text-[11.5px] font-bold uppercase tracking-[0.5px] text-[#9ca3af] hover:text-[#dc2626]"
                   >
                     Remove
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -156,16 +161,16 @@ export default function SavedDesignsPage() {
                 {Math.min(page * PAGE_SIZE, drafts.length)} of {drafts.length}
               </p>
               <div className="flex items-center gap-1.5">
-                <button
+                <Button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
                   aria-label="Previous page"
                   className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#e5e7eb] text-[#374151] hover:border-black disabled:opacity-40"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                </button>
+                </Button>
                 {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-                  <button
+                  <Button
                     key={n}
                     onClick={() => setPage(n)}
                     className={`h-9 w-9 rounded-[8px] text-[13px] font-bold ${
@@ -175,16 +180,16 @@ export default function SavedDesignsPage() {
                     }`}
                   >
                     {n}
-                  </button>
+                  </Button>
                 ))}
-                <button
+                <Button
                   onClick={() => setPage((p) => Math.min(pages, p + 1))}
                   disabled={page === pages}
                   aria-label="Next page"
                   className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#e5e7eb] text-[#374151] hover:border-black disabled:opacity-40"
                 >
                   <ChevronRight className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           </>

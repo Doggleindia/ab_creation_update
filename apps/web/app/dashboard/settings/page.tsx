@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Info, Pencil, X } from "lucide-react";
 import AccountShell from "@/components/account/AccountShell";
 import { apiFetch, logout, updateCachedUser } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 
 type Prefs = {
   orderUpdates: boolean;
@@ -272,13 +273,13 @@ export default function AccountSettingsPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-[20px] font-bold text-black">Profile Information</h2>
           {!editing && (
-            <button
+            <Button
               onClick={startEdit}
               disabled={!profile}
               className="flex items-center gap-1.5 text-[14px] font-bold text-black hover:text-brand-orange disabled:opacity-40"
             >
               <Pencil className="h-3.5 w-3.5" /> Edit
-            </button>
+            </Button>
           )}
         </div>
 
@@ -295,13 +296,13 @@ export default function AccountSettingsPage() {
               {(profile?.name || "?").charAt(0).toUpperCase()}
             </span>
           )}
-          <button
+          <Button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
             className="text-[15px] font-bold text-black hover:text-brand-orange disabled:opacity-40"
           >
             {uploading ? "Uploading…" : "Change Photo"}
-          </button>
+          </Button>
           <input
             ref={fileRef}
             type="file"
@@ -371,20 +372,20 @@ export default function AccountSettingsPage() {
             </div>
             <div className="pt-4">{renderFlash(flash)}</div>
             <div className="flex gap-3 pt-2">
-              <button
+              <Button
                 type="submit"
                 disabled={saving}
                 className="rounded-[8px] bg-black px-7 py-2.5 text-[13.5px] font-bold text-white hover:opacity-85 disabled:opacity-40"
               >
                 {saving ? "Saving…" : "Save Changes"}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setEditing(false)}
                 className="rounded-[8px] border border-[#c4c7c7] px-7 py-2.5 text-[13.5px] font-bold text-black hover:bg-[#f3f4f6]"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
         ) : (
@@ -434,12 +435,12 @@ export default function AccountSettingsPage() {
               ••••••••••
             </p>
           </div>
-          <button
+          <Button
             onClick={() => setPwOpen((v) => !v)}
             className="text-[14.5px] font-bold text-black hover:text-brand-orange"
           >
             {pwOpen ? "Close" : "Change Password"}
-          </button>
+          </Button>
         </div>
 
         {pwOpen && (
@@ -479,13 +480,13 @@ export default function AccountSettingsPage() {
               </label>
             </div>
             <div className="pt-4">{renderFlash(pwFlash)}</div>
-            <button
+            <Button
               type="submit"
               disabled={savingPw}
               className="mt-2 rounded-[8px] bg-black px-7 py-2.5 text-[13.5px] font-bold text-white hover:opacity-85 disabled:opacity-40"
             >
               {savingPw ? "Updating…" : "Update Password"}
-            </button>
+            </Button>
           </form>
         )}
         {!pwOpen && renderFlash(pwFlash)}
@@ -516,7 +517,7 @@ export default function AccountSettingsPage() {
                   </p>
                   <p className="text-[13.5px] text-[#6b7280]">{t.sub}</p>
                 </div>
-                <button
+                <Button
                   role="switch"
                   aria-checked={on && t.available}
                   aria-label={t.title}
@@ -531,7 +532,7 @@ export default function AccountSettingsPage() {
                       t.available && on ? "left-[22px]" : "left-0.5"
                     }`}
                   />
-                </button>
+                </Button>
               </div>
             );
           })}
@@ -547,7 +548,7 @@ export default function AccountSettingsPage() {
             addresses are removed; order records are retained for compliance.
             This action cannot be undone.
           </p>
-          <button
+          <Button
             onClick={() => {
               setDeleting(true);
               setDelPw("");
@@ -556,7 +557,7 @@ export default function AccountSettingsPage() {
             className="rounded-[8px] border-2 border-[#dc2626] px-6 py-2.5 text-[14px] font-bold text-[#dc2626] hover:bg-[#dc2626] hover:text-white"
           >
             Delete My Account
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -573,14 +574,14 @@ export default function AccountSettingsPage() {
           >
             <div className="flex items-center justify-between">
               <h3 className="text-[20px] font-bold text-[#dc2626]">Delete Account</h3>
-              <button
+              <Button
                 type="button"
                 aria-label="Close"
                 onClick={() => setDeleting(false)}
                 className="p-1 text-[#6b7280] hover:text-black"
               >
                 <X className="h-5 w-5" />
-              </button>
+              </Button>
             </div>
             <p className="pt-3 text-[14px] leading-6 text-[#374151]">
               This permanently deletes your account
@@ -604,13 +605,13 @@ export default function AccountSettingsPage() {
                 {delError}
               </p>
             )}
-            <button
+            <Button
               type="submit"
               disabled={delBusy || !delPw}
               className="mt-5 w-full rounded-[10px] bg-[#dc2626] py-3.5 text-[14.5px] font-bold text-white hover:opacity-90 disabled:opacity-40"
             >
               {delBusy ? "Deleting…" : "Permanently Delete My Account"}
-            </button>
+            </Button>
           </form>
         </div>
       )}

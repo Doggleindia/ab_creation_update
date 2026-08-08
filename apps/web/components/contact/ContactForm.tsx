@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const BACKEND = (process.env.NEXT_PUBLIC_MAIN_BACKEND ?? "").replace(/\/$/, "");
 const inputCls =
@@ -55,12 +56,12 @@ export default function ContactForm() {
         <p className="mt-1 text-[14px] text-[#444748]">
           Thanks for reaching out. Our team will get back to you shortly.
         </p>
-        <button
+        <Button
           onClick={() => setStatus("idle")}
           className="mt-6 text-[14px] font-semibold text-brand-orange underline"
         >
           Send another message
-        </button>
+        </Button>
       </div>
     );
   }
@@ -102,13 +103,13 @@ export default function ContactForm() {
       {status === "error" && (
         <p className="font-poppins text-[13px] text-red-500">{error}</p>
       )}
-      <button
+      <Button
         type="submit"
         disabled={status === "sending"}
         className="mt-2 h-[55px] w-full max-w-[284px] rounded-[28px] bg-brand-orange font-poppins text-[16px] text-white transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "sending" ? "Sending…" : "Submit"}
-      </button>
+      </Button>
     </form>
   );
 }

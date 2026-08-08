@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, PackageCheck, Truck, ShieldCheck, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function TrackOrderSearchPage() {
   const router = useRouter();
@@ -62,12 +63,12 @@ export default function TrackOrderSearchPage() {
             </div>
 
 
-            <button
+            <Button
               type="submit"
               className="mt-2 w-full rounded-xl bg-gradient-to-r from-[#ff6b00] to-[#ff4500] py-4 font-poppins text-[16px] font-bold text-white shadow-md transition-opacity hover:opacity-95"
             >
               Track Order Status
-            </button>
+            </Button>
           </form>
         </div>
 

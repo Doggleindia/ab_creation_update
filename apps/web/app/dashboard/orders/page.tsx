@@ -17,6 +17,7 @@ import {
 import AccountShell, { StatusChip } from "@/components/account/AccountShell";
 import { BACKEND, apiFetch, getToken } from "@/lib/auth";
 import { addToCart } from "@/lib/cart";
+import { Button } from "@/components/ui/button";
 
 type ApiOrder = {
   _id: string;
@@ -108,10 +109,12 @@ function OrdersView() {
   const [sel, setSel] = useState({ size: "M", color: "", qty: 1 });
 
   useEffect(() => {
-    const query = params.get("q");
-    if (query !== null) setQ(query);
-    const t = params.get("tab");
-    if (t && TABS.some((x) => x.id === t)) setTab(t);
+    Promise.resolve().then(() => {
+      const query = params.get("q");
+      if (query !== null) setQ(query);
+      const t = params.get("tab");
+      if (t && TABS.some((x) => x.id === t)) setTab(t);
+    });
   }, [params]);
 
   useEffect(() => {
@@ -121,25 +124,6 @@ function OrdersView() {
       .catch(() => {})
       .finally(() => setLoaded(true));
   }, []);
-
-  // Deep links: ?track=<id> / ?reorder=<id> auto-open once orders arrive
-  useEffect(() => {
-    if (orders.length === 0) return;
-    const find = (v: string | null) =>
-      v ? orders.find((o) => o.orderId === v || o._id === v) : undefined;
-    const t = find(params.get("track"));
-    if (t) setTrack(t);
-    const r = find(params.get("reorder"));
-    if (r) openReorder(r);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orders, params]);
-
-  useEffect(() => setPage(1), [tab, q]);
-
-  const flash = (text: string) => {
-    setToast(text);
-    setTimeout(() => setToast(""), 2500);
-  };
 
   function openReorder(o: ApiOrder) {
     setReorder(o);
@@ -152,6 +136,28 @@ function OrdersView() {
         .catch(() => {});
     }
   }
+
+  // Deep links: ?track=<id> / ?reorder=<id> auto-open once orders arrive
+  useEffect(() => {
+    if (orders.length === 0) return;
+    const find = (v: string | null) =>
+      v ? orders.find((o) => o.orderId === v || o._id === v) : undefined;
+    Promise.resolve().then(() => {
+      const t = find(params.get("track"));
+      if (t) setTrack(t);
+      const r = find(params.get("reorder"));
+      if (r) openReorder(r);
+    });
+  }, [orders, params]);
+
+  useEffect(() => {
+    Promise.resolve().then(() => setPage(1));
+  }, [tab, q]);
+
+  const flash = (text: string) => {
+    setToast(text);
+    setTimeout(() => setToast(""), 2500);
+  };
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -186,7 +192,7 @@ function OrdersView() {
       (v) => (v.color ?? "").toLowerCase() === sel.color.toLowerCase(),
     );
     return {
-      id: `re-${o._id}-${Date.now()}`,
+      id: `re-${o._id}-${crypto.randomUUID()}`,
       slug: o.productId?.slug ?? "custom-design",
       title: isCustom(o) ? `${title} — Custom Design` : title,
       variant: [sel.color, `Size ${sel.size}`].filter(Boolean).join(" · "),
@@ -231,9 +237,9 @@ function OrdersView() {
                 #{shortId(o)} · placed {dt(o.createdAt)}
               </p>
             </div>
-            <button aria-label="Close" onClick={() => setTrack(null)} className="p-1 text-[#6b7280] hover:text-black">
+            <Button aria-label="Close" onClick={() => setTrack(null)} className="p-1 text-[#6b7280] hover:text-black">
               <X className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
 
           <div className="mt-4 flex items-center gap-3 rounded-[10px] bg-[#f8f9fb] p-3.5">
@@ -357,9 +363,9 @@ function OrdersView() {
         >
           <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-4">
             <h3 className="text-[20px] font-bold text-black">Reorder</h3>
-            <button aria-label="Close" onClick={() => setReorder(null)} className="p-1 text-[#6b7280] hover:text-black">
+            <Button aria-label="Close" onClick={() => setReorder(null)} className="p-1 text-[#6b7280] hover:text-black">
               <X className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
 
           <div className="flex items-center gap-4 border-b border-[#e5e7eb] py-5">
@@ -389,7 +395,7 @@ function OrdersView() {
           <p className="pt-5 text-[14px] font-bold text-black">Size</p>
           <div className="flex flex-wrap gap-2 pt-2.5">
             {sizes.map((s) => (
-              <button
+              <Button
                 key={s}
                 onClick={() => setSel((x) => ({ ...x, size: s }))}
                 className={`min-w-[52px] rounded-full px-4 py-2.5 text-[13px] font-bold ${
@@ -399,7 +405,7 @@ function OrdersView() {
                 }`}
               >
                 {s}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -408,7 +414,7 @@ function OrdersView() {
               <p className="text-[14px] font-bold text-black">Color</p>
               <div className="flex items-center gap-2.5">
                 {colors.map((c) => (
-                  <button
+                  <Button
                     key={c}
                     onClick={() => setSel((x) => ({ ...x, color: c }))}
                     className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-bold ${
@@ -418,7 +424,7 @@ function OrdersView() {
                     }`}
                   >
                     {c}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -427,23 +433,23 @@ function OrdersView() {
           <div className="flex items-center justify-between pt-5">
             <p className="text-[14px] font-bold text-black">Quantity</p>
             <div className="flex items-center overflow-hidden rounded-[8px] border border-[#c4c7c7]">
-              <button
+              <Button
                 aria-label="Decrease quantity"
                 onClick={() => setSel((x) => ({ ...x, qty: Math.max(1, x.qty - 1) }))}
                 className="px-3.5 py-2.5 text-black hover:bg-[#f3f4f6]"
               >
                 <Minus className="h-4 w-4" />
-              </button>
+              </Button>
               <span className="min-w-[44px] border-x border-[#c4c7c7] py-2.5 text-center text-[14px] font-bold text-black">
                 {sel.qty}
               </span>
-              <button
+              <Button
                 aria-label="Increase quantity"
                 onClick={() => setSel((x) => ({ ...x, qty: Math.min(99, x.qty + 1) }))}
                 className="px-3.5 py-2.5 text-black hover:bg-[#f3f4f6]"
               >
                 <Plus className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -462,18 +468,18 @@ function OrdersView() {
             </div>
           </div>
 
-          <button
+          <Button
             onClick={() => addReorder(o, false)}
             className="mt-6 w-full rounded-[10px] bg-black py-4 text-[15px] font-bold uppercase tracking-[0.5px] text-white hover:opacity-85"
           >
             Add to Cart
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => addReorder(o, true)}
             className="mt-3 w-full rounded-[10px] border border-black py-4 text-[15px] font-bold uppercase tracking-[0.5px] text-black hover:bg-[#f3f4f6]"
           >
             Buy Now
-          </button>
+          </Button>
 
           {isCustom(o) && (
             <div className="pt-4 text-center">
@@ -498,32 +504,32 @@ function OrdersView() {
   const renderAction = (o: ApiOrder) => {
     if (o.orderStatus === "shipped") {
       return (
-        <button
+        <Button
           onClick={() => setTrack(o)}
           className="rounded-[8px] bg-black px-5 py-2 text-[11.5px] font-bold uppercase tracking-[0.5px] text-white hover:opacity-85"
         >
           Track
-        </button>
+        </Button>
       );
     }
     if (["delivered", "cancelled"].includes(o.orderStatus)) {
       return (
-        <button
+        <Button
           onClick={() => openReorder(o)}
           className="rounded-[8px] border border-[#c4c7c7] px-4 py-2 text-[11.5px] font-bold uppercase tracking-[0.5px] text-black hover:bg-[#f3f4f6]"
         >
           Reorder
-        </button>
+        </Button>
       );
     }
     return (
-      <button
+      <Button
         onClick={() => setTrack(o)}
         aria-label="View order progress"
         className="p-2 text-[#6b7280] hover:text-black"
       >
         <ChevronRight className="h-5 w-5" />
-      </button>
+      </Button>
     );
   };
 
@@ -543,7 +549,7 @@ function OrdersView() {
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 pt-5">
         {TABS.map((t) => (
-          <button
+          <Button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`rounded-full px-4 py-2 text-[13.5px] font-bold ${
@@ -551,16 +557,16 @@ function OrdersView() {
             }`}
           >
             {t.label} ({counts[t.id] ?? 0})
-          </button>
+          </Button>
         ))}
       </div>
 
       {q && (
         <p className="pt-4 text-[13px] text-[#6b7280]">
           Filtering by “{q}” —{" "}
-          <button onClick={() => setQ("")} className="font-bold text-black underline">
+          <Button onClick={() => setQ("")} className="font-bold text-black underline">
             clear
-          </button>
+          </Button>
         </p>
       )}
 
@@ -597,7 +603,7 @@ function OrdersView() {
               <tr key={o._id} className="border-b border-[#f3f4f6] last:border-b-0">
                 <td className="px-6 py-4">
                   <span className="flex items-center gap-4">
-                    <button
+                    <Button
                       onClick={() => setTrack(o)}
                       className="relative flex h-[68px] w-[68px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-[#e5e7eb] bg-[#f3f4f6]"
                       aria-label={`Order ${shortId(o)} details`}
@@ -616,15 +622,15 @@ function OrdersView() {
                       ) : (
                         <Archive className="h-6 w-6 text-[#9ca3af]" />
                       )}
-                    </button>
+                    </Button>
                     <span className="min-w-0">
                       <span className="flex items-center gap-2">
-                        <button
+                        <Button
                           onClick={() => setTrack(o)}
                           className="max-w-[280px] truncate text-left text-[15.5px] font-bold text-black hover:underline"
                         >
                           #{shortId(o)} · {o.productId?.title || o.productId?.name || "Custom order"}
-                        </button>
+                        </Button>
                         {o.productType === "bulk" && (
                           <span className="rounded-[6px] bg-black px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.5px] text-white">
                             Bulk
@@ -663,7 +669,7 @@ function OrdersView() {
             </p>
             <div className="flex items-center gap-1.5">
               {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-                <button
+                <Button
                   key={n}
                   onClick={() => setPage(n)}
                   className={`h-8 w-8 rounded-[6px] text-[13px] font-bold ${
@@ -671,16 +677,16 @@ function OrdersView() {
                   }`}
                 >
                   {n}
-                </button>
+                </Button>
               ))}
-              <button
+              <Button
                 onClick={() => setPage((p) => Math.min(pages, p + 1))}
                 disabled={page === pages}
                 aria-label="Next page"
                 className="flex h-8 w-8 items-center justify-center rounded-[6px] text-[#374151] hover:bg-[#eeeff1] disabled:opacity-40"
               >
                 <ChevronRight className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
         )}

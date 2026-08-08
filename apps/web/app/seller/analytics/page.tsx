@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Award, Eye, Target } from "lucide-react";
 import SellerShell from "@/components/seller/SellerShell";
+import { Button } from "@/components/ui/button";
 import {
   ORDER_CHIP,
   type SellerOrder,
@@ -213,7 +214,7 @@ export default function SellerAnalyticsPage() {
       {/* Range filter */}
       <div className="flex flex-wrap gap-1.5">
         {RANGES.map((r) => (
-          <button
+          <Button
             key={r.id}
             onClick={() => setRange(r.id)}
             className={`rounded-full px-4 py-2 text-[12.5px] font-bold ${
@@ -223,7 +224,7 @@ export default function SellerAnalyticsPage() {
             }`}
           >
             {r.label}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -6,6 +6,7 @@ import { Clock, Landmark, TrendingUp, Wallet } from "lucide-react";
 import SellerShell from "@/components/seller/SellerShell";
 import { apiFetch } from "@/lib/auth";
 import { inr } from "@/lib/seller";
+import { Button } from "@/components/ui/button";
 
 type Txn = {
   _id: string;
@@ -148,7 +149,7 @@ export default function SellerEarningsPage() {
             all move through it.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-4">
-            <button
+            <Button
               onClick={() => {
                 formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
                 formRef.current?.querySelector("input")?.focus();
@@ -156,7 +157,7 @@ export default function SellerEarningsPage() {
               className="rounded-full bg-brand-orange px-6 py-2.5 text-[13.5px] font-bold text-white hover:opacity-90"
             >
               Withdraw to Bank
-            </button>
+            </Button>
             {pendingReq && (
               <span className="rounded-full bg-white/10 px-3.5 py-2 text-[12px] font-semibold text-[#e8c56b]">
                 {inr(pendingReq.amount)} payout under review
@@ -269,24 +270,24 @@ export default function SellerEarningsPage() {
             {quickAmounts.length > 0 && (
               <div className="flex gap-2 pt-2.5">
                 {quickAmounts.map((o) => (
-                  <button
+                  <Button
                     key={o.label}
                     type="button"
                     onClick={() => setAmount(String(o.value))}
                     className="rounded-full border border-[#e5e7eb] px-3.5 py-1.5 text-[12px] font-bold text-[#374151] hover:border-black"
                   >
                     {o.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
-            <button
+            <Button
               type="submit"
               disabled={busy || !!pendingReq}
               className="mt-4 w-full rounded-full bg-brand-orange py-3 text-[14.5px] font-bold text-white hover:opacity-90 disabled:opacity-40"
             >
               {busy ? "Submitting…" : pendingReq ? "Request Pending Review" : "Request Payout"}
-            </button>
+            </Button>
           </form>
           <p className="pt-3 text-[11.5px] leading-4 text-[#9ca3af]">
             Approved amounts are debited from your wallet and transferred to your
@@ -352,12 +353,12 @@ export default function SellerEarningsPage() {
               ))}
             </div>
             {payouts.length > 8 && (
-              <button
+              <Button
                 onClick={() => setShowAllCredits((v) => !v)}
                 className="w-full border-t border-[#f3f4f6] py-3 text-[12.5px] font-bold text-black hover:bg-[#fafafa]"
               >
                 {showAllCredits ? "Show fewer" : `Show all ${payouts.length} credits`}
-              </button>
+              </Button>
             )}
           </div>
         </div>
