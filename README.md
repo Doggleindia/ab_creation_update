@@ -1,64 +1,36 @@
-# AB Creation
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Monorepo for the AB Creation platform — a custom apparel/printing e-commerce
-storefront, its admin panel, and the shared backend API.
+## Getting Started
 
-## Structure
-
-```
-apps/
-├── backend/   Express 5 + MongoDB (Mongoose) REST API
-├── web/       Next.js 16 customer storefront
-└── admin/     React + Vite admin dashboard
-packages/
-└── types/     @ab-creation/types — shared TypeScript domain types
-```
-
-This is an **npm workspaces** monorepo: a single `npm install` at the root
-installs every app and links the shared `@ab-creation/types` package. Each app still has
-its own build and deploy config (Dockerfiles included) and deploys independently.
-
-## Getting started
-
-Install everything once from the repo root (npm workspaces):
+First, run the development server:
 
 ```bash
-npm install
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Then copy each app's env file and fill it in:
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-cp apps/backend/.env.example apps/backend/.env   # Mongo, JWT, Razorpay, AWS, etc.
-cp apps/web/.env.example     apps/web/.env       # NEXT_PUBLIC_MAIN_BACKEND
-cp apps/admin/.env.example   apps/admin/.env     # VITE_MAIN_BACKEND
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### Running from the repo root
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-You can start all three applications simultaneously (concurrently) with one command:
+## Learn More
 
-```bash
-npm run dev             # Start backend, web storefront, and admin panel at once
-```
+To learn more about Next.js, take a look at the following resources:
 
-Alternatively, on Windows, you can double-click or run the batch script:
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-```bash
-run-all.bat
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-Or run individual apps separately:
+## Deploy on Vercel
 
-```bash
-npm run dev:backend     # start the API (nodemon)
-npm run dev:web         # start the storefront (Next.js)
-npm run dev:admin       # start the admin panel (Vite)
-npm run build:all       # production build of web + admin
-```
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Notes
-
-- This monorepo was consolidated from three separate repositories
-  (`kt-adhesives-backend`, `kt-adhesives`, `admin-kt-adhesives`); their original
-  histories remain on the `Doggleindia` GitHub org as a backup.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

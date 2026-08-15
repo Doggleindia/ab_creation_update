@@ -1,25 +1,44 @@
 {
-  "name": "ab-creations",
-  "version": "1.0.0",
+  "name": "web",
+  "version": "0.1.0",
   "private": true,
-  "description": "AB Creation monorepo — storefront (web), admin panel, and backend API",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "concurrently -n \"backend,web,admin\" -c \"blue,green,magenta\" \"npm run dev:backend\" \"npm run dev:web\" \"npm run dev:admin\"",
-    "dev:backend": "npm --prefix apps/backend run dev",
-    "start:backend": "npm --prefix apps/backend run start",
-    "dev:web": "npm --prefix apps/web run dev",
-    "build:web": "npm --prefix apps/web run build",
-    "start:web": "npm --prefix apps/web run start",
-    "dev:admin": "npm --prefix apps/admin start",
-    "build:admin": "npm --prefix apps/admin run build",
-    "build:all": "npm run build:web && npm run build:admin",
-    "install:all": "npm install"
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@ab-creation/types": "file:../types",
+    "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "axios": "^1.13.5",
+    "buffer": "^6.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.26.2",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "concurrently": "^10.0.3"
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5"
   }
 }

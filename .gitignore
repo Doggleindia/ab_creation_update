@@ -1,43 +1,41 @@
-# ---- Dependencies ----
-node_modules/
-**/node_modules/
-.pnp
-.pnp.js
-# Lockfile omitted: a Windows-generated npm lockfile breaks Linux CI builds via
-# the npm optional-deps bug (Rollup native binaries, npm/cli#4828). Each env
-# resolves its own platform binaries on install.
-/package-lock.json
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# ---- Build / output ----
-**/.next/
-**/out/
-**/build/
-**/dist/
-*.tsbuildinfo
-next-env.d.ts
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# ---- Env & secrets (never commit; keep .env.example) ----
-.env
-.env.*
-!.env.example
-**/.env
-**/.env.*
-!**/.env.example
+# testing
+/coverage
 
-# ---- Logs ----
-*.log
-**/*.log
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# ---- Caches / coverage ----
-.cache/
-coverage/
-.eslintcache
+# env files (can opt-in for committing if needed)
+.env*
 
-# ---- OS / editor ----
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
